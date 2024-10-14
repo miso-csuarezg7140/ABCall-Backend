@@ -1,15 +1,43 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-app-ingress
+  name: abcall-ingress
 spec:
   rules:
     - http:
         paths:
-          - path: /
-            pathType: Prefix
-            backend:
+          - backend:
               service:
-                name: my-app-service
+                name: ms-abcall-agentes-service
                 port:
-                  number: 80
+                  number: 8080
+            path: /service/abcall/agentes/v1(|$)(.*)
+            pathType: Prefix
+          - backend:
+              service:
+                name: ms-abcall-clientes-service
+                port:
+                  number: 8080
+            path: /service/abcall/clientes/v1(|$)(.*)
+            pathType: Prefix
+          - backend:
+              service:
+                name: ms-abcall-ia-service
+                port:
+                  number: 8080
+            path: /service/abcall/ia/v1(|$)(.*)
+            pathType: Prefix
+          - backend:
+              service:
+                name: ms-abcall-incidentes-service
+                port:
+                  number: 8080
+            path: /service/abcall/incidentes/v1(|$)(.*)
+            pathType: Prefix
+          - backend:
+              service:
+                name: ms-abcall-reporteria-service
+                port:
+                  number: 8080
+            path: /service/abcall/reporteria/v1(|$)(.*)
+            pathType: Prefix
