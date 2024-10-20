@@ -34,7 +34,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria]
+        include:
+        - service: MSAgentes,
+          sonar_project_id: agentes
+        - service: MSClientes,
+          sonar_project_id: clientes
+        - service: MSIA,
+          sonar_project_id: ia
+        - service: MSIncidentes,
+          sonar_project_id: incidentes
+        - service: MSReporteria,
+          sonar_project_id: reporteria
     steps:
       - uses: actions/checkout@v3
         with:
@@ -65,7 +75,7 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           ./mvnw clean verify org.jacoco:jacoco-maven-plugin:report sonar:sonar \
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}_${{ matrix.service }} \
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}${{ matrix.sonar_project_id }} \
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.java.source=${{ env.JAVA_VERSION }} \
