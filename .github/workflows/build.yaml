@@ -104,7 +104,7 @@ jobs:
           fi
 
   build-and-push:
-    needs: test-and-analyze
+    needs: validate-pr
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
     strategy:
