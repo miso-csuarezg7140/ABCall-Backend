@@ -149,7 +149,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release')
+    if: github.event_name == 'pull_request'
     strategy:
       matrix:
         include:
@@ -208,7 +208,7 @@ jobs:
   cleanup-feature-branch:
     needs: [ test-and-analyze, build-and-push ]
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feat/')
+    if: github.event.pull_request && startsWith(github.head_ref, 'feat/')
     steps:
       - name: Delete feature branch
         uses: dawidd6/action-delete-branch@v3
