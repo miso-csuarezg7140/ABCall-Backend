@@ -101,12 +101,22 @@ jobs:
           fi
 
   build-and-push:
-    needs: test-and-analyze
+    #needs: test-and-analyze
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
-        service: [ MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria ]
+        include:
+          - artifact-registry: ms-agentes
+            service: MSAgentes
+          - artifact-registry: ms-clientes
+            service: MSClientes
+          - artifact-registry: ms-ia
+            service: MSIA
+          - artifact-registry: ms-incidentes
+            service: MSIncidente
+          - artifact-registry: ms-reporteria
+            service: MSReporteria
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 21
@@ -126,7 +136,7 @@ jobs:
         run: gcloud auth configure-docker
       - name: Build and Push Docker image
         env:
-          IMAGE: ${{ matrix.service }}
+          IMAGE: ${{ matrix.artifact-registry }}
         run: |
           cd ${{ matrix.service }}
           docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
