@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,37 +8,33 @@ spec:
   selector:
     matchLabels:
       app: ms-abcall-ia-deployment
-    template:
-      metadata:
-        labels:
-          app: ms-abcall-ia-deployment
-      spec:
-        containers:
-          - name: ms-abcall-ia-deployment
-            image: gcr.io/ms-abcall/ms-ia:1.0
-            ports:
-              - containerPort: 8080
+  template:
+    metadata:
+      labels:
+        app: ms-abcall-ia-deployment
+    spec:
+      containers:
+        - name: ms-abcall-ia-deployment
+          image: IMAGE_TO_REPLACE
+          ports:
+            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-abcall-ia-service
 spec:
-  rules:
-    - http:
-        paths:
-          -path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: ms-abcall-ia-service
-              port:
-                number: 80
+  selector:
+    app: ms-abcall-ia-deployment
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
 ---
-apiVersion: autoscaling/v1
-kind: HorizontaPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
-  name: ms-ia-agentes-hpa
+  name: ms-abcall-ia-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -45,4 +42,10 @@ spec:
     name: ms-abcall-ia-deployment
   minReplicas: 1
   maxReplicas: 3
-  targetCPUUtilizationPercentage: 75
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
