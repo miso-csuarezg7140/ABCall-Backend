@@ -11,33 +11,33 @@ spec:
                 name: ms-abcall-agentes-service
                 port:
                   number: 8080
-            path: /service/abcall/agentes/v1(|$)(.*)
+            path: /service/abcall/agentes/v1
             pathType: Prefix
           - backend:
               service:
                 name: ms-abcall-clientes-service
                 port:
                   number: 8080
-            path: /service/abcall/clientes/v1(|$)(.*)
+            path: /service/abcall/clientes/v1
             pathType: Prefix
           - backend:
               service:
                 name: ms-abcall-ia-service
                 port:
                   number: 8080
-            path: /service/abcall/ia/v1(|$)(.*)
+            path: /service/abcall/ia/v1
             pathType: Prefix
           - backend:
               service:
                 name: ms-abcall-incidentes-service
                 port:
                   number: 8080
-            path: /service/abcall/incidentes/v1(|$)(.*)
+            path: /service/abcall/incidentes/v1
             pathType: Prefix
           - backend:
               service:
                 name: ms-abcall-reporteria-service
                 port:
                   number: 8080
-            path: /service/abcall/reporteria/v1(|$)(.*)
+            path: /service/abcall/reporteria/v1
             pathType: Prefix
