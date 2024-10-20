@@ -32,9 +32,6 @@ jobs:
     needs: validate-pr
     if: always() && (needs.validate-pr.result == 'success' || needs.validate-pr.result == 'skipped')
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [ MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -43,7 +40,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'  # OpenJDK distribution
+          distribution: 'temurin'
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -57,25 +54,39 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Grant execute permission for mvnw
-        run: chmod +x ./${{ matrix.service }}/mvnw
-      - name: Run tests and analyze
+        run: |
+          chmod +x ./MSAgentes/mvnw
+          chmod +x ./MSClientes/mvnw
+          chmod +x ./MSIA/mvnw
+          chmod +x ./MSIncidentes/mvnw
+          chmod +x ./MSReporteria/mvnw
+      - name: Build and test all modules
+        run: |
+          for module in MSAgentes MSClientes MSIA MSIncidentes MSReporteria; do
+            cd $module
+            ./mvnw clean verify org.jacoco:jacoco-maven-plugin:report
+            cd ..
+          done
+      - name: Run SonarQube analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          cd ${{ matrix.service }}
-          ./mvnw verify org.jacoco:jacoco-maven-plugin:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}_${{ matrix.service }} \
+          mvn sonar:sonar \
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-          -Dsonar.java.source=${{ env.JAVA_VERSION }}
+          -Dsonar.java.source=${{ env.JAVA_VERSION }} \
+          -Dsonar.sources=MSAgentes/src,MSClientes/src,MSIA/src,MSIncidentes/src,MSReporteria/src \
+          -Dsonar.tests=MSAgentes/src/test,MSClientes/src/test,MSIA/src/test,MSIncidentes/src/test,MSReporteria/src/test \
+          -Dsonar.java.binaries=MSAgentes/target/classes,MSClientes/target/classes,MSIA/target/classes,MSIncidentes/target/classes,MSReporteria/target/classes \
+          -Dsonar.java.test.binaries=MSAgentes/target/test-classes,MSClientes/target/test-classes,MSIA/target/test-classes,MSIncidentes/target/test-classes,MSReporteria/target/test-classes \
+          -Dsonar.coverage.jacoco.xmlReportPaths=MSAgentes/target/site/jacoco/jacoco.xml,MSClientes/target/site/jacoco/jacoco.xml,MSIA/target/site/jacoco/jacoco.xml,MSIncidentes/target/site/jacoco/jacoco.xml,MSReporteria/target/site/jacoco/jacoco.xml
       - name: Check coverage
         run: |
-          cd ${{ matrix.service }}
           COVERAGE=$(./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=1 -Djacoco.minimum=0.01)
           if [[ $COVERAGE == *"[ERROR]"* ]]; then
-            echo "Test coverage below 80% for ${{ matrix.service }}"
+            echo "Test coverage below minimum threshold"
             exit 1
           fi
 
