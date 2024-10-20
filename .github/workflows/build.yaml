@@ -216,7 +216,7 @@ jobs:
       - name: Verify Ingress
         run: |
           kubectl get ingress
-          kubectl describe ingress microservices-ingress
+          kubectl describe ingress abcall-ingress
 
   cleanup-feature-branch:
     needs: update-ingress
