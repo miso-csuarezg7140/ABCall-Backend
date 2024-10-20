@@ -2,7 +2,7 @@ name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
 
 on:
   pull_request:
-    branches: [main, release, develop]
+    branches: [ main, release, develop ]
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria]
+        service: [ MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -56,6 +56,8 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Grant execute permission for mvnw
+        run: chmod +x ./${{ matrix.service }}/mvnw
       - name: Run tests and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,7 +85,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     strategy:
       matrix:
-        service: [MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria]
+        service: [ MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 21
@@ -159,7 +161,7 @@ jobs:
           kubectl describe ingress microservices-ingress
 
   cleanup-feature-branch:
-    needs: [test-and-analyze, build-and-push]
+    needs: [ test-and-analyze, build-and-push ]
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feat/')
     steps:
