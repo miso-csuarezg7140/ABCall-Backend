@@ -101,7 +101,7 @@ jobs:
           fi
 
   build-and-push:
-    #needs: test-and-analyze
+    needs: test-and-analyze
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     strategy:
