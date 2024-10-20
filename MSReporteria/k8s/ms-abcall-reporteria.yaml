@@ -7,14 +7,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ms-abcall-reporteria
+      app: ms-abcall-reporteria-deployment
   template:
     metadata:
       labels:
-        app: ms-abcall-reporteria
+        app: ms-abcall-reporteria-deployment
     spec:
       containers:
-        - name: ms-abcall-reporteria
+        - name: ms-abcall-reporteria-deployment
           image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
@@ -25,7 +25,7 @@ metadata:
   name: ms-abcall-reporteria-service
 spec:
   selector:
-    app: ms-abcall-reporteria
+    app: ms-abcall-reporteria-deployment
   ports:
     - protocol: TCP
       port: 80

@@ -7,14 +7,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ms-abcall-agentes
+      app: ms-abcall-agentes-deployment
   template:
     metadata:
       labels:
-        app: ms-abcall-agentes
+        app: ms-abcall-agentes-deployment
     spec:
       containers:
-        - name: ms-abcall-agentes
+        - name: ms-abcall-agentes-deployment
           image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
@@ -25,7 +25,7 @@ metadata:
   name: ms-abcall-agentes-service
 spec:
   selector:
-    app: ms-abcall-agentes
+    app: ms-abcall-agentes-deployment
   ports:
     - protocol: TCP
       port: 80
