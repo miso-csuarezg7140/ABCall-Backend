@@ -83,9 +83,16 @@ jobs:
       - name: Check coverage
         run: |
           cd ${{ matrix.service }}
-          COVERAGE=$(./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=1 -Djacoco.minimum=0.01)
-          if [[ $COVERAGE != *"[ERROR]"* ]]; then
+          echo "Running Maven command for ${{ matrix.service }}..."
+          ./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=1 -Djacoco.minimum=0.01
+          MAVEN_EXIT_CODE=$?
+          echo "Maven exit code for ${{ matrix.service }}: $MAVEN_EXIT_CODE"
+          if [ $MAVEN_EXIT_CODE -eq 0 ]; then
+            echo "Test coverage meets or exceeds minimum threshold for ${{ matrix.service }}"
+          else
             echo "Test coverage below minimum threshold for ${{ matrix.service }}"
+            echo "Maven command output for ${{ matrix.service }}:"
+            ./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=1 -Djacoco.minimum=0.01
             exit 1
           fi
 
