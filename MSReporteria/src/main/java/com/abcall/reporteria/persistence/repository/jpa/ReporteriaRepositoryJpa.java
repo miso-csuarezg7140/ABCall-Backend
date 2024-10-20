@@ -1,4 +1,7 @@
 package com.abcall.reporteria.persistence.repository.jpa;
 
-public interface ReporteriaRepositoryJpa {
+import com.abcall.reporteria.persistence.entity.Reporteria;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ReporteriaRepositoryJpa extends JpaRepository<Reporteria, Long> {
 }

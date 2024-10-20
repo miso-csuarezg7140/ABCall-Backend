@@ -33,3 +33,16 @@ spec:
               name: ms-abcall-reporteria-service
               port:
                 number: 80
+---
+apiVersion: autoscaling/v1
+kind: HorizontaPodAutoscaler
+metadata:
+  name: ms-abcall-reporteria-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ms-abcall-reporteria-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75

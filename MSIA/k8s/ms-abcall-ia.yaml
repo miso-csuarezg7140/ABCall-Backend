@@ -33,3 +33,16 @@ spec:
               name: ms-abcall-ia-service
               port:
                 number: 80
+---
+apiVersion: autoscaling/v1
+kind: HorizontaPodAutoscaler
+metadata:
+  name: ms-ia-agentes-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ms-abcall-ia-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
