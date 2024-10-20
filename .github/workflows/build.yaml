@@ -130,15 +130,14 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           ./mvnw package -DskipTests
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
       - name: Configure Docker
-        run: |
-          gcloud auth configure-docker gcr.io --quiet
+        run: gcloud auth configure-docker gcr.io --quiet
       - name: Build and Push Docker image
         env:
           IMAGE: ${{ matrix.artifact-registry }}
@@ -190,6 +189,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
       - name: Get GKE Credentials
