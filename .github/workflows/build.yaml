@@ -88,7 +88,7 @@ jobs:
           cd ${{ matrix.service }}
           echo "Running Maven command for ${{ matrix.service }}..."
           ./mvnw clean verify org.jacoco:jacoco-maven-plugin:report sonar:sonar \
-            -Dsonar.projectKey=ABCall-Backend-${{ matrix.service }} \
+            -Dsonar.projectKey=com.abcall.${{ matrix.sonar_project_id }} \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
             -Dsonar.host.url=https://sonarcloud.io
           MAVEN_EXIT_CODE=$?
