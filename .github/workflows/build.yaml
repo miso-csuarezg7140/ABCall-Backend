@@ -186,6 +186,9 @@ jobs:
       - name: Update image in Kubernetes manifest
         run: |
           sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-${{ matrix.yaml_name }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
+      - name: Apply BackendConfig
+        run: |
+          kubectl apply -f k8s/abcall-backend-config.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
