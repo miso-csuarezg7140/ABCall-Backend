@@ -1,5 +1,5 @@
-# Usa una imagen base con Java
-FROM openjdk:11-jdk-slim
+# Usa una imagen base con Java 21 de Eclipse Temurin
+FROM eclipse-temurin:21-jdk-jammy
 
 # Argumentos para la ubicación del JAR y el puerto de la aplicación
 ARG JAR_FILE=target/*.jar
