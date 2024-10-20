@@ -180,9 +180,9 @@ jobs:
           curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
           sudo apt-get update
           sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
-      - name: Get GKE Credentials
+      - name: Get GKE Credentials with Timeout
         run: |
-          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --timeout 600s
+          timeout 600s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 600 seconds"
       - name: Update image in Kubernetes manifest
         run: |
           sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-${{ matrix.yaml_name }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
