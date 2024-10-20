@@ -35,15 +35,15 @@ jobs:
     strategy:
       matrix:
         include:
-        - service: MSAgentes,
+        - service: MSAgentes
           sonar_project_id: agentes
-        - service: MSClientes,
+        - service: MSClientes
           sonar_project_id: clientes
-        - service: MSIA,
+        - service: MSIA
           sonar_project_id: ia
-        - service: MSIncidentes,
+        - service: MSIncidentes
           sonar_project_id: incidentes
-        - service: MSReporteria,
+        - service: MSReporteria
           sonar_project_id: reporteria
     steps:
       - uses: actions/checkout@v3
