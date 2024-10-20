@@ -84,7 +84,7 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           COVERAGE=$(./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=1 -Djacoco.minimum=0.01)
-          if [[ $COVERAGE == *"[ERROR]"* ]]; then
+          if [[ $COVERAGE != *"[ERROR]"* ]]; then
             echo "Test coverage below minimum threshold for ${{ matrix.service }}"
             exit 1
           fi
