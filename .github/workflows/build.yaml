@@ -132,8 +132,13 @@ jobs:
           ./mvnw package -DskipTests
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
       - name: Configure Docker
-        run: gcloud auth configure-docker
+        run: |
+          gcloud auth configure-docker gcr.io --quiet
       - name: Build and Push Docker image
         env:
           IMAGE: ${{ matrix.artifact-registry }}
@@ -163,6 +168,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
       - name: Get GKE Credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
       - name: Update Kubernetes manifests
