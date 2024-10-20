@@ -114,7 +114,7 @@ jobs:
           - artifact-registry: ms-ia
             service: MSIA
           - artifact-registry: ms-incidentes
-            service: MSIncidente
+            service: MSIncidentes
           - artifact-registry: ms-reporteria
             service: MSReporteria
     steps:
