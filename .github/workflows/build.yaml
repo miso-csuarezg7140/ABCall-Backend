@@ -1,0 +1,170 @@
+name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
+
+on:
+  pull_request:
+    branches: [main, release, develop]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
+  GKE_ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
+  JAVA_VERSION: '21'
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate PR
+        run: |
+          BASE="${{ github.base_ref }}"
+          HEAD="${{ github.head_ref }}"
+          if [[ $HEAD == feat/* && $BASE == "develop" ]]; then
+            echo "Valid PR: feat to develop"
+          elif [[ $BASE == "release" && $HEAD == "develop" ]] || [[ $BASE == "main" && $HEAD == "release" ]]; then
+            echo "Valid PR: develop to release or release to main"
+          else
+            echo "Invalid PR combination"
+            exit 1
+          fi
+
+  test-and-analyze:
+    needs: validate-pr
+    if: always() && (needs.validate-pr.result == 'success' || needs.validate-pr.result == 'skipped')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'  # OpenJDK distribution
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Run tests and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd ${{ matrix.service }}
+          ./mvnw verify org.jacoco:jacoco-maven-plugin:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}_${{ matrix.service }} \
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+          -Dsonar.java.source=${{ env.JAVA_VERSION }}
+      - name: Check coverage
+        run: |
+          cd ${{ matrix.service }}
+          COVERAGE=$(./mvnw org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:check -Dsonar.coverage.minimum=80 -Djacoco.minimum=0.80)
+          if [[ $COVERAGE == *"[ERROR]"* ]]; then
+            echo "Test coverage below 80% for ${{ matrix.service }}"
+            exit 1
+          fi
+
+  build-and-push:
+    needs: test-and-analyze
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    strategy:
+      matrix:
+        service: [MSAgentes, MSClientes, MSIA, MSIncidentes, MSReporteria]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      - name: Build with Maven
+        run: |
+          cd ${{ matrix.service }}
+          ./mvnw package -DskipTests
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+      - name: Build and Push Docker image
+        env:
+          IMAGE: ${{ matrix.service }}
+        run: |
+          cd ${{ matrix.service }}
+          docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
+          docker push gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release')
+    strategy:
+      matrix:
+        include:
+          - module: MSAgentes
+            yaml_name: agentes
+          - module: MSClientes
+            yaml_name: clientes
+          - module: MSIA
+            yaml_name: ia
+          - module: MSIncidentes
+            yaml_name: incidentes
+          - module: MSReporteria
+            yaml_name: reporteria
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Get GKE Credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
+      - name: Update Kubernetes manifests
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/${{ matrix.module }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-${{ matrix.yaml_name }}
+          kubectl get services -o wide | grep ms-abcall-${{ matrix.yaml_name }}
+
+  update-ingress:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Get GKE Credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
+      - name: Update and Apply Ingress
+        run: |
+          kubectl apply -f k8s/ingress.yaml
+      - name: Verify Ingress
+        run: |
+          kubectl get ingress
+          kubectl describe ingress microservices-ingress
+
+  cleanup-feature-branch:
+    needs: [test-and-analyze, build-and-push]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feat/')
+    steps:
+      - name: Delete feature branch
+        uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
