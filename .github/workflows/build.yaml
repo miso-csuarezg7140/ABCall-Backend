@@ -187,8 +187,8 @@ jobs:
           kubectl apply -f ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
       - name: Verify Deployment
         run: |
-          kubectl rollout status deployment/ms-abcall-${{ matrix.yaml_name }}
-          kubectl get services -o wide | grep ms-abcall-${{ matrix.yaml_name }}
+          kubectl rollout status deployment/ms-abcall-${{ matrix.yaml_name }}-deployment
+          kubectl get services -o wide | grep ms-abcall-${{ matrix.yaml_name }}-service
 
   update-ingress:
     needs: deploy

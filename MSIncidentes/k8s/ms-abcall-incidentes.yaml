@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,35 +8,31 @@ spec:
   selector:
     matchLabels:
       app: ms-abcall-incidentes-deployment
-    template:
-      metadata:
-        labels:
-          app: ms-abcall-incidentes-deployment
-      spec:
-        containers:
-          - name: ms-abcall-incidentes-deployment
-            image: gcr.io/ms-abcall/ms-incidentes:1.0
-            ports:
-              - containerPort: 8080
+  template:
+    metadata:
+      labels:
+        app: ms-abcall-incidentes-deployment
+    spec:
+      containers:
+        - name: ms-abcall-incidentes-deployment
+          image: gcr.io/ms-abcall/ms-incidentes:1.0
+          ports:
+            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-abcall-incidentes-service
 spec:
-  rules:
-    - http:
-        paths:
-          -path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: ms-abcall-incidentes-service
-              port:
-                number: 80
+  selector:
+    app: ms-abcall-incidentes-deployment
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
 ---
-apiVersion: autoscaling/v1
-kind: HorizontaPodAutoscaler
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
 metadata:
   name: ms-abcall-incidentes-hpa
 spec:
@@ -45,4 +42,8 @@ spec:
     name: ms-abcall-incidentes-deployment
   minReplicas: 1
   maxReplicas: 3
-  targetCPUUtilizationPercentage: 75
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 75
