@@ -106,7 +106,7 @@ jobs:
   build-and-push:
     needs: validate-pr
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
     strategy:
       matrix:
         include:
@@ -152,7 +152,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
     strategy:
       matrix:
         include:
@@ -197,7 +197,7 @@ jobs:
   update-ingress:
     needs: deploy
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
     steps:
       - uses: actions/checkout@v3
       - name: Authenticate to Google Cloud
