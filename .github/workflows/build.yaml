@@ -171,11 +171,17 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
       - name: Get GKE Credentials
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
       - name: Update Kubernetes manifests
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/${{ matrix.module }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/${{ matrix.yaml_name }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
