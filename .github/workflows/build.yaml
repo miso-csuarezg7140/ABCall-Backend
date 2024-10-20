@@ -212,14 +212,14 @@ jobs:
         run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
       - name: Update and Apply Ingress
         run: |
-          kubectl apply -f k8s/ingress.yaml
+          kubectl apply -f k8s/abcall-ingress.yaml
       - name: Verify Ingress
         run: |
           kubectl get ingress
           kubectl describe ingress microservices-ingress
 
   cleanup-feature-branch:
-    needs: [ test-and-analyze, build-and-push ]
+    needs: update-ingress
     runs-on: ubuntu-latest
     if: github.event.pull_request && startsWith(github.head_ref, 'feat/')
     steps:
