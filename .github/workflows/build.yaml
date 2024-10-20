@@ -3,6 +3,9 @@ name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
 on:
   pull_request:
     branches: [ main, release, develop ]
+  pull_request_target:
+    types:
+      - closed
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -30,7 +33,7 @@ jobs:
 
   test-and-analyze:
     needs: validate-pr
-    if: always() && (needs.validate-pr.result == 'success' || needs.validate-pr.result == 'skipped')
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/')
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -103,7 +106,7 @@ jobs:
   build-and-push:
     needs: test-and-analyze
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
     strategy:
       matrix:
         include:
@@ -149,7 +152,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
     strategy:
       matrix:
         include:
@@ -194,6 +197,7 @@ jobs:
   update-ingress:
     needs: deploy
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
     steps:
       - uses: actions/checkout@v3
       - name: Authenticate to Google Cloud
@@ -219,9 +223,9 @@ jobs:
           kubectl describe ingress abcall-ingress
 
   cleanup-feature-branch:
-    needs: update-ingress
+    needs: test-and-analyze
     runs-on: ubuntu-latest
-    if: github.event.pull_request && startsWith(github.head_ref, 'feat/')
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feat/')
     steps:
       - name: Delete feature branch
         uses: dawidd6/action-delete-branch@v3
