@@ -7,15 +7,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ms-abcall-incidentes-deployment
+      app: ms-abcall-incidentes
   template:
     metadata:
       labels:
-        app: ms-abcall-incidentes-deployment
+        app: ms-abcall-incidentes
     spec:
       containers:
-        - name: ms-abcall-incidentes-deployment
-          image: gcr.io/ms-abcall/ms-incidentes:1.0
+        - name: ms-abcall-incidentes
+          image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
 ---
@@ -25,13 +25,13 @@ metadata:
   name: ms-abcall-incidentes-service
 spec:
   selector:
-    app: ms-abcall-incidentes-deployment
+    app: ms-abcall-incidentes
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8080
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ms-abcall-incidentes-hpa
@@ -46,4 +46,6 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: 75
+        target:
+          type: Utilization
+          averageUtilization: 75

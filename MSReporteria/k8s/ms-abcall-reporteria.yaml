@@ -7,15 +7,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ms-abcall-reporteria-deployment
+      app: ms-abcall-reporteria
   template:
     metadata:
       labels:
-        app: ms-abcall-reporteria-deployment
+        app: ms-abcall-reporteria
     spec:
       containers:
-        - name: ms-abcall-reporteria-deployment
-          image: gcr.io/ms-abcall/ms-reporteria:1.0
+        - name: ms-abcall-reporteria
+          image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
 ---
@@ -25,13 +25,13 @@ metadata:
   name: ms-abcall-reporteria-service
 spec:
   selector:
-    app: ms-abcall-reporteria-deployment
+    app: ms-abcall-reporteria
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8080
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ms-abcall-reporteria-hpa
@@ -46,4 +46,6 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: 75
+        target:
+          type: Utilization
+          averageUtilization: 75
