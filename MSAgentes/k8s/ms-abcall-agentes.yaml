@@ -18,11 +18,25 @@ spec:
           image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-abcall-agentes-service
+  annotations:
+    cloud.google.com/backend-config: '{"default": "health-check-config"}'
 spec:
   selector:
     app: ms-abcall-agentes-deployment
