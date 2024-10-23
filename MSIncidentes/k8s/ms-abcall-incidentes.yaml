@@ -18,6 +18,15 @@ spec:
           image: IMAGE_TO_REPLACE
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+              ephemeral-storage: "2Gi"
           readinessProbe:
             httpGet:
               path: /service/abcall/agentes/v1/ping
@@ -36,7 +45,7 @@ kind: Service
 metadata:
   name: ms-abcall-incidentes-service
   annotations:
-    cloud.google.com/backend-config: '{"default": "health-check-config"}'
+    cloud.google.com/backend-config: '{"default": "health-check-config-incidentes"}'
 spec:
   selector:
     app: ms-abcall-incidentes-deployment
