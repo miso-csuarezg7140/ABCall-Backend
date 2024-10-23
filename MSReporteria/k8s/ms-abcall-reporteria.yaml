@@ -30,11 +30,11 @@ spec:
           env:
             - name: JAVA_TOOL_OPTIONS
               value: >-
-                -XX: InitialRAMPercentage=50.0
-                -XX: MaxRAMPercentage=75.0
-                -XX: +UseG1GC
+                -XX:InitialRAMPercentage=50.0
+                -XX:MaxRAMPercentage=75.0
+                -XX:+UseG1GC
                 -Xmx1536m
-                -XX: +HeapDumpOnOutOfMemoryError
+                -XX:+HeapDumpOnOutOfMemoryError
             - name: SPRING_PROFILES_ACTIVE
               value: "cloud"
           readinessProbe:
