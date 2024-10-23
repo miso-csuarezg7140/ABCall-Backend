@@ -1,7 +1,8 @@
+---
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: health-check-config
+  name: health-check-config-agentes
 spec:
   healthCheck:
     checkIntervalSec: 15
@@ -9,5 +10,61 @@ spec:
     healthyThreshold: 1
     unhealthyThreshold: 2
     type: HTTP
-    requestPath: /ping
+    requestPath: /service/abcall/agentes/v1/ping
+    port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: health-check-config-clientes
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /service/abcall/clientes/v1/ping
+    port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: health-check-config-ia
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /service/abcall/ia/v1/ping
+    port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: health-check-config-incidentes
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /service/abcall/incidentes/v1/ping
+    port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: health-check-config-reporteria
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /service/abcall/reporteria/v1/ping
     port: 8080
