@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: abcall-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
   rules:
     - http:
