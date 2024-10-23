@@ -39,7 +39,7 @@ spec:
               value: "cloud"
           readinessProbe:
             httpGet:
-              path: /service/abcall/ia/v1/ping
+              path: /service/abcall/incidentes/v1/ping
               port: 8080
             initialDelaySeconds: 45
             periodSeconds: 10
@@ -47,7 +47,7 @@ spec:
             failureThreshold: 5
           livenessProbe:
             httpGet:
-              path: /service/abcall/ia/v1/ping
+              path: /service/abcall/incidentes/v1/ping
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 15
