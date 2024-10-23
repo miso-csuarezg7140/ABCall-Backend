@@ -20,13 +20,13 @@ spec:
             - containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /ping
+              path: /service/abcall/agentes/v1/ping
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /ping
+              path: /service/abcall/agentes/v1/ping
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10

@@ -9,5 +9,5 @@ spec:
     healthyThreshold: 1
     unhealthyThreshold: 2
     type: HTTP
-    requestPath: /ping
+    requestPath: /service/abcall/agentes/v1/ping
     port: 8080
