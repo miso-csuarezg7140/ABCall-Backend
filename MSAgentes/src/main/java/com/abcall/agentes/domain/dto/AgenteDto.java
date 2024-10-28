@@ -3,13 +3,13 @@ package com.abcall.agentes.domain.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 public class AgenteDto {
 
-    private Long id;
+    private String tipoDocumento;
+    private Long numeroDocumento;
+    private String contrasena;
     private String nombres;
     private String apellidos;
-    private Character tipoDocumento;
-    private Long documento;
 }

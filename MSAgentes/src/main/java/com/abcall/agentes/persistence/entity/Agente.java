@@ -1,10 +1,9 @@
 package com.abcall.agentes.persistence.entity;
 
+import com.abcall.agentes.persistence.entity.compositekey.AgentePK;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,20 +14,15 @@ import lombok.Setter;
 @Table(name = "agente")
 public class Agente {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @EmbeddedId
+    private AgentePK agentePK;
 
-    @Column(name = "nombres")
+    @Column(name = "contrasena", nullable = false)
+    private String contrasena;
+
+    @Column(name = "nombres", nullable = false)
     private String nombres;
 
-    @Column(name = "apellidos")
+    @Column(name = "apellidos", nullable = false)
     private String apellidos;
-
-    @Column(name = "tipo_documento")
-    private Character tipoDocumento;
-
-    @Column(name = "documento")
-    private Long documento;
 }
