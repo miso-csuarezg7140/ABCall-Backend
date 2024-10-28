@@ -24,7 +24,6 @@ public class ClienteDto {
     @NotBlank(message = "El campo razonSocial no puede ser nulo.")
     private String razonSocial;
 
-
     @NotBlank(message = "El campo contrasena no puede ser nulo.")
     @Pattern(regexp = VALIDACION_CONTRASENA, message = "La contrasena no cumple con el formato requerido.")
     private String contrasena;

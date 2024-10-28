@@ -49,8 +49,9 @@ public class IncidenteServiceImpl implements IncidenteService {
     @Override
     public ResponseServiceDto crear(IncidenteDto incidenteDto) {
         try {
-            Incidente incidente = incidenteRepository.crear(incidenteMapper.toEntity(incidenteDto));
-            return buildResponseServiceDto(CODIGO_201, MENSAJE_201, incidente);
+            Incidente incidente = incidenteMapper.toEntity(incidenteDto);
+            IncidenteDto incidenteCreado = incidenteMapper.toDto(incidenteRepository.crear(incidente));
+            return buildResponseServiceDto(CODIGO_201, MENSAJE_201, incidenteCreado);
         } catch (Exception ex) {
             return buildResponseServiceDto(CODIGO_500, MENSAJE_500, ex.getMessage());
         }

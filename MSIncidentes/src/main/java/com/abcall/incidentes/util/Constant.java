@@ -16,6 +16,7 @@ public class Constant {
     public static final String MENSAJE_500 = "Error interno del servidor";
     public static final LocalDateTime HOY = LocalDateTime.now();
     public static final String VALIDACION_NUMERICO = "^\\d+$";
+    public static final String ESTADO_DEFAULT = "ACTIVO";
 
     private Constant() {
         throw new IllegalStateException("Utility class");
