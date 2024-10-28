@@ -82,24 +82,17 @@ jobs:
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.java.source=${{ env.JAVA_VERSION }} \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      - name: Build, analyze, and check coverage
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+          -Dsonar.qualitygate.wait=true
+      - name: Check Quality Gate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd ${{ matrix.service }}
-          echo "Running Maven command for ${{ matrix.service }}..."
-          ./mvnw clean verify org.jacoco:jacoco-maven-plugin:report sonar:sonar \
-            -Dsonar.projectKey=com.abcall.${{ matrix.sonar_project_id }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.host.url=https://sonarcloud.io
-          MAVEN_EXIT_CODE=$?
-          echo "Maven exit code for ${{ matrix.service }}: $MAVEN_EXIT_CODE"
-          if [ $MAVEN_EXIT_CODE -eq 0 ]; then
-            echo "Build successful and test coverage meets or exceeds minimum threshold for ${{ matrix.service }}"
-          else
-            echo "Build failed or test coverage below minimum threshold for ${{ matrix.service }}"
+          QUALITY_GATE_STATUS=$(curl -s -u ${SONAR_TOKEN}: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}${{ matrix.sonar_project_id }}" | jq -r '.projectStatus.status')
+          
+          if [ "$QUALITY_GATE_STATUS" = "ERROR" ]; then
+            echo "Quality Gate failed!"
             exit 1
           fi
 
