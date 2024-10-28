@@ -5,11 +5,17 @@ import com.abcall.agentes.persistence.entity.Agente;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface AgenteMapper {
 
-    Agente toAgente(AgenteDto agenteDto);
+    AgenteDto toDto(Agente agente);
+
+    List<AgenteDto> toDtoList(List<Agente> agenteList);
 
     @InheritInverseConfiguration
-    AgenteDto fromAgente(Agente agente);
+    Agente toEntity(AgenteDto agenteDto);
+
+    List<Agente> toEntityList(List<AgenteDto> agenteDtoList);
 }
