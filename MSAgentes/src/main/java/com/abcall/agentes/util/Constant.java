@@ -20,7 +20,7 @@ public class Constant {
     public static final String VALIDACION_CONTRASENA = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$";
     public static final String VALIDACION_NUMERICO = "^\\d+$";
 
-    private Constant() {
+    Constant() {
         throw new IllegalStateException("Utility class");
     }
 }
