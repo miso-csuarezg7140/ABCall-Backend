@@ -37,14 +37,16 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public ResponseServiceDto registrar(ClienteDto clienteDto) {
         try {
-            ClienteDto clienteExistente = clienteMapper.toDto(
-                    clienteRepository.obtenerPorId(clienteDto.getNumeroDocumento()));
+            Cliente cliente = clienteRepository.obtenerPorId(clienteDto.getNumeroDocumento());
+            ClienteDto clienteExistente = clienteMapper.toDto(cliente);
 
             if (null == clienteExistente) {
-                String passwordEncoded = encodeToBase64(clienteDto.getContrasena());
+                String passwordDecoded = clienteDto.getContrasena();
+                String passwordEncoded = encodeToBase64(passwordDecoded);
                 clienteDto.setContrasena(passwordEncoded);
-                Cliente cliente = clienteMapper.toEntity(clienteDto);
-                clienteDto = clienteMapper.toDto(clienteRepository.guardar(cliente));
+                Cliente clienteAGuardar = clienteMapper.toEntity(clienteDto);
+                clienteDto = clienteMapper.toDto(clienteRepository.guardar(clienteAGuardar));
+                clienteDto.setContrasena(passwordDecoded);
                 return buildResponseServiceDto(CODIGO_201, MENSAJE_201, clienteDto);
             } else
                 return buildResponseServiceDto(CODIGO_409, MENSAJE_409, new HashMap<>());
@@ -63,9 +65,10 @@ public class ClienteServiceImpl implements ClienteService {
 
             if (null != clienteDto) {
                 String passwordDecoded = decodeFromBase64(clienteDto.getContrasena());
-                if (passwordDecoded.equals(contrasena))
+                if (passwordDecoded.equals(contrasena)) {
+                    clienteDto.setContrasena(passwordDecoded);
                     return buildResponseServiceDto(CODIGO_200, MENSAJE_200, clienteDto);
-                else
+                } else
                     return buildResponseServiceDto(CODIGO_401, MENSAJE_401, new HashMap<>());
             } else
                 return buildResponseServiceDto(CODIGO_206, MENSAJE_206, new HashMap<>());

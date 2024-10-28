@@ -3,6 +3,7 @@ package com.abcall.agentes.domain.service.impl;
 import com.abcall.agentes.domain.dto.AgenteDto;
 import com.abcall.agentes.domain.dto.ResponseServiceDto;
 import com.abcall.agentes.domain.service.AgenteService;
+import com.abcall.agentes.persistence.entity.Agente;
 import com.abcall.agentes.persistence.entity.compositekey.AgentePK;
 import com.abcall.agentes.persistence.mappers.AgenteMapper;
 import com.abcall.agentes.persistence.repository.AgenteRepository;
@@ -37,13 +38,15 @@ public class AgenteServiceImpl implements AgenteService {
             agentePK.setTipoDocumento(tipoDocumentoAgente);
             Long numDocumentoAgente = Long.valueOf(numDocumentoAgenteStr);
             agentePK.setNumeroDocumento(numDocumentoAgente);
-            AgenteDto agenteDto = agenteMapper.toDto(agenteRepository.obtenerPorId(agentePK));
+            Agente agente = agenteRepository.obtenerPorId(agentePK);
+            AgenteDto agenteDto = agenteMapper.toDto(agente);
 
             if (null != agenteDto) {
                 String passwordDecoded = decodeFromBase64(agenteDto.getContrasena());
-                if (passwordDecoded.equals(contrasena))
+                if (passwordDecoded.equals(contrasena)) {
+                    agenteDto.setContrasena(passwordDecoded);
                     return buildResponseServiceDto(CODIGO_200, MENSAJE_200, agenteDto);
-                else
+                } else
                     return buildResponseServiceDto(CODIGO_401, MENSAJE_401, new HashMap<>());
             } else
                 return buildResponseServiceDto(CODIGO_206, MENSAJE_206, new HashMap<>());
