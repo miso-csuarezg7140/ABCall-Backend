@@ -68,7 +68,7 @@ spec:
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
           command:
-            - "/cloud_sql_proxy"
+            - "/cloud-sql-proxy"
             - "abcall-uniandes-g18a:us-central1:postgresql"
           volumeMounts:
             - name: cloud-sql-proxy-sa-key-volume
@@ -76,7 +76,7 @@ spec:
               subPath: service_account.json
               readOnly: true
           env:
-            - name: GOOGLE_APPLICATIONS_CREDENTIALS
+            - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /secrets/service_account.json
           resources:
             requests:
