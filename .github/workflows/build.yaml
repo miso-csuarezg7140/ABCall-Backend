@@ -133,14 +133,14 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
       - name: Configure Docker
-        run: gcloud auth configure-docker gcr.io --quiet
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
       - name: Build and Push Docker image
         env:
           IMAGE: ${{ matrix.artifact-registry }}
         run: |
           cd ${{ matrix.service }}
-          docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
-          docker push gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA
+          docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
+          docker push us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE:$GITHUB_SHA
 
   deploy-backend-config:
     needs: build-and-push
@@ -189,7 +189,7 @@ jobs:
           timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-agentes:${{ github.sha }}|g' MSAgentes/k8s/ms-abcall-agentes.yaml
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/ms-agentes:${{ github.sha }}|g' MSAgentes/k8s/ms-abcall-agentes.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f MSAgentes/k8s/ms-abcall-agentes.yaml
@@ -222,7 +222,7 @@ jobs:
           timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-clientes:${{ github.sha }}|g' MSClientes/k8s/ms-abcall-clientes.yaml
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/ms-clientes:${{ github.sha }}|g' MSClientes/k8s/ms-abcall-clientes.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f MSClientes/k8s/ms-abcall-clientes.yaml
@@ -255,7 +255,7 @@ jobs:
           timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-ia:${{ github.sha }}|g' MSIA/k8s/ms-abcall-ia.yaml
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/ms-ia:${{ github.sha }}|g' MSIA/k8s/ms-abcall-ia.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f MSIA/k8s/ms-abcall-ia.yaml
@@ -288,7 +288,7 @@ jobs:
           timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-incidentes:${{ github.sha }}|g' MSIncidentes/k8s/ms-abcall-incidentes.yaml
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/ms-incidentes:${{ github.sha }}|g' MSIncidentes/k8s/ms-abcall-incidentes.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f MSIncidentes/k8s/ms-abcall-incidentes.yaml
@@ -321,7 +321,7 @@ jobs:
           timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-reporteria:${{ github.sha }}|g' MSReporteria/k8s/ms-abcall-reporteria.yaml
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/ms-reporteria:${{ github.sha }}|g' MSReporteria/k8s/ms-abcall-reporteria.yaml
       - name: Deploy Module to GKE
         run: |
           kubectl apply -f MSReporteria/k8s/ms-abcall-reporteria.yaml
@@ -358,13 +358,3 @@ jobs:
         run: |
           kubectl get ingress
           kubectl describe ingress abcall-ingress
-
-  cleanup-feature-branch:
-    if: github.event.name == 'pull_request_target' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feat/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete feature branch
-        uses: dawidd6/action-delete-branch@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.event.pull_request.head.ref }}
