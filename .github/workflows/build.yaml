@@ -3,9 +3,9 @@ name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
 on:
   pull_request:
     branches: [ main, release, develop ]
+    types: [ opened, synchronize, reopened ]
   pull_request_target:
-    types:
-      - closed
+    types: [ closed ]
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -142,23 +142,34 @@ jobs:
           docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
           docker push gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA
 
-  deploy:
+  deploy-backend-config:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.head_ref == 'release'
-    strategy:
-      matrix:
-        include:
-          - module: MSAgentes
-            yaml_name: agentes
-          - module: MSClientes
-            yaml_name: clientes
-          - module: MSIA
-            yaml_name: ia
-          - module: MSIncidentes
-            yaml_name: incidentes
-          - module: MSReporteria
-            yaml_name: reporteria
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials
+        run: gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
+      - name: Apply BackendConfig
+        run: |
+          kubectl apply -f k8s/abcall-backend-config.yaml
+
+  deploy-agentes:
+    needs: deploy-backend-config
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
     steps:
       - uses: actions/checkout@v3
       - name: Authenticate to Google Cloud
@@ -175,24 +186,153 @@ jobs:
           sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
       - name: Get GKE Credentials with Timeout
         run: |
-          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 600 seconds"
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
       - name: Update image in Kubernetes manifest
         run: |
-          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-${{ matrix.yaml_name }}:${{ github.sha }}|g' ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
-      - name: Apply BackendConfig
-        run: |
-          kubectl apply -f k8s/abcall-backend-config.yaml
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-agentes:${{ github.sha }}|g' MSAgentes/k8s/ms-abcall-agentes.yaml
       - name: Deploy Module to GKE
         run: |
-          kubectl apply -f ${{ matrix.module }}/k8s/ms-abcall-${{ matrix.yaml_name }}.yaml
+          kubectl apply -f MSAgentes/k8s/ms-abcall-agentes.yaml
       - name: Verify Deployment
         run: |
-          kubectl rollout status deployment/ms-abcall-${{ matrix.yaml_name }}-deployment
-          kubectl get services -o wide | grep ms-abcall-${{ matrix.yaml_name }}-service
-          kubectl get hpa ms-abcall-${{ matrix.yaml_name }}-hpa
+          kubectl rollout status deployment/ms-abcall-agentes-deployment
+          kubectl get services -o wide | grep ms-abcall-agentes-service
+          kubectl get hpa ms-abcall-agentes-hpa
+
+  deploy-clientes:
+    needs: deploy-agentes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials with Timeout
+        run: |
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
+      - name: Update image in Kubernetes manifest
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-clientes:${{ github.sha }}|g' MSClientes/k8s/ms-abcall-clientes.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f MSClientes/k8s/ms-abcall-clientes.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-clientes-deployment
+          kubectl get services -o wide | grep ms-abcall-clientes-service
+          kubectl get hpa ms-abcall-clientes-hpa
+
+  deploy-ia:
+    needs: deploy-clientes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials with Timeout
+        run: |
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
+      - name: Update image in Kubernetes manifest
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-ia:${{ github.sha }}|g' MSIA/k8s/ms-abcall-ia.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f MSIA/k8s/ms-abcall-ia.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-ia-deployment
+          kubectl get services -o wide | grep ms-abcall-ia-service
+          kubectl get hpa ms-abcall-ia-hpa
+
+  deploy-incidentes:
+    needs: deploy-ia
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials with Timeout
+        run: |
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
+      - name: Update image in Kubernetes manifest
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-incidentes:${{ github.sha }}|g' MSIncidentes/k8s/ms-abcall-incidentes.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f MSIncidentes/k8s/ms-abcall-incidentes.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-incidentes-deployment
+          kubectl get services -o wide | grep ms-abcall-incidentes-service
+          kubectl get hpa ms-abcall-incidentes-hpa
+
+  deploy-reporteria:
+    needs: deploy-incidentes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials with Timeout
+        run: |
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
+      - name: Update image in Kubernetes manifest
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|gcr.io/${{ env.PROJECT_ID }}/ms-reporteria:${{ github.sha }}|g' MSReporteria/k8s/ms-abcall-reporteria.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f MSReporteria/k8s/ms-abcall-reporteria.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-reporteria-deployment
+          kubectl get services -o wide | grep ms-abcall-reporteria-service
+          kubectl get hpa ms-abcall-reporteria-hpa
 
   update-ingress:
-    needs: deploy
+    needs: deploy-reporteria
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.head_ref == 'release'
     steps:
@@ -220,12 +360,11 @@ jobs:
           kubectl describe ingress abcall-ingress
 
   cleanup-feature-branch:
-    needs: test-and-analyze
+    if: github.event.name == 'pull_request_target' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feat/')
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feat/')
     steps:
       - name: Delete feature branch
         uses: dawidd6/action-delete-branch@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref }}
+          branch: ${{ github.event.pull_request.head.ref }}
