@@ -3,7 +3,7 @@ name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
 on:
   pull_request:
     branches: [ main, release, develop ]
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, synchronize, reopened, closed ]
   pull_request_target:
     types: [ closed ]
 
