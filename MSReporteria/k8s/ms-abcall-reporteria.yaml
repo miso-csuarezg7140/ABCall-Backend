@@ -37,6 +37,18 @@ spec:
                 -XX:+HeapDumpOnOutOfMemoryError
             - name: SPRING_PROFILES_ACTIVE
               value: "cloud"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://127.0.0.1:5432/reporteria
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
           readinessProbe:
             httpGet:
               path: /service/abcall/reporteria/v1/ping
@@ -53,6 +65,30 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 3
             failureThreshold: 5
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+          command:
+            - "/cloud_sql_proxy"
+            - "abcall-uniandes-g18a:us-central1:postgresql"
+          volumeMounts:
+            - name: cloud-sql-proxy-sa-key-volume
+              mountPath: /secrets/service_account.json
+              subPath: service_account.json
+              readOnly: true
+          env:
+            - name: GOOGLE_APPLICATIONS_CREDENTIALS
+              value: /secrets/service_account.json
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+      volumes:
+        - name: cloud-sql-proxy-sa-key-volume
+          secret:
+            secretName: cloud-sql-proxy-sa-key
 ---
 apiVersion: v1
 kind: Service
