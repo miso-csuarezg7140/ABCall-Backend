@@ -139,8 +139,8 @@ jobs:
           IMAGE: ${{ matrix.artifact-registry }}
         run: |
           cd ${{ matrix.service }}
-          docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE:$GITHUB_SHA .
-          docker push us-central1-docker.pkg.dev/$PROJECT_ID/$IMAGE:$GITHUB_SHA
+          docker build --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} -t us-central1-docker.pkg.dev/$PROJECT_ID/microservices/$IMAGE:$GITHUB_SHA .
+          docker push us-central1-docker.pkg.dev/$PROJECT_ID/microservices/$IMAGE:$GITHUB_SHA
 
   deploy-backend-config:
     needs: build-and-push
