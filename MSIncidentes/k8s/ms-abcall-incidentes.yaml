@@ -85,10 +85,10 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "300m"
-          volumes:
-            - name: cloud-sql-proxy-sa-key-volume
-              secret:
-                secretName: cloud-sql-proxy-sa-key
+      volumes:
+        - name: cloud-sql-proxy-sa-key-volume
+          secret:
+            secretName: cloud-sql-proxy-sa-key
 ---
 apiVersion: v1
 kind: Service
