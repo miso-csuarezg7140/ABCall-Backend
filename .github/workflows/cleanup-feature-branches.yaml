@@ -8,17 +8,9 @@ jobs:
   cleanup-feature-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug information
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "PR merged: ${{ github.event.pull_request.merged }}"
-          echo "Head ref: ${{ github.event.pull_request.head.ref }}"
-          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
-          echo "Should delete: ${{ github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feat/') && github.event.pull_request.base.ref == 'develop' }}"
-
       - name: Delete feature branch
         if: ${{ github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feat/') && github.event.pull_request.base.ref == 'develop' }}
         uses: dawidd6/action-delete-branch@v3
         with:
           github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          branch: ${{ github.event.pull_request.head.ref }}
+          branches: ${{ github.event.pull_request.head.ref }}
