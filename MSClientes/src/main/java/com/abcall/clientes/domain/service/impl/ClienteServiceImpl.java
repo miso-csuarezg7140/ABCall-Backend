@@ -67,6 +67,7 @@ public class ClienteServiceImpl implements ClienteService {
                 String passwordDecoded = decodeFromBase64(clienteDto.getContrasena());
                 if (passwordDecoded.equals(contrasena)) {
                     clienteDto.setContrasena(passwordDecoded);
+                    //TODO
                     return buildResponseServiceDto(CODIGO_200, MENSAJE_200, clienteDto);
                 } else
                     return buildResponseServiceDto(CODIGO_401, MENSAJE_401, new HashMap<>());
