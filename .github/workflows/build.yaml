@@ -3,7 +3,7 @@ name: Microservices CI/CD with Java 21 and Detailed K8s Deployment
 on:
   pull_request:
     branches: [ main, release, develop ]
-    types: [ opened, synchronize, reopened, closed ]
+    types: [ opened, synchronize, reopened ]
   pull_request_target:
     types: [ closed ]
 
@@ -358,23 +358,3 @@ jobs:
         run: |
           kubectl get ingress
           kubectl describe ingress abcall-ingress
-
-  cleanup-feature-branch:
-    if: |
-      github.event.name == 'pull_request_target' && 
-      github.event.pull_request.merged == true && 
-      startsWith(github.event.pull_request.head.ref, 'feat/') &&
-      github.event.pull_request.base.ref == 'develop'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug information
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "PR merged: ${{ github.event.pull_request.merged }}"
-          echo "Head ref: ${{ github.event.pull_request.head.ref }}"
-          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
-      - name: Delete feature branch
-        uses: dawidd6/action-delete-branch@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.event.pull_request.head.ref }}
