@@ -17,9 +17,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "data",
         "statusCode",
-        "statusDescription",
-        "data"
+        "statusDescription"
 })
 public class ResponseServiceDto {
 
