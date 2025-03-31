@@ -85,7 +85,7 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.java.source=${{ env.JAVA_VERSION }} \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-          -Dsonar.qualitygate.wait=true
+          -Dsonar.qualitygate.wait=true \
           -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
           -Dsonar.pullrequest.branch=${{ github.head_ref }} \
           -Dsonar.pullrequest.base=${{ github.base_ref }}
