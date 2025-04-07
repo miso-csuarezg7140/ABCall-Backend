@@ -38,7 +38,7 @@ class OpenApiConfigTest {
         assertNotNull(openAPI.getInfo());
 
         Info info = openAPI.getInfo();
-        assertEquals("API MS Clientes", info.getTitle());
+        assertEquals("MS Clientes", info.getTitle());
         assertEquals("1.0", info.getVersion());
         assertEquals("Servicio que gestiona la información de los clientes de ABCall.", info.getDescription());
     }
@@ -65,7 +65,7 @@ class OpenApiConfigTest {
         Info info = openAPI.getInfo();
 
         // Assert
-        assertEquals("API MS Clientes", info.getTitle());
+        assertEquals("MS Clientes", info.getTitle());
         assertEquals("1.0", info.getVersion());
         assertEquals("Servicio que gestiona la información de los clientes de ABCall.", info.getDescription());
     }
