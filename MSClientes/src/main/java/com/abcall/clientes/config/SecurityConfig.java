@@ -24,8 +24,7 @@ public class SecurityConfig {
                         "/swagger-ui.html/**", "/v3/api-docs/**"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
+                                "/v3/api-docs/**").permitAll().anyRequest().authenticated()
                 );
 
         return http.build();
