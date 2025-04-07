@@ -147,6 +147,11 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <includes>
+                        <include>com/abcall/clientes/**/*</include>
+                    </includes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
