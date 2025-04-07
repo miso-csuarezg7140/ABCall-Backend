@@ -38,8 +38,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - service: MSClientes
-            sonar_project_id: -MSClientes
           - service: MSAuth
             sonar_project_id: -MSAuth
     steps:
