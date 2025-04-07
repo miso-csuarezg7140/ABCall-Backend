@@ -60,7 +60,7 @@ class CorsConfigTest {
         corsConfig.addCorsMappings(registry);
 
         // Assert - Verificamos que la configuración se realiza sin errores
-        assertDoesNotThrow(() -> registry.toString());
+        assertDoesNotThrow(registry::toString);
     }
 
     @Test
