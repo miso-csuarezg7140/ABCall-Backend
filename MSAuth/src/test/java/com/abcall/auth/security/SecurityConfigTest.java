@@ -1,12 +1,14 @@
 package com.abcall.auth.security;
 
+import com.abcall.auth.web.AuthController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -17,8 +19,15 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(properties = {
+        "spring.cloud.openfeign.enabled=false",
+        "spring.cloud.discovery.enabled=false",
+        "agent.service.url=http://localhost:8080/",
+        "client.service.url=http://localhost:8081/",
+        "jwt.secret=test-secret-key-for-jwt-token-generation-used-in-testing-only",
+        "jwt.access.expiration.ms=3600000",
+        "jwt.refresh.expiration.ms=25200000"
+})
 class SecurityConfigTest {
 
     @Autowired
