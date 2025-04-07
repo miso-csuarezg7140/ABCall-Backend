@@ -52,18 +52,18 @@ spec:
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                name: jwt-secret
-                key: jwt_secret
+                  name: jwt-secret
+                  key: jwt_secret
             - name: JWT_ACCESS_TOKEN_EXPIRATION_MS
               valueFrom:
                 secretKeyRef:
-                name: jwt-secret
-                key: jwt_access_token_expiration_ms
+                  name: jwt-secret
+                  key: jwt_access_token_expiration_ms
             - name: JWT_REFRESH_TOKEN_EXPIRATION_MS
               valueFrom:
                 secretKeyRef:
-                name: jwt-secret
-                key: jwt_refresh_token_expiration_ms
+                  name: jwt-secret
+                  key: jwt_refresh_token_expiration_ms
           readinessProbe:
             httpGet:
               path: /service/abcall/auth/v1/ping
