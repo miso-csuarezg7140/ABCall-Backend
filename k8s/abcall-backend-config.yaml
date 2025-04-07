@@ -68,3 +68,17 @@ spec:
     type: HTTP
     requestPath: /service/abcall/reporteria/v1/ping
     port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: health-check-config-auth
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /service/abcall/auth/v1/ping
+    port: 8080
