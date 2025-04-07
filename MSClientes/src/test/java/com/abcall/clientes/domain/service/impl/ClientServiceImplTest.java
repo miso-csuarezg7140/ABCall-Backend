@@ -53,7 +53,7 @@ class ClientServiceImplTest {
         String username = "123";
         String password = "password";
         ClientDto clientDto = new ClientDto();
-        clientDto.setPassword("encodedPassword");
+        clientDto.setPassword("password");
 
         when(clientRepository.findByDocumentNumber(Long.parseLong(username))).thenReturn(clientDto);
         when(passwordEncoder.matches(password, clientDto.getPassword())).thenReturn(true);
