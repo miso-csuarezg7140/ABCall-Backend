@@ -1,4 +1,4 @@
-package com.abcall.clientes.config;
+package com.abcall.auth.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +20,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping",
                         "/swagger-ui.html/**", "/v3/api-docs/**"))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**").permitAll().anyRequest().authenticated()
+                        .requestMatchers("/ping", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
