@@ -225,7 +225,7 @@ jobs:
           kubectl get hpa ${{ matrix.service-name }}-hpa
 
   update-ingress:
-    needs: deploy-auth
+    needs: deploy-services
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.head_ref == 'release'
     steps:
