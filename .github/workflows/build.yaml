@@ -48,6 +48,8 @@ jobs:
             sonar_project_id: -MSIncidentes
           - service: MSReporteria
             sonar_project_id: -MSReporteria
+          - service: MSAuth
+            sonar_project_id: -MSAuth
     steps:
       - uses: actions/checkout@v3
         with:
@@ -113,6 +115,8 @@ jobs:
             service: MSIncidentes
           - artifact-registry: ms-reporteria
             service: MSReporteria
+          - artifact-registry: ms-auth
+            service: MSAuth
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 21
@@ -331,8 +335,41 @@ jobs:
           kubectl get services -o wide | grep ms-abcall-reporteria-service
           kubectl get hpa ms-abcall-reporteria-hpa
 
-  update-ingress:
+  deploy-auth:
     needs: deploy-reporteria
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Get GKE Credentials with Timeout
+        run: |
+          timeout 1200s gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE || echo "Command timed out after 1200 seconds"
+      - name: Update image in Kubernetes manifest
+        run: |
+          sed -i 's|IMAGE_TO_REPLACE|us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/microservices/ms-auth:${{ github.sha }}|g' MSAuth/k8s/ms-abcall-auth.yaml
+      - name: Deploy Module to GKE
+        run: |
+          kubectl apply -f MSAuth/k8s/ms-abcall-auth.yaml
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/ms-abcall-auth-deployment
+          kubectl get services -o wide | grep ms-abcall-auth-service
+          kubectl get hpa ms-abcall-auth-hpa
+
+  update-ingress:
+    needs: deploy-auth
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.head_ref == 'release'
     steps:

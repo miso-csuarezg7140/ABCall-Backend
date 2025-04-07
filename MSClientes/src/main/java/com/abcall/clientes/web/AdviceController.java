@@ -1,7 +1,10 @@
 package com.abcall.clientes.web;
 
-import com.abcall.clientes.domain.dto.ResponseServiceDto;
+import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.exception.ApiException;
+import com.abcall.clientes.util.ApiUtils;
+import com.abcall.clientes.util.enums.HttpResponseCodes;
+import com.abcall.clientes.util.enums.HttpResponseMessages;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,72 +18,79 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.abcall.clientes.util.ApiUtils.buildResponseServiceDto;
-import static com.abcall.clientes.util.Constant.CODIGO_400;
-import static com.abcall.clientes.util.Constant.MENSAJE_400;
-
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class AdviceController {
 
+    private final ApiUtils apiUtils;
+
     /**
-     * Manejo de excepciones ApiException del servicio
+     * Handles ApiException thrown by the service.
+     * <p>
+     * This method handles ApiException and constructs a ResponseServiceDto with the exception details.
+     * It returns a ResponseEntity with the appropriate HTTP status and the response data.
+     * </p>
      *
-     * @param apiException la excepcion ApiException
-     * @return ResponseEntity con la respuesta definida al servicio
+     * @param apiException the ApiException that was thrown
+     * @return ResponseEntity with a ResponseServiceDto containing the exception details
      */
     @ExceptionHandler(value = ApiException.class)
     public ResponseEntity<ResponseServiceDto> handlerApiException(ApiException apiException) {
-        ResponseServiceDto responseServiceDto = buildResponseServiceDto(apiException.getCode(),
+        ResponseServiceDto responseDto = apiUtils.buildResponse(apiException.getCode(),
                 apiException.getMessage(),
                 apiException.getAdditionalExceptionMessage());
-        return new ResponseEntity<>(responseServiceDto,
+        return new ResponseEntity<>(responseDto,
                 apiException.getHttpStatus());
     }
 
     /**
-     * Handler BindException manejo de validaciones
+     * Handler for BindException to manage validation errors.
+     * <p>
+     * This method handles BindException thrown during validation and extracts the first error message
+     * to return in a ResponseServiceDto with a BAD_REQUEST status.
+     * </p>
      *
-     * @param exception la excepcion
-     * @return Respuesta con mensaje de validacion
+     * @param exception the BindException that was thrown
+     * @return ResponseEntity with a ResponseServiceDto containing the validation error message
      */
     @ExceptionHandler(value = BindException.class)
     public ResponseEntity<ResponseServiceDto> handlerBindException(BindException exception) {
         List<ObjectError> allErrors = exception.getBindingResult().getAllErrors();
         String finalMessage = allErrors.get(0).getDefaultMessage();
-        ResponseServiceDto responseServiceDto = buildResponseServiceDto("400",
-                finalMessage,
-                List.of());
-        return new ResponseEntity<>(responseServiceDto, HttpStatus.BAD_REQUEST);
+        ResponseServiceDto responseDto = apiUtils.buildResponse(400, finalMessage, List.of());
+        return new ResponseEntity<>(responseDto,
+                HttpStatus.BAD_REQUEST);
     }
 
     /**
-     * Manejo de excepciones Exception del servicio
+     * Handles general exceptions that are not specifically caught by other exception handlers.
+     * <p>
+     * This method catches any exception that is not handled by other specific exception handlers
+     * and returns a ResponseEntity with an INTERNAL_SERVER_ERROR status and the exception details.
+     * </p>
      *
-     * @param exception la excepcion Exception
-     * @return ResponseEntity con la respuesta definida al servicio
+     * @param exception the exception that was thrown
+     * @return ResponseEntity with a ResponseServiceDto containing the exception message and stack trace
      */
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ResponseServiceDto> handlerException(Exception exception) {
-        return new ResponseEntity<>(buildResponseServiceDto("500",
-                exception.getMessage(),
-                exception.getStackTrace()),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiUtils.buildResponse(
+                500, exception.getMessage(), exception.getStackTrace()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
-     * Manejador para MethodArgumentNotValidException y ConstraintViolationException.
+     * Handles validation exceptions for method arguments and constraint violations.
      * <p>
-     * Este metodo maneja las excepciones lanzadas cuando los argumentos del metodo no son válidos
-     * o cuando hay violaciones de restricciones. Recopila los errores de validación y los devuelve
-     * en un ResponseServiceDto con un estado BAD_REQUEST.
+     * This method handles exceptions thrown when method arguments are not valid
+     * or when there are constraint violations. It collects validation errors and returns
+     * them in a ResponseServiceDto with a BAD_REQUEST status.
      * </p>
      *
-     * @param ex la excepción lanzada cuando los argumentos del metodo no son válidos o hay violaciones de restricciones
-     * @return ResponseEntity con un ResponseServiceDto que contiene los detalles de los errores de validación
+     * @param ex the exception thrown when method arguments are not valid or there are constraint violations
+     * @return ResponseEntity with a ResponseServiceDto containing the validation error details
      */
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
-    public ResponseEntity<ResponseServiceDto> handleValidationExcpetions(Exception ex) {
+    public ResponseEntity<ResponseServiceDto> handleValidationExceptions(Exception ex) {
         List<String> errors = new ArrayList<>();
 
         if (ex instanceof MethodArgumentNotValidException) {
@@ -93,7 +103,9 @@ public class AdviceController {
             );
         }
 
-        ResponseServiceDto response = buildResponseServiceDto(CODIGO_400, MENSAJE_400, errors);
+        ResponseServiceDto response = apiUtils.buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(),
+                HttpResponseMessages.BAD_REQUEST.getMessage(), errors);
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
