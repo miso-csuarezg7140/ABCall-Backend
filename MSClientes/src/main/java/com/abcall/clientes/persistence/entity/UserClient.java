@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "usuario_cliente")
-public class ClienteUsuario {
+public class UserClient {
 
     @EmbeddedId
     ClienteUsuarioPK clienteUsuarioPK;

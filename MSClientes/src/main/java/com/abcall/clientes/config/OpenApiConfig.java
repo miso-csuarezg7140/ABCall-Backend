@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API MS Clientes")
+                        .title("MS Clientes")
                         .version("1.0")
                         .description("Servicio que gestiona la información de los clientes de ABCall."));
     }

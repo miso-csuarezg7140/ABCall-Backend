@@ -1,4 +1,4 @@
-package com.abcall.clientes.domain.dto;
+package com.abcall.clientes.domain.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,27 +11,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "data",
         "statusCode",
-        "statusDescription"
+        "statusDescription",
+        "data"
 })
 public class ResponseServiceDto {
 
     @Schema(description = "Código de estado", example = "200")
     @JsonProperty("statusCode")
-    private String statusCode;
+    private Integer statusCode;
 
-    @Schema(description = "Descripción de estado", example = "Transacción exitosa.")
+    @Schema(description = "Descripción de estado", example = "Consulta exitosa.")
     @JsonProperty("statusDescription")
     private String statusDescription;
 
-    @Schema(description = "Data", example = "[Registrado]")
+    @Schema(description = "Data", example = "")
     @JsonProperty("data")
     private Object data;
 }
