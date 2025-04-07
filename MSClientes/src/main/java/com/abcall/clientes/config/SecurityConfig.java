@@ -20,9 +20,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
+                        "/swagger-ui.html/**", "/v3/api-docs/**"))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/ping", "/authenticate").permitAll()
+                        .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
+                                "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
