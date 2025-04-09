@@ -4,17 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-import static com.abcall.clientes.util.Constants.ESTADO_DEFAULT;
-import static com.abcall.clientes.util.Constants.HOY;
-import static com.abcall.clientes.util.Constants.VALIDACION_NUMERICO;
+import static com.abcall.clientes.util.Constants.*;
 
 @Getter
 @Setter
+@Builder
 public class ClientDto {
 
     private Integer clientId;
