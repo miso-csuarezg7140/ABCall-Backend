@@ -38,8 +38,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - service: MSAuth
-            sonar_project_id: -MSAuth
+          - service: MSClientes
+            sonar_project_id: -MSClientes
     steps:
       - uses: actions/checkout@v3
         with:
