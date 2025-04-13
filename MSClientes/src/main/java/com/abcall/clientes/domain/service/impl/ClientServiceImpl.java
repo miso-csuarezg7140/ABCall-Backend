@@ -55,7 +55,7 @@ public class ClientServiceImpl implements IClientService {
             clientRepository.save(clientDto);
 
             ClientAuthResponse clientAuthResponse = ClientAuthResponse.builder()
-                    .clientId(clientDto.getClientId())
+                    .clientId(clientDto.getIdClient())
                     .documentNumber(clientDto.getDocumentNumber())
                     .authenticated(true)
                     .roles(List.of("cliente"))
@@ -105,7 +105,7 @@ public class ClientServiceImpl implements IClientService {
             ClientDto savedClient = clientRepository.save(newClient);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("clientId", savedClient.getClientId());
+            response.put("clientId", savedClient.getIdClient());
             response.put("documentNumber", savedClient.getDocumentNumber());
             response.put("email", savedClient.getEmail());
 

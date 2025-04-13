@@ -24,7 +24,7 @@ class ClientMapperImplTest {
     @Test
     void toEntity_MapsFieldsCorrectly() {
         ClientDto clientDto = new ClientDto();
-        clientDto.setClientId(1);
+        clientDto.setIdClient(1);
         clientDto.setDocumentNumber(123456789L);
         clientDto.setPassword("password");
         clientDto.setSocialReason("ABC Corp");
@@ -37,7 +37,7 @@ class ClientMapperImplTest {
 
         Client result = mapper.toEntity(clientDto);
 
-        assertEquals(clientDto.getClientId(), result.getClientId());
+        assertEquals(clientDto.getIdClient(), result.getIdClient());
         assertEquals(clientDto.getDocumentNumber(), result.getDocumentNumber());
         assertEquals(clientDto.getPassword(), result.getPassword());
         assertEquals(clientDto.getSocialReason(), result.getSocialReason());
@@ -59,7 +59,7 @@ class ClientMapperImplTest {
     void toEntityList_MapsListCorrectly() {
         List<ClientDto> clientDtoList = new ArrayList<>();
         ClientDto clientDto = new ClientDto();
-        clientDto.setClientId(1);
+        clientDto.setIdClient(1);
         clientDto.setDocumentNumber(123456789L);
         clientDto.setPassword("password");
         clientDto.setSocialReason("ABC Corp");
@@ -74,7 +74,7 @@ class ClientMapperImplTest {
         List<Client> result = mapper.toEntityList(clientDtoList);
 
         assertEquals(1, result.size());
-        assertEquals(clientDto.getClientId(), result.getFirst().getClientId());
+        assertEquals(clientDto.getIdClient(), result.getFirst().getIdClient());
     }
 
     @Test
@@ -86,7 +86,7 @@ class ClientMapperImplTest {
     @Test
     void toDto_MapsFieldsCorrectly() {
         Client client = new Client();
-        client.setClientId(1);
+        client.setIdClient(1);
         client.setDocumentNumber(123456789L);
         client.setPassword("password");
         client.setSocialReason("ABC Corp");
@@ -99,7 +99,7 @@ class ClientMapperImplTest {
 
         ClientDto result = mapper.toDto(client);
 
-        assertEquals(client.getClientId(), result.getClientId());
+        assertEquals(client.getIdClient(), result.getIdClient());
         assertEquals(client.getDocumentNumber(), result.getDocumentNumber());
         assertEquals(client.getPassword(), result.getPassword());
         assertEquals(client.getSocialReason(), result.getSocialReason());
@@ -121,7 +121,7 @@ class ClientMapperImplTest {
     void toDtoList_MapsListCorrectly() {
         List<Client> clientList = new ArrayList<>();
         Client client = new Client();
-        client.setClientId(1);
+        client.setIdClient(1);
         client.setDocumentNumber(123456789L);
         client.setPassword("password");
         client.setSocialReason("ABC Corp");
@@ -136,6 +136,6 @@ class ClientMapperImplTest {
         List<ClientDto> result = mapper.toDtoList(clientList);
 
         assertEquals(1, result.size());
-        assertEquals(client.getClientId(), result.getFirst().getClientId());
+        assertEquals(client.getIdClient(), result.getFirst().getIdClient());
     }
 }

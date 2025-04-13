@@ -21,7 +21,7 @@ import static com.abcall.clientes.util.Constants.*;
 @NoArgsConstructor
 public class ClientDto {
 
-    private Integer clientId;
+    private Integer idClient;
 
     @JsonProperty("numeroDocumento")
     @NotNull(message = "El campo numeroDocumento cumple las validaciones.")

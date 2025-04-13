@@ -13,7 +13,7 @@ class ClientTest {
     void clientEntity_HasCorrectFieldValues() {
         Client client = getClient();
 
-        assertEquals(1, client.getIdCliente());
+        assertEquals(1, client.getIdClient());
         assertEquals(123456789L, client.getDocumentNumber());
         assertEquals("password123", client.getPassword());
         assertEquals("ABC Corp", client.getSocialReason());
@@ -27,7 +27,7 @@ class ClientTest {
 
     private static Client getClient() {
         Client client = new Client();
-        client.setIdCliente(1);
+        client.setIdClient(1);
         client.setDocumentNumber(123456789L);
         client.setPassword("password123");
         client.setSocialReason("ABC Corp");
@@ -43,7 +43,7 @@ class ClientTest {
     @Test
     void clientEntity_AllowsNullValuesForOptionalFields() {
         Client client = new Client();
-        client.setIdCliente(1);
+        client.setIdClient(1);
         client.setDocumentNumber(123456789L);
         client.setPassword("password123");
         client.setSocialReason("ABC Corp");
@@ -54,7 +54,7 @@ class ClientTest {
         client.setLastLogin(null);
         client.setStatus(null);
 
-        assertEquals(1, client.getIdCliente());
+        assertEquals(1, client.getIdClient());
         assertEquals(123456789L, client.getDocumentNumber());
         assertEquals("password123", client.getPassword());
         assertEquals("ABC Corp", client.getSocialReason());
