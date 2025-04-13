@@ -1,8 +1,5 @@
 package com.abcall.clientes.persistence.repository.impl;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.abcall.clientes.domain.dto.ClientDto;
 import com.abcall.clientes.persistence.entity.Client;
 import com.abcall.clientes.persistence.mappers.IClientMapper;
@@ -13,6 +10,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ClientRepositoryImplTest {
 

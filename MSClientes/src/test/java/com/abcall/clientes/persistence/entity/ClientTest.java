@@ -9,6 +9,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ClientTest {
 
+    private static Client getClient() {
+        Client client = new Client();
+        client.setIdClient(1);
+        client.setDocumentNumber(123456789L);
+        client.setPassword("password123");
+        client.setSocialReason("ABC Corp");
+        client.setEmail("abc@corp.com");
+        client.setPlan("Premium");
+        client.setCreatedDate(LocalDateTime.of(2023, 1, 1, 0, 0));
+        client.setUpdatedDate(LocalDateTime.of(2023, 1, 2, 0, 0));
+        client.setLastLogin(LocalDateTime.of(2023, 1, 3, 0, 0));
+        client.setStatus("Active");
+        return client;
+    }
+
     @Test
     void clientEntity_HasCorrectFieldValues() {
         Client client = getClient();
@@ -23,21 +38,6 @@ class ClientTest {
         assertEquals(LocalDateTime.of(2023, 1, 2, 0, 0), client.getUpdatedDate());
         assertEquals(LocalDateTime.of(2023, 1, 3, 0, 0), client.getLastLogin());
         assertEquals("Active", client.getStatus());
-    }
-
-    private static Client getClient() {
-        Client client = new Client();
-        client.setIdClient(1);
-        client.setDocumentNumber(123456789L);
-        client.setPassword("password123");
-        client.setSocialReason("ABC Corp");
-        client.setEmail("abc@corp.com");
-        client.setPlan("Premium");
-        client.setCreatedDate(LocalDateTime.of(2023, 1, 1, 0, 0));
-        client.setUpdatedDate(LocalDateTime.of(2023, 1, 2, 0, 0));
-        client.setLastLogin(LocalDateTime.of(2023, 1, 3, 0, 0));
-        client.setStatus("Active");
-        return client;
     }
 
     @Test
