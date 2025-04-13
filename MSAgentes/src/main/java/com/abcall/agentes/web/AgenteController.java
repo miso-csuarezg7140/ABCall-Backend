@@ -1,6 +1,6 @@
 package com.abcall.agentes.web;
 
-import com.abcall.agentes.domain.dto.ResponseServiceDto;
+import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.agentes.domain.service.AgenteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,11 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.abcall.agentes.util.Constant.CODIGO_200;
-import static com.abcall.agentes.util.Constant.CODIGO_206;
-import static com.abcall.agentes.util.Constant.CODIGO_400;
-import static com.abcall.agentes.util.Constant.VALIDACION_CONTRASENA;
-import static com.abcall.agentes.util.Constant.VALIDACION_NUMERICO;
+import static com.abcall.agentes.util.Constants.VALIDACION_CONTRASENA;
+import static com.abcall.agentes.util.Constants.VALIDACION_NUMERICO;
 
 @Validated
 @RestController
@@ -47,13 +44,7 @@ public class AgenteController {
             @RequestParam(value = "contrasena") String contrasena) {
 
         ResponseServiceDto response = agenteService.login(tipoDocumentoAgente, numDocumentoAgente, contrasena);
-
-        return switch (response.getStatusCode()) {
-            case CODIGO_200 -> ResponseEntity.ok(response);
-            case CODIGO_206 -> ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(response);
-            case CODIGO_400 -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            case null, default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        };
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @Operation(summary = "Permite monitorear el estado del MS en el despliegue.")

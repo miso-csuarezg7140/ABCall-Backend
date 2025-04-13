@@ -1,8 +1,8 @@
-package com.abcall.agentes.util;
+package com.abcall.ia.util;
 
-import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
-import com.abcall.agentes.util.enums.HttpResponseCodes;
-import com.abcall.agentes.util.enums.HttpResponseMessages;
+import com.abcall.ia.domain.dto.response.ResponseServiceDto;
+import com.abcall.ia.util.enums.HttpResponseCodes;
+import com.abcall.ia.util.enums.HttpResponseMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

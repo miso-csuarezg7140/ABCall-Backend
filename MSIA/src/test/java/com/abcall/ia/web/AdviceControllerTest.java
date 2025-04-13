@@ -1,10 +1,10 @@
-package com.abcall.agentes.web;
+package com.abcall.ia.web;
 
-import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
-import com.abcall.agentes.exception.ApiException;
-import com.abcall.agentes.util.ApiUtils;
-import com.abcall.agentes.util.enums.HttpResponseCodes;
-import com.abcall.agentes.util.enums.HttpResponseMessages;
+import com.abcall.ia.domain.dto.response.ResponseServiceDto;
+import com.abcall.ia.exception.ApiException;
+import com.abcall.ia.util.ApiUtils;
+import com.abcall.ia.util.enums.HttpResponseCodes;
+import com.abcall.ia.util.enums.HttpResponseMessages;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
