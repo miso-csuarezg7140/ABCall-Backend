@@ -1,6 +1,6 @@
 package com.abcall.incidentes.persistence.mappers;
 
-import com.abcall.incidentes.domain.dto.IncidenteDto;
+import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
 import com.abcall.incidentes.persistence.entity.Incidente;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -10,12 +10,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface IncidenteMapper {
 
-    Incidente toEntity(IncidenteDto incidenteDto);
+    Incidente toEntity(IncidenteRequest incidenteRequest);
 
-    List<Incidente> toEntityList(List<IncidenteDto> incidenteDtoList);
+    List<Incidente> toEntityList(List<IncidenteRequest> incidenteRequestList);
 
     @InheritInverseConfiguration
-    IncidenteDto toDto(Incidente incidente);
+    IncidenteRequest toDto(Incidente incidente);
 
-    List<IncidenteDto> toDtoList(List<Incidente> incidenteDtoList);
+    List<IncidenteRequest> toDtoList(List<Incidente> incidenteDtoList);
 }

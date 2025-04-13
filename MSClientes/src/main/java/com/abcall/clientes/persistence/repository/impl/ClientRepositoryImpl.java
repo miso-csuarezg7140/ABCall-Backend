@@ -3,13 +3,13 @@ package com.abcall.clientes.persistence.repository.impl;
 import com.abcall.clientes.domain.dto.ClientDto;
 import com.abcall.clientes.persistence.entity.Client;
 import com.abcall.clientes.persistence.mappers.IClientMapper;
-import com.abcall.clientes.persistence.repository.IClienteRepository;
+import com.abcall.clientes.persistence.repository.IClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ClientRepositoryImpl implements IClienteRepository {
+public class ClientRepositoryImpl implements IClientRepository {
 
     private final IClientRepositoryJpa clienteRepositoryJpa;
     private final IClientMapper clientMapper;

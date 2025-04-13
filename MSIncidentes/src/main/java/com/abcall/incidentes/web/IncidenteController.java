@@ -1,6 +1,6 @@
 package com.abcall.incidentes.web;
 
-import com.abcall.incidentes.domain.dto.IncidenteDto;
+import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.util.ApiUtils;
@@ -49,14 +49,14 @@ public class IncidenteController {
 
     @Operation(summary = "Método que permite la creación de un incidente nuevo.")
     @PostMapping("/crear")
-    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody IncidenteDto incidenteDto,
+    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody IncidenteRequest incidenteRequest,
                                                     BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         } else {
-            ResponseServiceDto response = incidentesService.crear(incidenteDto);
+            ResponseServiceDto response = incidentesService.crear(incidenteRequest);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         }
     }

@@ -1,6 +1,6 @@
 package com.abcall.incidentes.domain.service.impl;
 
-import com.abcall.incidentes.domain.dto.IncidenteDto;
+import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.persistence.entity.Incidente;
 import com.abcall.incidentes.persistence.mappers.IncidenteMapper;
@@ -42,13 +42,13 @@ class IncidenteServiceImplTest {
         String numeroDocUsuarioStr = "123456";
         Long numeroDocUsuario = 123456L;
         List<Incidente> incidentes = List.of(new Incidente());
-        List<IncidenteDto> incidenteDtos = List.of(new IncidenteDto());
+        List<IncidenteRequest> incidenteRequests = List.of(new IncidenteRequest());
         ResponseServiceDto expectedResponse = new ResponseServiceDto();
 
         Mockito.when(incidenteRepository.obtenerPorUsuario(tipoDocUsuario, numeroDocUsuario)).thenReturn(incidentes);
-        Mockito.when(incidenteMapper.toDtoList(incidentes)).thenReturn(incidenteDtos);
+        Mockito.when(incidenteMapper.toDtoList(incidentes)).thenReturn(incidenteRequests);
         Mockito.when(apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
-                        incidenteDtos))
+                        incidenteRequests))
                 .thenReturn(expectedResponse);
 
         ResponseServiceDto actualResponse = incidenteService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
@@ -92,34 +92,34 @@ class IncidenteServiceImplTest {
 
     @Test
     void crearReturnsCreatedResponseWhenSuccessful() {
-        IncidenteDto incidenteDto = new IncidenteDto();
+        IncidenteRequest incidenteRequest = new IncidenteRequest();
         Incidente incidente = new Incidente();
-        IncidenteDto incidenteCreado = new IncidenteDto();
+        IncidenteRequest incidenteCreado = new IncidenteRequest();
         ResponseServiceDto expectedResponse = new ResponseServiceDto();
 
-        Mockito.when(incidenteMapper.toEntity(incidenteDto)).thenReturn(incidente);
+        Mockito.when(incidenteMapper.toEntity(incidenteRequest)).thenReturn(incidente);
         Mockito.when(incidenteRepository.crear(incidente)).thenReturn(incidente);
         Mockito.when(incidenteMapper.toDto(incidente)).thenReturn(incidenteCreado);
         Mockito.when(apiUtils.buildResponse(HttpResponseCodes.CREATED.getCode(),
                         HttpResponseMessages.CREATED.getMessage(), incidenteCreado))
                 .thenReturn(expectedResponse);
 
-        ResponseServiceDto actualResponse = incidenteService.crear(incidenteDto);
+        ResponseServiceDto actualResponse = incidenteService.crear(incidenteRequest);
 
         Assertions.assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
     void crearHandlesExceptionGracefully() {
-        IncidenteDto incidenteDto = new IncidenteDto();
+        IncidenteRequest incidenteRequest = new IncidenteRequest();
         ResponseServiceDto expectedResponse = new ResponseServiceDto();
 
-        Mockito.when(incidenteMapper.toEntity(incidenteDto)).thenThrow(new RuntimeException("Error"));
+        Mockito.when(incidenteMapper.toEntity(incidenteRequest)).thenThrow(new RuntimeException("Error"));
         Mockito.when(apiUtils.buildResponse(eq(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode()),
                         eq(HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage()), Mockito.anyString()))
                 .thenReturn(expectedResponse);
 
-        ResponseServiceDto actualResponse = incidenteService.crear(incidenteDto);
+        ResponseServiceDto actualResponse = incidenteService.crear(incidenteRequest);
 
         Assertions.assertEquals(expectedResponse, actualResponse);
     }
