@@ -14,7 +14,7 @@ class UserClientTest {
         UserClientPK pk = new UserClientPK();
         pk.setTipoDocUsuario("CC");
         pk.setNumeroDocUsuario(123456L);
-        pk.setNumeroDocCliente(789012L);
+        pk.setIdCliente(789012);
 
         UserClient userClient = new UserClient();
         userClient.setUserClientPK(pk);
@@ -22,7 +22,7 @@ class UserClientTest {
         assertNotNull(userClient.getUserClientPK());
         assertEquals("CC", userClient.getUserClientPK().getTipoDocUsuario());
         assertEquals(123456L, userClient.getUserClientPK().getNumeroDocUsuario());
-        assertEquals(789012L, userClient.getUserClientPK().getNumeroDocCliente());
+        assertEquals(789012, userClient.getUserClientPK().getIdCliente());
     }
 
     @Test

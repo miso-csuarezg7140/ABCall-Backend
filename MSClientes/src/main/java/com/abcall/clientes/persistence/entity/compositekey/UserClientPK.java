@@ -18,6 +18,6 @@ public class UserClientPK {
     @Column(name = "numero_doc_usuario", nullable = false)
     private Long numeroDocUsuario;
 
-    @Column(name = "numero_doc_cliente", nullable = false)
-    private Long numeroDocCliente;
+    @Column(name = "id_cliente", nullable = false)
+    private Integer idCliente;
 }

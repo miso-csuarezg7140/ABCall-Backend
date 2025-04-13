@@ -14,8 +14,8 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "cliente_id", nullable = false)
-    private Integer clientId;
+    @Column(name = "id_cliente", nullable = false)
+    private Integer idCliente;
 
     @Column(name = "numero_documento", nullable = false)
     private Long documentNumber;
