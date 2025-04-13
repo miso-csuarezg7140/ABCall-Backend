@@ -14,7 +14,7 @@ class ClientDtoTest {
     void clientDto_HasCorrectFieldValues() {
         LocalDateTime now = LocalDateTime.now();
         ClientDto clientDto = new ClientDto();
-        clientDto.setClientId(1);
+        clientDto.setIdClient(1);
         clientDto.setDocumentNumber(123456789L);
         clientDto.setPassword("password123");
         clientDto.setSocialReason("ABC Corp");
@@ -25,7 +25,7 @@ class ClientDtoTest {
         clientDto.setLastLogin(now);
         clientDto.setStatus('A');
 
-        assertEquals(1, clientDto.getClientId());
+        assertEquals(1, clientDto.getIdClient());
         assertEquals(123456789L, clientDto.getDocumentNumber());
         assertEquals("password123", clientDto.getPassword());
         assertEquals("ABC Corp", clientDto.getSocialReason());
@@ -40,7 +40,7 @@ class ClientDtoTest {
     @Test
     void clientDto_AllowsNullValuesForOptionalFields() {
         ClientDto clientDto = new ClientDto();
-        clientDto.setClientId(1);
+        clientDto.setIdClient(1);
         clientDto.setDocumentNumber(123456789L);
         clientDto.setPassword("password123");
         clientDto.setSocialReason("ABC Corp");
@@ -51,7 +51,7 @@ class ClientDtoTest {
         clientDto.setLastLogin(null);
         clientDto.setStatus(null);
 
-        assertEquals(1, clientDto.getClientId());
+        assertEquals(1, clientDto.getIdClient());
         assertEquals(123456789L, clientDto.getDocumentNumber());
         assertEquals("password123", clientDto.getPassword());
         assertEquals("ABC Corp", clientDto.getSocialReason());

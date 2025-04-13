@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class ClienteUsuarioPK {
+public class UserClientPK {
 
     @Column(name = "tipo_doc_usuario", nullable = false)
     private String tipoDocUsuario;
@@ -18,6 +18,6 @@ public class ClienteUsuarioPK {
     @Column(name = "numero_doc_usuario", nullable = false)
     private Long numeroDocUsuario;
 
-    @Column(name = "numero_doc_cliente", nullable = false)
-    private Long numeroDocCliente;
+    @Column(name = "id_cliente", nullable = false)
+    private Integer idCliente;
 }
