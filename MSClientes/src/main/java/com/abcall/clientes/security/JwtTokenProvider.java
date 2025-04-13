@@ -15,7 +15,7 @@ import java.util.List;
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
-    private String jwtSecret;
+    String jwtSecret;
 
     @Value("${jwt.access.expiration.ms}")
     private String jwtExpirationMs;

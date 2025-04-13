@@ -38,8 +38,18 @@ jobs:
     strategy:
       matrix:
         include:
+          - service: MSAgentes
+            sonar_project_id: -MSAgentes
           - service: MSClientes
             sonar_project_id: -MSClientes
+          - service: MSIA
+            sonar_project_id: -MSIA
+          - service: MSIncidentes
+            sonar_project_id: -MSIncidentes
+          - service: MSReporteria
+            sonar_project_id: -MSReporteria
+          - service: MSAuth
+            sonar_project_id: -MSAuth
     steps:
       - uses: actions/checkout@v3
         with:
