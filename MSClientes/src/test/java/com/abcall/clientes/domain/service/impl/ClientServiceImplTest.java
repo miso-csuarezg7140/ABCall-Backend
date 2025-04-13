@@ -131,7 +131,7 @@ class ClientServiceImplTest {
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
         when(clientRepository.save(any(ClientDto.class))).thenAnswer(invocation -> {
             ClientDto client = invocation.getArgument(0);
-            client.setClientId(1);
+            client.setIdClient(1);
             return client;
         });
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());

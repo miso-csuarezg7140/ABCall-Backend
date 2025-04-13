@@ -12,7 +12,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-import static com.abcall.clientes.util.Constants.*;
+import static com.abcall.clientes.util.Constants.ESTADO_DEFAULT;
+import static com.abcall.clientes.util.Constants.HOY;
+import static com.abcall.clientes.util.Constants.VALIDACION_NUMERICO;
 
 @Getter
 @Setter
@@ -21,7 +23,7 @@ import static com.abcall.clientes.util.Constants.*;
 @NoArgsConstructor
 public class ClientDto {
 
-    private Integer clientId;
+    private Integer idClient;
 
     @JsonProperty("numeroDocumento")
     @NotNull(message = "El campo numeroDocumento cumple las validaciones.")
