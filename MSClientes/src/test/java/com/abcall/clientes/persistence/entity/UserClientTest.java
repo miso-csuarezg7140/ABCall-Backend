@@ -1,6 +1,6 @@
 package com.abcall.clientes.persistence.entity;
 
-import com.abcall.clientes.persistence.entity.compositekey.ClienteUsuarioPK;
+import com.abcall.clientes.persistence.entity.compositekey.UserClientPK;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,25 +11,25 @@ class UserClientTest {
 
     @Test
     void userClient_HasCorrectEmbeddedId() {
-        ClienteUsuarioPK pk = new ClienteUsuarioPK();
+        UserClientPK pk = new UserClientPK();
         pk.setTipoDocUsuario("CC");
         pk.setNumeroDocUsuario(123456L);
-        pk.setNumeroDocCliente(789012L);
+        pk.setIdCliente(789012);
 
         UserClient userClient = new UserClient();
-        userClient.setClienteUsuarioPK(pk);
+        userClient.setUserClientPK(pk);
 
-        assertNotNull(userClient.getClienteUsuarioPK());
-        assertEquals("CC", userClient.getClienteUsuarioPK().getTipoDocUsuario());
-        assertEquals(123456L, userClient.getClienteUsuarioPK().getNumeroDocUsuario());
-        assertEquals(789012L, userClient.getClienteUsuarioPK().getNumeroDocCliente());
+        assertNotNull(userClient.getUserClientPK());
+        assertEquals("CC", userClient.getUserClientPK().getTipoDocUsuario());
+        assertEquals(123456L, userClient.getUserClientPK().getNumeroDocUsuario());
+        assertEquals(789012, userClient.getUserClientPK().getIdCliente());
     }
 
     @Test
     void userClient_AllowsNullEmbeddedId() {
         UserClient userClient = new UserClient();
-        userClient.setClienteUsuarioPK(null);
+        userClient.setUserClientPK(null);
 
-        assertNull(userClient.getClienteUsuarioPK());
+        assertNull(userClient.getUserClientPK());
     }
 }

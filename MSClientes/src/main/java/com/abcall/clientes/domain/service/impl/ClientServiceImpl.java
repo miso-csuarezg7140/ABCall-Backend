@@ -7,6 +7,7 @@ import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
 import com.abcall.clientes.persistence.repository.IClienteRepository;
 import com.abcall.clientes.util.ApiUtils;
+import com.abcall.clientes.util.Constants;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
 import com.abcall.clientes.util.enums.HttpResponseMessages;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class ClientServiceImpl implements IClientService {
             clientRepository.save(clientDto);
 
             ClientAuthResponse clientAuthResponse = ClientAuthResponse.builder()
-                    .clientId(clientDto.getClientId())
+                    .clientId(clientDto.getIdClient())
                     .documentNumber(clientDto.getDocumentNumber())
                     .authenticated(true)
                     .roles(List.of("cliente"))
@@ -96,13 +97,15 @@ public class ClientServiceImpl implements IClientService {
                     .documentNumber(Long.parseLong(clientRegisterRequest.getDocumentNumber()))
                     .socialReason(clientRegisterRequest.getSocialReason())
                     .email(clientRegisterRequest.getEmail())
-                    .password(encodedPassword)
+                    .password(clientRegisterRequest.getPassword())
+                    .createdDate(Constants.HOY)
+                    .status(Constants.ESTADO_DEFAULT)
                     .build();
 
             ClientDto savedClient = clientRepository.save(newClient);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("clientId", savedClient.getClientId());
+            response.put("clientId", savedClient.getIdClient());
             response.put("documentNumber", savedClient.getDocumentNumber());
             response.put("email", savedClient.getEmail());
 

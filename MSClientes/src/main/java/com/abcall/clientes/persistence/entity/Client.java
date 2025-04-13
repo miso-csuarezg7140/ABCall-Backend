@@ -1,6 +1,11 @@
 package com.abcall.clientes.persistence.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,8 +19,8 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "cliente_id", nullable = false)
-    private Integer clientId;
+    @Column(name = "id_cliente", nullable = false)
+    private Integer idClient;
 
     @Column(name = "numero_documento", nullable = false)
     private Long documentNumber;
@@ -29,16 +34,16 @@ public class Client {
     @Column(name = "correo", nullable = false)
     private String email;
 
-    @Column(name = "plan", nullable = false)
+    @Column(name = "plan")
     private String plan;
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "fecha_modificacion", nullable = false)
+    @Column(name = "fecha_modificacion")
     private LocalDateTime updatedDate;
 
-    @Column(name = "ultimo_login", nullable = false)
+    @Column(name = "ultimo_login")
     private LocalDateTime lastLogin;
 
     @Column(name = "estado", nullable = false)
