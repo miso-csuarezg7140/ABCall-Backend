@@ -13,11 +13,11 @@ import lombok.Setter;
 public class UserClientPK {
 
     @Column(name = "tipo_doc_usuario", nullable = false)
-    private String tipoDocUsuario;
+    private String documentTypeUser;
 
     @Column(name = "numero_doc_usuario", nullable = false)
-    private Long numeroDocUsuario;
+    private Long documentNumberUser;
 
     @Column(name = "id_cliente", nullable = false)
-    private Integer idCliente;
+    private Integer idClient;
 }

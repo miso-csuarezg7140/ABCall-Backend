@@ -1,11 +1,13 @@
 package com.abcall.clientes.domain.service.impl;
 
 import com.abcall.clientes.domain.dto.ClientDto;
+import com.abcall.clientes.domain.dto.UserClientDto;
 import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
-import com.abcall.clientes.persistence.repository.IClienteRepository;
+import com.abcall.clientes.persistence.repository.IClientRepository;
+import com.abcall.clientes.persistence.repository.IUserClientRepository;
 import com.abcall.clientes.util.ApiUtils;
 import com.abcall.clientes.util.Constants;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
@@ -23,7 +25,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ClientServiceImpl implements IClientService {
 
-    private final IClienteRepository clientRepository;
+    private final IClientRepository clientRepository;
+    private final IUserClientRepository userClientRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApiUtils apiUtils;
 
@@ -115,6 +118,47 @@ public class ClientServiceImpl implements IClientService {
         } catch (Exception e) {
             return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
                     HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), e.getMessage());
+        }
+    }
+
+    /**
+     * Validates the association between a client and a user based on their document numbers and document type.
+     *
+     * @param documentClientStr the document number of the client as a string
+     * @param documentTypeUser  the document type of the user
+     * @param documentUserStr   the document number of the user as a string
+     * @return a ResponseServiceDto containing the validation result:
+     * - If the client is not found, returns a BUSINESS_MISTAKE response.
+     * - If the user-client association is found, returns an OK response with the associated data.
+     * - If the user-client association is not found, returns a BUSINESS_MISTAKE response.
+     * - If an exception occurs, returns an INTERNAL_SERVER_ERROR response with the exception message.
+     */
+    @Override
+    public ResponseServiceDto validateUserClient(
+            String documentClientStr, String documentTypeUser, String documentUserStr) {
+        try {
+            Long documentClient = Long.parseLong(documentClientStr);
+            Long documentUser = Long.parseLong(documentUserStr);
+
+            ClientDto clientDto = clientRepository.findByDocumentNumber(documentClient);
+
+            if (clientDto == null) {
+                return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                        HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
+            }
+
+            UserClientDto userClientDto = new UserClientDto(documentTypeUser, documentUser, clientDto.getIdClient());
+            UserClientDto userClientDtoFound = userClientRepository.findById(userClientDto);
+
+            if (null != userClientDtoFound)
+                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                        HttpResponseMessages.OK.getMessage(), userClientDtoFound);
+            else
+                return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                        HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
+        } catch (Exception ex) {
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
         }
     }
 }

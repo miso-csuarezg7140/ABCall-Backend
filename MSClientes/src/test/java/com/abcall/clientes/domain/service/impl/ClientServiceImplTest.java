@@ -4,7 +4,7 @@ import com.abcall.clientes.domain.dto.ClientDto;
 import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
-import com.abcall.clientes.persistence.repository.IClienteRepository;
+import com.abcall.clientes.persistence.repository.IClientRepository;
 import com.abcall.clientes.security.EncoderConfig;
 import com.abcall.clientes.util.ApiUtils;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class ClientServiceImplTest {
 
     @Mock
-    private IClienteRepository clientRepository;
+    private IClientRepository clientRepository;
 
     @Mock
     private EncoderConfig encoderConfig;
