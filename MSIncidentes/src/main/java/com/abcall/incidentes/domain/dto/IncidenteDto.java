@@ -8,9 +8,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-import static com.abcall.incidentes.util.Constant.ESTADO_DEFAULT;
-import static com.abcall.incidentes.util.Constant.HOY;
-import static com.abcall.incidentes.util.Constant.VALIDACION_NUMERICO;
+import static com.abcall.incidentes.util.Constants.ESTADO_DEFAULT;
+import static com.abcall.incidentes.util.Constants.HOY;
+import static com.abcall.incidentes.util.Constants.VALIDACION_NUMERICO;
 
 @Getter
 @Setter

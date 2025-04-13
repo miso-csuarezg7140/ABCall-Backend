@@ -56,7 +56,7 @@ public class AdviceController {
     @ExceptionHandler(value = BindException.class)
     public ResponseEntity<ResponseServiceDto> handlerBindException(BindException exception) {
         List<ObjectError> allErrors = exception.getBindingResult().getAllErrors();
-        String finalMessage = allErrors.get(0).getDefaultMessage();
+        String finalMessage = allErrors.getFirst().getDefaultMessage();
         ResponseServiceDto responseDto = apiUtils.buildResponse(400, finalMessage, List.of());
         return new ResponseEntity<>(responseDto,
                 HttpStatus.BAD_REQUEST);

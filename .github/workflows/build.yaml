@@ -85,14 +85,53 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.java.source=${{ env.JAVA_VERSION }} \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-          -Dsonar.qualitygate.wait=true
-      - name: Check Quality Gate
+          -Dsonar.verbose=true \
+          -Dsonar.qualitygate.wait=true \
+          -Dsonar.pullrequest.provider=github \
+          -Dsonar.pullrequest.github.repository=${{ github.repository }} \
+          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+          -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+          -Dsonar.pullrequest.base=${{ github.base_ref }} \
+          -Dsonar.scm.provider=git \
+          -Dsonar.coverage.overall.report=true \
+          -Dsonar.pullrequest.coverage.mode=overall \
+          -Dsonar.qualitygate.project=QualityGate
+      - name: Check Quality Gate and Coverage
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd ${{ matrix.service }}
-          QUALITY_GATE_STATUS=$(curl -s -u ${SONAR_TOKEN}: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}${{ matrix.sonar_project_id }}" | jq -r '.projectStatus.status')
-          
+
+          # Esperar a que el análisis se complete completamente
+          echo "Waiting for SonarCloud analysis to complete..."
+          sleep 30
+
+          # Verificar el Quality Gate
+          QUALITY_GATE_STATUS=$(curl -s -u ${SONAR_TOKEN}: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}${{ matrix.sonar_project_id }}" | grep -o '"status":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+          echo "Quality Gate Status: $QUALITY_GATE_STATUS"
+
+          # Obtener la cobertura consultando métricas adicionales
+          COV_RESPONSE=$(curl -s -u ${SONAR_TOKEN}: "https://sonarcloud.io/api/measures/component?component=${{ secrets.SONAR_PROJECT_KEY }}${{ matrix.sonar_project_id }}&metricKeys=coverage,line_coverage,branch_coverage,coverage_line_hits_data")
+          echo "Coverage response: $COV_RESPONSE"
+
+          # Extraer cobertura directamente del informe de Jacoco
+          COVERAGE=$(grep -o 'Total.*[0-9]\+%' target/site/jacoco/index.html | grep -o '[0-9]\+%' | head -1 | tr -d '%')
+
+          # Si no se pudo obtener la cobertura, establecer a 0
+          if [ -z "$COVERAGE" ]; then
+            echo "No coverage value found in SonarCloud response. Setting to 0."
+            COVERAGE=0
+          fi
+
+          echo "Overall coverage: ${COVERAGE}%"
+
+          # Comparación usando bash directamente
+          THRESHOLD=50
+          if (( $(echo "$COVERAGE < $THRESHOLD" | awk '{print ($1 < $3)}') )); then
+            echo "Coverage is below threshold ($THRESHOLD%). Current coverage: $COVERAGE%"
+            exit 1
+          fi
+
           if [ "$QUALITY_GATE_STATUS" = "ERROR" ]; then
             echo "Quality Gate failed!"
             exit 1

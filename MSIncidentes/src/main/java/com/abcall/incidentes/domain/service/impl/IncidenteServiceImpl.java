@@ -1,26 +1,19 @@
 package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.IncidenteDto;
-import com.abcall.incidentes.domain.dto.ResponseServiceDto;
+import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.persistence.entity.Incidente;
 import com.abcall.incidentes.persistence.mappers.IncidenteMapper;
 import com.abcall.incidentes.persistence.repository.IncidenteRepository;
+import com.abcall.incidentes.util.ApiUtils;
+import com.abcall.incidentes.util.enums.HttpResponseCodes;
+import com.abcall.incidentes.util.enums.HttpResponseMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
-
-import static com.abcall.incidentes.util.ApiUtils.buildResponseServiceDto;
-import static com.abcall.incidentes.util.Constant.CODIGO_200;
-import static com.abcall.incidentes.util.Constant.CODIGO_201;
-import static com.abcall.incidentes.util.Constant.CODIGO_206;
-import static com.abcall.incidentes.util.Constant.CODIGO_500;
-import static com.abcall.incidentes.util.Constant.MENSAJE_200;
-import static com.abcall.incidentes.util.Constant.MENSAJE_201;
-import static com.abcall.incidentes.util.Constant.MENSAJE_206;
-import static com.abcall.incidentes.util.Constant.MENSAJE_500;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +21,7 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     private final IncidenteRepository incidenteRepository;
     private final IncidenteMapper incidenteMapper;
+    private final ApiUtils apiUtils;
 
     @Override
     public ResponseServiceDto consultar(String tipoDocUsuario, String numeroDocUsuarioStr) {
@@ -37,12 +31,15 @@ public class IncidenteServiceImpl implements IncidenteService {
                     incidenteRepository.obtenerPorUsuario(tipoDocUsuario, numeroDocUsuario));
 
             if (incidenteDtoList != null && !incidenteDtoList.isEmpty()) {
-                return buildResponseServiceDto(CODIGO_200, MENSAJE_200, incidenteDtoList);
+                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
+                        incidenteDtoList);
             } else {
-                return buildResponseServiceDto(CODIGO_206, MENSAJE_206, new HashMap<>());
+                return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                        HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
             }
         } catch (Exception ex) {
-            return buildResponseServiceDto(CODIGO_500, MENSAJE_500, ex.getMessage());
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
         }
     }
 
@@ -51,9 +48,11 @@ public class IncidenteServiceImpl implements IncidenteService {
         try {
             Incidente incidente = incidenteMapper.toEntity(incidenteDto);
             IncidenteDto incidenteCreado = incidenteMapper.toDto(incidenteRepository.crear(incidente));
-            return buildResponseServiceDto(CODIGO_201, MENSAJE_201, incidenteCreado);
+            return apiUtils.buildResponse(HttpResponseCodes.CREATED.getCode(),
+                    HttpResponseMessages.CREATED.getMessage(), incidenteCreado);
         } catch (Exception ex) {
-            return buildResponseServiceDto(CODIGO_500, MENSAJE_500, ex.getMessage());
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
         }
     }
 }
