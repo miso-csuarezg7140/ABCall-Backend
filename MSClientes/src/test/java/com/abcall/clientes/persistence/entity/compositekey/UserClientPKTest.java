@@ -10,14 +10,14 @@ class UserClientPKTest {
     @Test
     void equalsAndHashCode_ReturnsTrue_ForSameValues() {
         UserClientPK pk1 = new UserClientPK();
-        pk1.setTipoDocUsuario("CC");
-        pk1.setNumeroDocUsuario(123456L);
-        pk1.setIdCliente(789012);
+        pk1.setDocumentTypeUser("CC");
+        pk1.setDocumentNumberUser(123456L);
+        pk1.setIdClient(789012);
 
         UserClientPK pk2 = new UserClientPK();
-        pk2.setTipoDocUsuario("CC");
-        pk2.setNumeroDocUsuario(123456L);
-        pk2.setIdCliente(789012);
+        pk2.setDocumentTypeUser("CC");
+        pk2.setDocumentNumberUser(123456L);
+        pk2.setIdClient(789012);
 
         assertEquals(pk1, pk2);
         assertEquals(pk1.hashCode(), pk2.hashCode());
@@ -26,14 +26,14 @@ class UserClientPKTest {
     @Test
     void equalsAndHashCode_ReturnsFalse_ForDifferentValues() {
         UserClientPK pk1 = new UserClientPK();
-        pk1.setTipoDocUsuario("CC");
-        pk1.setNumeroDocUsuario(123456L);
-        pk1.setIdCliente(789012);
+        pk1.setDocumentTypeUser("CC");
+        pk1.setDocumentNumberUser(123456L);
+        pk1.setIdClient(789012);
 
         UserClientPK pk2 = new UserClientPK();
-        pk2.setTipoDocUsuario("TI");
-        pk2.setNumeroDocUsuario(654321L);
-        pk2.setIdCliente(210987);
+        pk2.setDocumentTypeUser("TI");
+        pk2.setDocumentNumberUser(654321L);
+        pk2.setIdClient(210987);
 
         assertNotEquals(pk1, pk2);
         assertNotEquals(pk1.hashCode(), pk2.hashCode());
@@ -42,9 +42,9 @@ class UserClientPKTest {
     @Test
     void equals_ReturnsFalse_WhenComparedWithNull() {
         UserClientPK pk = new UserClientPK();
-        pk.setTipoDocUsuario("CC");
-        pk.setNumeroDocUsuario(123456L);
-        pk.setIdCliente(789012);
+        pk.setDocumentTypeUser("CC");
+        pk.setDocumentNumberUser(123456L);
+        pk.setIdClient(789012);
 
         assertNotEquals(null, pk);
     }
@@ -52,9 +52,9 @@ class UserClientPKTest {
     @Test
     void equals_ReturnsFalse_WhenComparedWithDifferentClass() {
         UserClientPK pk = new UserClientPK();
-        pk.setTipoDocUsuario("CC");
-        pk.setNumeroDocUsuario(123456L);
-        pk.setIdCliente(789012);
+        pk.setDocumentTypeUser("CC");
+        pk.setDocumentNumberUser(123456L);
+        pk.setIdClient(789012);
 
         assertNotEquals("SomeString", pk);
     }

@@ -39,10 +39,11 @@ public class SecurityConfig {
                 );*/
         httpSecurity
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
-                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register"))
+                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register", "/validateUserClient"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**", "/register").permitAll().anyRequest().authenticated()
+                                "/v3/api-docs/**", "/register", "/validateUserClient")
+                        .permitAll().anyRequest().authenticated()
                 );
 
         httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
