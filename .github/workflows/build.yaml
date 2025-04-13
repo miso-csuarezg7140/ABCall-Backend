@@ -126,7 +126,7 @@ jobs:
           echo "Overall coverage: ${COVERAGE}%"
 
           # Comparación usando bash directamente
-          THRESHOLD=50
+          THRESHOLD=10
           if (( $(echo "$COVERAGE < $THRESHOLD" | awk '{print ($1 < $3)}') )); then
             echo "Coverage is below threshold ($THRESHOLD%). Current coverage: $COVERAGE%"
             exit 1

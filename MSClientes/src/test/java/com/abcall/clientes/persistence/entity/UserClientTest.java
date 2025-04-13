@@ -12,17 +12,17 @@ class UserClientTest {
     @Test
     void userClient_HasCorrectEmbeddedId() {
         UserClientPK pk = new UserClientPK();
-        pk.setTipoDocUsuario("CC");
-        pk.setNumeroDocUsuario(123456L);
-        pk.setIdCliente(789012);
+        pk.setDocumentTypeUser("CC");
+        pk.setDocumentNumberUser(123456L);
+        pk.setIdClient(789012);
 
         UserClient userClient = new UserClient();
         userClient.setUserClientPK(pk);
 
         assertNotNull(userClient.getUserClientPK());
-        assertEquals("CC", userClient.getUserClientPK().getTipoDocUsuario());
-        assertEquals(123456L, userClient.getUserClientPK().getNumeroDocUsuario());
-        assertEquals(789012, userClient.getUserClientPK().getIdCliente());
+        assertEquals("CC", userClient.getUserClientPK().getDocumentTypeUser());
+        assertEquals(123456L, userClient.getUserClientPK().getDocumentNumberUser());
+        assertEquals(789012, userClient.getUserClientPK().getIdClient());
     }
 
     @Test

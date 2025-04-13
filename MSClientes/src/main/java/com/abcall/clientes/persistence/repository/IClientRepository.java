@@ -2,7 +2,7 @@ package com.abcall.clientes.persistence.repository;
 
 import com.abcall.clientes.domain.dto.ClientDto;
 
-public interface IClienteRepository {
+public interface IClientRepository {
 
     ClientDto findByDocumentNumber(Long documentNumber);
 

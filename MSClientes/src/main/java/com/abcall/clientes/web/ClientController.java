@@ -5,12 +5,16 @@ import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
 import com.abcall.clientes.util.ApiUtils;
+import com.abcall.clientes.util.Constants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -67,6 +72,31 @@ public class ClientController {
         }
 
         ResponseServiceDto response = clientService.registerClient(clientRegisterRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/validateUserClient")
+    public ResponseEntity<ResponseServiceDto> validateUserClient(
+            @Valid
+            @Parameter(description = "Documento del cliente", example = "1010258471")
+            @Pattern(regexp = Constants.VALIDACION_NUMERICO)
+            @NotBlank(message = "El parámetro documentClient no cumple las validaciones.")
+            @RequestParam(required = false) String documentClient,
+
+            @Valid
+            @Parameter(description = "Tipo de documento del usuario", example = "CC")
+            @Pattern(regexp = Constants.VALIDACION_TIPO_DOCUMENTO, message = "El parámetro documentTypeUser no cumple las validaciones.")
+            @NotBlank(message = "El parámetro documentTypeUser no cumple las validaciones.")
+            @RequestParam(required = false) String documentTypeUser,
+
+            @Valid
+            @Parameter(description = "Número de documento del usuario", example = "1010478914")
+            @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El parámetro documentUser no cumple las validaciones.")
+            @NotBlank(message = "El parámetro documentUser no cumple las validaciones.")
+            @RequestParam(required = false) String documentUser) {
+
+        ResponseServiceDto response = clientService.validateUserClient(
+                documentClient, documentTypeUser, documentUser);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

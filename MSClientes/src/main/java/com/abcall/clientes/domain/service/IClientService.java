@@ -8,4 +8,6 @@ public interface IClientService {
     ResponseServiceDto authenticateClient(String username, String password);
 
     ResponseServiceDto registerClient(ClientRegisterRequest clientRegisterRequest);
+
+    ResponseServiceDto validateUserClient(String documentClient, String documentTypeUser, String documentUser);
 }
