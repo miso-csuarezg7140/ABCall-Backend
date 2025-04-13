@@ -49,6 +49,21 @@ spec:
                 secretKeyRef:
                   name: db-credentials
                   key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_secret
+            - name: JWT_ACCESS_TOKEN_EXPIRATION_MS
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_access_token_expiration_ms
+            - name: JWT_REFRESH_TOKEN_EXPIRATION_MS
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_refresh_token_expiration_ms
           readinessProbe:
             httpGet:
               path: /service/abcall/clientes/v1/ping
