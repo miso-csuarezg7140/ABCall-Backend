@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class ClienteUsuarioPK {
+public class UserClientPK {
 
     @Column(name = "tipo_doc_usuario", nullable = false)
     private String tipoDocUsuario;

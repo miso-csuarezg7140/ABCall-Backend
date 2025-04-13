@@ -1,6 +1,6 @@
 package com.abcall.clientes.persistence.entity;
 
-import com.abcall.clientes.persistence.entity.compositekey.ClienteUsuarioPK;
+import com.abcall.clientes.persistence.entity.compositekey.UserClientPK;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,5 +14,5 @@ import lombok.Setter;
 public class UserClient {
 
     @EmbeddedId
-    ClienteUsuarioPK clienteUsuarioPK;
+    UserClientPK userClientPK;
 }

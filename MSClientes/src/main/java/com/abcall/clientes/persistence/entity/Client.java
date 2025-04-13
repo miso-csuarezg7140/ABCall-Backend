@@ -29,16 +29,16 @@ public class Client {
     @Column(name = "correo", nullable = false)
     private String email;
 
-    @Column(name = "plan", nullable = false)
+    @Column(name = "plan")
     private String plan;
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "fecha_modificacion", nullable = false)
+    @Column(name = "fecha_modificacion")
     private LocalDateTime updatedDate;
 
-    @Column(name = "ultimo_login", nullable = false)
+    @Column(name = "ultimo_login")
     private LocalDateTime lastLogin;
 
     @Column(name = "estado", nullable = false)

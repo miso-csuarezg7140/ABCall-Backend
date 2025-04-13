@@ -5,16 +5,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class ClienteUsuarioPKTest {
+class UserClientPKTest {
 
     @Test
     void equalsAndHashCode_ReturnsTrue_ForSameValues() {
-        ClienteUsuarioPK pk1 = new ClienteUsuarioPK();
+        UserClientPK pk1 = new UserClientPK();
         pk1.setTipoDocUsuario("CC");
         pk1.setNumeroDocUsuario(123456L);
         pk1.setNumeroDocCliente(789012L);
 
-        ClienteUsuarioPK pk2 = new ClienteUsuarioPK();
+        UserClientPK pk2 = new UserClientPK();
         pk2.setTipoDocUsuario("CC");
         pk2.setNumeroDocUsuario(123456L);
         pk2.setNumeroDocCliente(789012L);
@@ -25,12 +25,12 @@ class ClienteUsuarioPKTest {
 
     @Test
     void equalsAndHashCode_ReturnsFalse_ForDifferentValues() {
-        ClienteUsuarioPK pk1 = new ClienteUsuarioPK();
+        UserClientPK pk1 = new UserClientPK();
         pk1.setTipoDocUsuario("CC");
         pk1.setNumeroDocUsuario(123456L);
         pk1.setNumeroDocCliente(789012L);
 
-        ClienteUsuarioPK pk2 = new ClienteUsuarioPK();
+        UserClientPK pk2 = new UserClientPK();
         pk2.setTipoDocUsuario("TI");
         pk2.setNumeroDocUsuario(654321L);
         pk2.setNumeroDocCliente(210987L);
@@ -41,7 +41,7 @@ class ClienteUsuarioPKTest {
 
     @Test
     void equals_ReturnsFalse_WhenComparedWithNull() {
-        ClienteUsuarioPK pk = new ClienteUsuarioPK();
+        UserClientPK pk = new UserClientPK();
         pk.setTipoDocUsuario("CC");
         pk.setNumeroDocUsuario(123456L);
         pk.setNumeroDocCliente(789012L);
@@ -51,7 +51,7 @@ class ClienteUsuarioPKTest {
 
     @Test
     void equals_ReturnsFalse_WhenComparedWithDifferentClass() {
-        ClienteUsuarioPK pk = new ClienteUsuarioPK();
+        UserClientPK pk = new UserClientPK();
         pk.setTipoDocUsuario("CC");
         pk.setNumeroDocUsuario(123456L);
         pk.setNumeroDocCliente(789012L);

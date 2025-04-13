@@ -7,6 +7,7 @@ import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
 import com.abcall.clientes.persistence.repository.IClienteRepository;
 import com.abcall.clientes.util.ApiUtils;
+import com.abcall.clientes.util.Constants;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
 import com.abcall.clientes.util.enums.HttpResponseMessages;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +97,9 @@ public class ClientServiceImpl implements IClientService {
                     .documentNumber(Long.parseLong(clientRegisterRequest.getDocumentNumber()))
                     .socialReason(clientRegisterRequest.getSocialReason())
                     .email(clientRegisterRequest.getEmail())
-                    .password(encodedPassword)
+                    .password(clientRegisterRequest.getPassword())
+                    .createdDate(Constants.HOY)
+                    .status(Constants.ESTADO_DEFAULT)
                     .build();
 
             ClientDto savedClient = clientRepository.save(newClient);
