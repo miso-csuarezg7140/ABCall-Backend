@@ -1,13 +1,17 @@
 package com.abcall.agentes.web;
 
-import com.abcall.agentes.domain.dto.ResponseServiceDto;
+import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.agentes.exception.ApiException;
+import com.abcall.agentes.util.ApiUtils;
+import com.abcall.agentes.util.enums.HttpResponseCodes;
+import com.abcall.agentes.util.enums.HttpResponseMessages;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -16,141 +20,123 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.abcall.agentes.util.Constant.CODIGO_400;
-import static com.abcall.agentes.util.Constant.MENSAJE_400;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class AdviceControllerTest {
+
+    @Mock
+    private ApiUtils apiUtils;
 
     @InjectMocks
     private AdviceController adviceController;
 
-    @Test
-    void handlerApiException() {
-        // Arrange
-        String errorMessage = "Error de API";
-        String errorCode = "400";
-        String additionalInfo = "Información adicional";
-        ApiException apiException = new ApiException(errorCode, HttpStatus.BAD_REQUEST, additionalInfo,
-                List.of(errorMessage));
-
-        // Act
-        ResponseEntity<ResponseServiceDto> response = adviceController.handlerApiException(apiException);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(errorCode, response.getBody().getStatusCode());
-        assertEquals(List.of(errorMessage), response.getBody().getData());
-        assertEquals(additionalInfo, response.getBody().getStatusDescription());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void handlerBindException() {
-        // Arrange
-        String errorMessage = "Campo requerido";
+    void handlerApiExceptionShouldReturnResponseWithExceptionDetails() {
+        List<String> additionalMessages = List.of("Additional message");
+        ApiException apiException = new ApiException(400, HttpStatus.BAD_REQUEST, "Error message", additionalMessages);
+
+        ResponseServiceDto expectedResponseDto = new ResponseServiceDto(400,
+                "Error message", additionalMessages);
+        when(apiUtils.buildResponse(400, "Error message", additionalMessages))
+                .thenReturn(expectedResponseDto);
+
+        ResponseEntity<ResponseServiceDto> response = adviceController.handlerApiException(apiException);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponseDto, response.getBody());
+    }
+
+    @Test
+    void handlerBindExceptionShouldReturnResponseWithValidationError() {
         BindException bindException = mock(BindException.class);
         BindingResult bindingResult = mock(BindingResult.class);
-        ObjectError objectError = new ObjectError("objectName", errorMessage);
+
+        ObjectError objectError = new ObjectError("objectName", "Validation error");
 
         when(bindException.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getAllErrors()).thenReturn(List.of(objectError));
 
-        // Act
+        ResponseServiceDto expectedResponseDto = new ResponseServiceDto(400,
+                "Validation error", List.of());
+        when(apiUtils.buildResponse(400, "Validation error", List.of()))
+                .thenReturn(expectedResponseDto);
+
         ResponseEntity<ResponseServiceDto> response = adviceController.handlerBindException(bindException);
 
-        // Assert
-        assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("400", response.getBody().getStatusCode());
-        assertEquals(errorMessage, response.getBody().getStatusDescription());
-        assertTrue(((List<?>) response.getBody().getData()).isEmpty());
+        assertEquals(expectedResponseDto, response.getBody());
     }
 
     @Test
-    void handlerException() {
-        // Arrange
-        String errorMessage = "Error general";
-        Exception exception = new Exception(errorMessage);
+    void handlerExceptionShouldReturnResponseWithExceptionDetails() {
+        Exception exception = new Exception("Internal server error");
+        StackTraceElement[] stackTrace = exception.getStackTrace();
 
-        // Act
+        ResponseServiceDto expectedResponseDto = new ResponseServiceDto(500,
+                "Internal server error", stackTrace);
+        when(apiUtils.buildResponse(500, "Internal server error", stackTrace))
+                .thenReturn(expectedResponseDto);
+
         ResponseEntity<ResponseServiceDto> response = adviceController.handlerException(exception);
 
-        // Assert
-        assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("500", response.getBody().getStatusCode());
-        assertEquals(errorMessage, response.getBody().getStatusDescription());
-        assertNotNull(response.getBody().getData());
+        assertEquals(expectedResponseDto, response.getBody());
     }
 
     @Test
-    void handleMethodArgumentNotValidException() {
-        // Arrange
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+    void handleValidationExceptionsShouldReturnResponseWithValidationErrors() {
+        MethodArgumentNotValidException methodArgumentNotValidException = mock(MethodArgumentNotValidException.class);
         BindingResult bindingResult = mock(BindingResult.class);
-        String errorMessage = "Campo inválido";
-        FieldError fieldError = new FieldError("objectName", "fieldName", errorMessage);
+        FieldError fieldError = new FieldError("objectName", "fieldName",
+                "Field error message");
 
-        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 
-        // Act
-        ResponseEntity<ResponseServiceDto> response = adviceController.handleValidationExcpetions(ex);
+        List<String> errorMessages = List.of("Field error message");
 
-        // Assert
-        assertNotNull(response);
+        ResponseServiceDto expectedResponseDto = new ResponseServiceDto(400, "Bad Request",
+                errorMessages);
+
+        when(apiUtils.buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(),
+                HttpResponseMessages.BAD_REQUEST.getMessage(), errorMessages)).thenReturn(expectedResponseDto);
+
+        ResponseEntity<ResponseServiceDto> response = adviceController.handleValidationExceptions(
+                methodArgumentNotValidException);
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(CODIGO_400, response.getBody().getStatusCode());
-        assertEquals(MENSAJE_400, response.getBody().getStatusDescription());
-        assertTrue(((List<?>) response.getBody().getData()).contains(errorMessage));
+        assertEquals(expectedResponseDto, response.getBody());
     }
 
     @Test
-    void handleConstraintViolationException() {
-        // Arrange
-        Set<ConstraintViolation<?>> violations = new HashSet<>();
-        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
-        String errorMessage = "Violación de restricción";
+    void handleValidationExceptionsForConstraintViolationsShouldReturnResponseWithValidationErrors() {
+        ConstraintViolationException constraintViolationException = mock(ConstraintViolationException.class);
+        ConstraintViolation<?> constraintViolation = mock(ConstraintViolation.class);
+        when(constraintViolation.getMessage()).thenReturn("Constraint violation message");
+        when(constraintViolationException.getConstraintViolations()).thenReturn(Set.of(constraintViolation));
 
-        when(violation.getMessage()).thenReturn(errorMessage);
-        violations.add(violation);
+        List<String> errorMessages = List.of("Constraint violation message");
 
-        ConstraintViolationException ex = new ConstraintViolationException("Error de validación", violations);
+        ResponseServiceDto expectedResponseDto = new ResponseServiceDto(400,
+                "Bad Request", errorMessages);
 
-        // Act
-        ResponseEntity<ResponseServiceDto> response = adviceController.handleValidationExcpetions(ex);
+        when(apiUtils.buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(),
+                HttpResponseMessages.BAD_REQUEST.getMessage(), errorMessages)).thenReturn(expectedResponseDto);
 
-        // Assert
-        assertNotNull(response);
+        ResponseEntity<ResponseServiceDto> response = adviceController.handleValidationExceptions(
+                constraintViolationException);
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(CODIGO_400, response.getBody().getStatusCode());
-        assertEquals(MENSAJE_400, response.getBody().getStatusDescription());
-        assertTrue(((List<?>) response.getBody().getData()).contains(errorMessage));
-    }
-
-    @Test
-    void handleValidationExceptionsWithUnknownException() {
-        // Arrange
-        Exception unknownException = new Exception("Error desconocido");
-
-        // Act
-        ResponseEntity<ResponseServiceDto> response = adviceController.handleValidationExcpetions(unknownException);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(CODIGO_400, response.getBody().getStatusCode());
-        assertEquals(MENSAJE_400, response.getBody().getStatusDescription());
-        assertTrue(((List<?>) response.getBody().getData()).isEmpty());
+        assertEquals(expectedResponseDto, response.getBody());
     }
 }

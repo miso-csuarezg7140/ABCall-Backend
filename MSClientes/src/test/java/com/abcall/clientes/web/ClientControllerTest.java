@@ -1,6 +1,7 @@
 package com.abcall.clientes.web;
 
 import com.abcall.clientes.domain.dto.request.ClientAuthRequest;
+import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
 import com.abcall.clientes.util.ApiUtils;
@@ -86,5 +87,68 @@ class ClientControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("pong", response.getBody());
+    }
+
+    @Test
+    void registerClient_ReturnsBadRequestResponse_WhenRequestHasErrors() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("")
+                .socialReason("")
+                .email("invalid-email")
+                .password("")
+                .build();
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        when(bindingResult.hasErrors()).thenReturn(true);
+        when(apiUtils.badRequestResponse(bindingResult)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void registerClient_ReturnsCreatedResponse_WhenClientIsSuccessfullyRegistered() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("123456789")
+                .socialReason("ABC Corp")
+                .email("abc@corp.com")
+                .password("password123")
+                .build();
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.CREATED.value());
+
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(clientService.registerClient(request)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void registerClient_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("123456789")
+                .socialReason("ABC Corp")
+                .email("abc@corp.com")
+                .password("password123")
+                .build();
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(clientService.registerClient(request)).thenReturn(responseServiceDto);
+        when(apiUtils.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                "Unexpected error")).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 }

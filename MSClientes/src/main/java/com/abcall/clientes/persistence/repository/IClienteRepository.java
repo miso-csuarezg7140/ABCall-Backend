@@ -6,5 +6,5 @@ public interface IClienteRepository {
 
     ClientDto findByDocumentNumber(Long documentNumber);
 
-    void save(ClientDto client);
+    ClientDto save(ClientDto client);
 }

@@ -64,7 +64,7 @@ class AuthServiceImplTest {
     @Test
     void authenticateUserShouldReturnJwtResponseForClient() {
         ClientAuthRequest request = new ClientAuthRequest("client", "password");
-        ClientAuthResponse clientResponse = new ClientAuthResponse(1, "client", List.of("ROLE_USER"), true);
+        ClientAuthResponse clientResponse = new ClientAuthResponse(1, "client", List.of("ROLE_USER"), true, "Company", "client@example.com", null);
         ResponseServiceDto responseServiceDto = new ResponseServiceDto(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(), clientResponse);
         ResponseEntity<ResponseServiceDto> responseEntity = ResponseEntity.ok(responseServiceDto);
         when(clientService.authenticateClient(request)).thenReturn(responseEntity);

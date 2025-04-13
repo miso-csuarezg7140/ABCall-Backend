@@ -1,64 +1,85 @@
 package com.abcall.incidentes.util;
 
-import com.abcall.incidentes.domain.dto.ResponseServiceDto;
-import lombok.extern.slf4j.Slf4j;
+import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
+import com.abcall.incidentes.util.enums.HttpResponseCodes;
+import com.abcall.incidentes.util.enums.HttpResponseMessages;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
-@Slf4j
 public class ApiUtils {
 
     /**
-     * Construir Respuesta Servicio
+     * Constructs a ResponseServiceDto for a Bad Request response.
      *
-     * @param statusCode        el codigo de respuesta
-     * @param statusDescription el mensaje de respuesta
-     * @param data              información adicional de la respuesta
-     * @return ResponseServiceDto con la información de respuesta
+     * @param bindingResult the validation result containing field errors
+     * @return a ResponseServiceDto instance with the Bad Request status code and validation error messages
      */
-    public static ResponseServiceDto buildResponseServiceDto(String statusCode,
-                                                             String statusDescription,
-                                                             Object data) {
-        return ResponseServiceDto.builder()
-                .statusCode(statusCode)
-                .statusDescription(statusDescription)
-                .data(data)
-                .build();
+    public ResponseServiceDto badRequestResponse(BindingResult bindingResult) {
+        Map<String, String> validationErrors = bindingResult.getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        FieldError::getDefaultMessage,
+                        (error1, error2) -> error1
+                ));
+
+        return buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(), HttpResponseMessages.BAD_REQUEST.getMessage(),
+                validationErrors);
     }
 
     /**
-     * <p>Handler validation errors.</p>
+     * Constructs a ResponseServiceDto with the given status code, status description, response data, and pagination information.
      *
-     * @param bindingResult Validation result.
-     * @return Map with field error as key and its description error as value.
+     * @param statusCode        the response status code
+     * @param statusDescription the response status description
+     * @param response          additional response information
+     * @param pagination        pagination information
+     * @return a ResponseServiceDto containing the response information and pagination data if the status code is OK,
+     * otherwise a ResponseServiceDto containing the response information only
      */
-    public static Map<String, String> requestHandleErrors(BindingResult bindingResult) {
+    public ResponseServiceDto buildResponse(int statusCode,
+                                            String statusDescription,
+                                            Object response, Object pagination) {
 
-        Map<String, String> errors = new HashMap<>() {
-            @Override
-            public String toString() {
-                StringBuilder stb = new StringBuilder();
+        Map<String, Object> data = new HashMap<>();
+        if (HttpResponseCodes.OK.getCode() == statusCode) {
+            data.put(Constants.RESPONSE_VALUE, response);
+            data.put(Constants.PAGINATION_VALUE, pagination);
 
-                for (Map.Entry<String, String> entry : this.entrySet()) {
-                    stb.append(String.format(" Parámetro '%s' %s ", entry.getKey(), entry.getValue()));
-                }
+            return ResponseServiceDto.builder()
+                    .statusCode(statusCode)
+                    .statusDescription(statusDescription)
+                    .data(data)
+                    .build();
+        } else
+            return ResponseServiceDto.builder()
+                    .statusCode(statusCode)
+                    .statusDescription(statusDescription)
+                    .data(response)
+                    .build();
+    }
 
-                return stb.toString();
-            }
-        };
+    /**
+     * Constructs a ResponseServiceDto with the given status code, status description, and response data.
+     *
+     * @param statusCode        the response status code
+     * @param statusDescription the response status description
+     * @param response          additional response information
+     * @return a ResponseServiceDto containing the response information
+     */
+    public ResponseServiceDto buildResponse(int statusCode,
+                                            String statusDescription,
+                                            Object response) {
 
-        bindingResult.getAllErrors().forEach(error -> {
-            String fieldName;
-            String errorMessage = error.getDefaultMessage();
-            fieldName = ((FieldError) error).getField();
-            errors.put(fieldName, errorMessage);
-        });
-
-        return errors;
+        return ResponseServiceDto.builder()
+                .statusCode(statusCode)
+                .statusDescription(statusDescription)
+                .data(response)
+                .build();
     }
 }
