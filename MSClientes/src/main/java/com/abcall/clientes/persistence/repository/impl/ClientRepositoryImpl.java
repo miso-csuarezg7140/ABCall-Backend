@@ -25,8 +25,9 @@ public class ClientRepositoryImpl implements IClienteRepository {
     }
 
     @Override
-    public void save(ClientDto clientDto) {
+    public ClientDto save(ClientDto clientDto) {
         Client client = clientMapper.toEntity(clientDto);
-        clienteRepositoryJpa.save(client);
+        Client savedClient = clienteRepositoryJpa.save(client);
+        return clientMapper.toDto(savedClient);
     }
 }

@@ -1,187 +1,85 @@
 package com.abcall.agentes.util;
 
-import com.abcall.agentes.domain.dto.ResponseServiceDto;
+import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
+import com.abcall.agentes.util.enums.HttpResponseCodes;
+import com.abcall.agentes.util.enums.HttpResponseMessages;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class ApiUtilsTest {
 
-    @Test
-    void buildResponseServiceDto_WithValidData() {
-        // Arrange
-        String statusCode = "200";
-        String statusDescription = "Success";
-        Object data = new Object();
+    @Mock
+    private BindingResult bindingResult;
 
-        // Act
-        ResponseServiceDto response = ApiUtils.buildResponseServiceDto(statusCode, statusDescription, data);
+    @InjectMocks
+    private ApiUtils apiUtils;
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(statusCode, response.getStatusCode());
-        assertEquals(statusDescription, response.getStatusDescription());
-        assertEquals(data, response.getData());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void buildResponseServiceDto_WithNullData() {
-        // Arrange
-        String statusCode = "404";
-        String statusDescription = "Not Found";
+    void badRequestResponseShouldReturnValidationErrors() {
+        FieldError fieldError1 = new FieldError("objectName", "field1", "error1");
+        FieldError fieldError2 = new FieldError("objectName", "field2", "error2");
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError1, fieldError2));
 
-        // Act
-        ResponseServiceDto response = ApiUtils.buildResponseServiceDto(statusCode, statusDescription, null);
+        ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(statusCode, response.getStatusCode());
-        assertEquals(statusDescription, response.getStatusDescription());
-        assertNull(response.getData());
+        assertEquals(HttpResponseCodes.BAD_REQUEST.getCode(), response.getStatusCode());
+        assertEquals(HttpResponseMessages.BAD_REQUEST.getMessage(), response.getStatusDescription());
+        Map<String, String> expectedErrors = Map.of("field1", "error1", "field2", "error2");
+        assertEquals(expectedErrors, response.getData());
     }
 
     @Test
-    void requestHandleErrors_WithValidationErrors() {
-        // Arrange
-        BindingResult bindingResult = mock(BindingResult.class);
-        FieldError error1 = new FieldError("object", "field1", "error1");
-        FieldError error2 = new FieldError("object", "field2", "error2");
+    void buildResponseShouldReturnResponseWithPaginationWhenStatusCodeIsOk() {
+        Object response = "response";
+        Object pagination = "pagination";
 
-        when(bindingResult.getAllErrors()).thenReturn(Arrays.asList(error1, error2));
+        ResponseServiceDto result = apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), response, pagination);
 
-        // Act
-        Map<String, String> errors = ApiUtils.requestHandleErrors(bindingResult);
-
-        // Assert
-        assertNotNull(errors);
-        assertEquals(2, errors.size());
-        assertEquals("error1", errors.get("field1"));
-        assertEquals("error2", errors.get("field2"));
+        assertEquals(HttpResponseCodes.OK.getCode(), result.getStatusCode());
+        assertEquals(HttpResponseMessages.OK.getMessage(), result.getStatusDescription());
+        Map<String, Object> expectedData = Map.of(Constants.RESPONSE_VALUE, response, Constants.PAGINATION_VALUE,
+                pagination);
+        assertEquals(expectedData, result.getData());
     }
 
     @Test
-    void requestHandleErrors_ToString() {
-        // Arrange
-        BindingResult bindingResult = mock(BindingResult.class);
-        FieldError error = new FieldError("object", "field1", "error1");
+    void buildResponseShouldReturnResponseWithoutPaginationWhenStatusCodeIsNotOk() {
+        Object response = "response";
 
-        when(bindingResult.getAllErrors()).thenReturn(Arrays.asList(error));
+        ResponseServiceDto result = apiUtils.buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(),
+                HttpResponseMessages.BAD_REQUEST.getMessage(), response, null);
 
-        // Act
-        Map<String, String> errors = ApiUtils.requestHandleErrors(bindingResult);
-        String errorString = errors.toString();
-
-        // Assert
-        assertTrue(errorString.contains("field1"));
-        assertTrue(errorString.contains("error1"));
+        assertEquals(HttpResponseCodes.BAD_REQUEST.getCode(), result.getStatusCode());
+        assertEquals(HttpResponseMessages.BAD_REQUEST.getMessage(), result.getStatusDescription());
+        assertEquals(response, result.getData());
     }
 
     @Test
-    void encodeToBase64_ValidString() {
-        // Arrange
-        String originalText = "Hello World!";
-        String expectedEncoded = Base64.getEncoder()
-                .encodeToString(originalText.getBytes(StandardCharsets.UTF_8));
+    void buildResponseShouldReturnResponseWithGivenData() {
+        Object response = "response";
 
-        // Act
-        String encodedText = ApiUtils.encodeToBase64(originalText);
+        ResponseServiceDto result = apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), response);
 
-        // Assert
-        assertNotNull(encodedText);
-        assertEquals(expectedEncoded, encodedText);
-        assertTrue(Base64.getDecoder().decode(encodedText.getBytes(StandardCharsets.UTF_8)).length > 0);
-    }
-
-    @Test
-    void encodeToBase64_EmptyString() {
-        // Arrange
-        String originalText = "";
-
-        // Act
-        String encodedText = ApiUtils.encodeToBase64(originalText);
-
-        // Assert
-        assertNotNull(encodedText);
-        assertEquals("", encodedText);
-    }
-
-    @Test
-    void decodeFromBase64_ValidString() {
-        // Arrange
-        String originalText = "Hello World!";
-        String encodedText = Base64.getEncoder()
-                .encodeToString(originalText.getBytes(StandardCharsets.UTF_8));
-
-        // Act
-        String decodedText = ApiUtils.decodeFromBase64(encodedText);
-
-        // Assert
-        assertNotNull(decodedText);
-        assertEquals(originalText, decodedText);
-    }
-
-    @Test
-    void decodeFromBase64_EmptyString() {
-        // Arrange
-        String encodedText = "";
-
-        // Act
-        String decodedText = ApiUtils.decodeFromBase64(encodedText);
-
-        // Assert
-        assertNotNull(decodedText);
-        assertEquals("", decodedText);
-    }
-
-    @Test
-    void decodeFromBase64_InvalidBase64() {
-        // Arrange
-        String invalidBase64 = "This is not base64!";
-
-        // Assert
-        assertThrows(RuntimeException.class, () -> ApiUtils.decodeFromBase64(invalidBase64));
-    }
-
-    @Test
-    void encodeAndDecode_RoundTrip() {
-        // Arrange
-        String originalText = "Test string with special chars !@#$%^&*()";
-
-        // Act
-        String encodedText = ApiUtils.encodeToBase64(originalText);
-        String decodedText = ApiUtils.decodeFromBase64(encodedText);
-
-        // Assert
-        assertNotNull(encodedText);
-        assertNotNull(decodedText);
-        assertEquals(originalText, decodedText);
-    }
-
-    @Test
-    void encodeAndDecode_SpecialCharacters() {
-        // Arrange
-        String originalText = "áéíóúñÁÉÍÓÚÑ@#$%^&*()";
-
-        // Act
-        String encodedText = ApiUtils.encodeToBase64(originalText);
-        String decodedText = ApiUtils.decodeFromBase64(encodedText);
-
-        // Assert
-        assertNotNull(encodedText);
-        assertNotNull(decodedText);
-        assertEquals(originalText, decodedText);
+        assertEquals(HttpResponseCodes.OK.getCode(), result.getStatusCode());
+        assertEquals(HttpResponseMessages.OK.getMessage(), result.getStatusDescription());
+        assertEquals(response, result.getData());
     }
 }

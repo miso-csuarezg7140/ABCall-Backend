@@ -1,6 +1,7 @@
 package com.abcall.clientes.web;
 
 import com.abcall.clientes.domain.dto.request.ClientAuthRequest;
+import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.domain.service.IClientService;
 import com.abcall.clientes.util.ApiUtils;
@@ -15,11 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
@@ -53,6 +50,19 @@ public class ClientController {
 
         ResponseServiceDto response = clientService.authenticateClient(
                 clientAuthRequest.getUsername(), clientAuthRequest.getPassword());
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ResponseServiceDto> registerClient(
+            @Valid @RequestBody ClientRegisterRequest clientRegisterRequest, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        }
+
+        ResponseServiceDto response = clientService.registerClient(clientRegisterRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

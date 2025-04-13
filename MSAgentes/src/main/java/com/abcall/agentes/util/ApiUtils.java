@@ -1,7 +1,8 @@
 package com.abcall.agentes.util;
 
-import com.abcall.agentes.domain.dto.ResponseServiceDto;
-import lombok.extern.slf4j.Slf4j;
+import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
+import com.abcall.agentes.util.enums.HttpResponseCodes;
+import com.abcall.agentes.util.enums.HttpResponseMessages;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -10,82 +11,83 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
-@Slf4j
 public class ApiUtils {
 
     /**
-     * Construir Respuesta Servicio
+     * Constructs a ResponseServiceDto for a Bad Request response.
      *
-     * @param statusCode        el codigo de respuesta
-     * @param statusDescription el mensaje de respuesta
-     * @param data              información adicional de la respuesta
-     * @return ResponseServiceDto con la información de respuesta
+     * @param bindingResult the validation result containing field errors
+     * @return a ResponseServiceDto instance with the Bad Request status code and validation error messages
      */
-    public static ResponseServiceDto buildResponseServiceDto(String statusCode,
-                                                             String statusDescription,
-                                                             Object data) {
+    public ResponseServiceDto badRequestResponse(BindingResult bindingResult) {
+        Map<String, String> validationErrors = bindingResult.getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        FieldError::getDefaultMessage,
+                        (error1, error2) -> error1
+                ));
+
+        return buildResponse(HttpResponseCodes.BAD_REQUEST.getCode(), HttpResponseMessages.BAD_REQUEST.getMessage(),
+                validationErrors);
+    }
+
+    /**
+     * Constructs a ResponseServiceDto with the given status code, status description, response data, and pagination information.
+     *
+     * @param statusCode        the response status code
+     * @param statusDescription the response status description
+     * @param response          additional response information
+     * @param pagination        pagination information
+     * @return a ResponseServiceDto containing the response information and pagination data if the status code is OK,
+     * otherwise a ResponseServiceDto containing the response information only
+     */
+    public ResponseServiceDto buildResponse(int statusCode,
+                                            String statusDescription,
+                                            Object response, Object pagination) {
+
+        Map<String, Object> data = new HashMap<>();
+        if (HttpResponseCodes.OK.getCode() == statusCode) {
+            data.put(Constants.RESPONSE_VALUE, response);
+            data.put(Constants.PAGINATION_VALUE, pagination);
+
+            return ResponseServiceDto.builder()
+                    .statusCode(statusCode)
+                    .statusDescription(statusDescription)
+                    .data(data)
+                    .build();
+        } else
+            return ResponseServiceDto.builder()
+                    .statusCode(statusCode)
+                    .statusDescription(statusDescription)
+                    .data(response)
+                    .build();
+    }
+
+    /**
+     * Constructs a ResponseServiceDto with the given status code, status description, and response data.
+     *
+     * @param statusCode        the response status code
+     * @param statusDescription the response status description
+     * @param response          additional response information
+     * @return a ResponseServiceDto containing the response information
+     */
+    public ResponseServiceDto buildResponse(int statusCode,
+                                            String statusDescription,
+                                            Object response) {
+
         return ResponseServiceDto.builder()
                 .statusCode(statusCode)
                 .statusDescription(statusDescription)
-                .data(data)
+                .data(response)
                 .build();
     }
 
     /**
-     * <p>Handler validation errors.</p>
-     *
-     * @param bindingResult Validation result.
-     * @return Map with field error as key and its description error as value.
-     */
-    public static Map<String, String> requestHandleErrors(BindingResult bindingResult) {
-
-        Map<String, String> errors = new HashMap<>() {
-            @Override
-            public String toString() {
-                StringBuilder stb = new StringBuilder();
-
-                for (Map.Entry<String, String> entry : this.entrySet()) {
-                    stb.append(String.format(" Parámetro '%s' %s ", entry.getKey(), entry.getValue()));
-                }
-
-                return stb.toString();
-            }
-        };
-
-        bindingResult.getAllErrors().forEach((error) -> {
-            String fieldName;
-            String errorMessage = error.getDefaultMessage();
-            fieldName = ((FieldError) error).getField();
-            errors.put(fieldName, errorMessage);
-        });
-
-        return errors;
-    }
-
-    /**
-     * Codifica una cadena de texto a formato Base64.
-     * Este método convierte una cadena de texto plano a su representación en Base64.
-     *
-     * @param password La cadena que se desea codificar en Base64.
-     *                 No debe ser null ni estar vacía.
-     * @return La cadena codificada en formato Base64.
-     */
-    public static String encodeToBase64(String password) {
-        try {
-            byte[] encodedBytes = Base64.getEncoder().encode(
-                    password.getBytes(StandardCharsets.UTF_8)
-            );
-            return new String(encodedBytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al codificar la contraseña", e);
-        }
-    }
-
-    /**
      * Decodifica una cadena en formato Base64 a su valor original.
-     * Este método convierte una cadena codificada en Base64 a su representación original en texto plano.
+     * Este metodo convierte una cadena codificada en Base64 a su representación original en texto plano.
      *
      * @param encodedPassword La cadena codificada en Base64 que se desea decodificar.
      *                        No debe ser null ni estar vacía.

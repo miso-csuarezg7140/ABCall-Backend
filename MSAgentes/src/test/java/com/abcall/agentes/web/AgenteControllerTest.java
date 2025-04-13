@@ -1,38 +1,26 @@
 package com.abcall.agentes.web;
 
 import com.abcall.agentes.domain.dto.AgenteDto;
-import com.abcall.agentes.domain.dto.ResponseServiceDto;
+import com.abcall.agentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.agentes.domain.service.AgenteService;
+import com.abcall.agentes.util.enums.HttpResponseCodes;
+import com.abcall.agentes.util.enums.HttpResponseMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.ResponseEntity;
 
-import static com.abcall.agentes.util.Constant.CODIGO_200;
-import static com.abcall.agentes.util.Constant.CODIGO_206;
-import static com.abcall.agentes.util.Constant.CODIGO_400;
-import static com.abcall.agentes.util.Constant.CODIGO_500;
-import static com.abcall.agentes.util.Constant.MENSAJE_200;
-import static com.abcall.agentes.util.Constant.MENSAJE_206;
-import static com.abcall.agentes.util.Constant.MENSAJE_500;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.HashMap;
+import java.util.Objects;
 
-@ExtendWith(MockitoExtension.class)
-class AgenteControllerTest {
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-    private MockMvc mockMvc;
+public class AgenteControllerTest {
 
     @Mock
     private AgenteService agenteService;
@@ -40,108 +28,141 @@ class AgenteControllerTest {
     @InjectMocks
     private AgenteController agenteController;
 
-    private static final String TIPO_DOCUMENTO = "CC";
-    private static final String NUMERO_DOCUMENTO = "123456789";
-    private static final String CONTRASENA = "Password123!";
-    private static final String BASE_URL = "/login";
+    private ResponseServiceDto responseOk;
+    private ResponseServiceDto responseUnauthorized;
+    private ResponseServiceDto responseNoContent;
+    private ResponseServiceDto responseError;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(agenteController)
-                .setControllerAdvice(new AdviceController())
-                .build();
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        // Configurar respuestas de prueba
+        // Respuesta exitosa
+        responseOk = new ResponseServiceDto();
+        responseOk.setStatusCode(HttpResponseCodes.OK.getCode());
+        responseOk.setStatusDescription(HttpResponseMessages.OK.getMessage());
+        responseOk.setData(new AgenteDto());
+        responseOk.setStatusCode(HttpStatus.OK.value());
+
+        // Respuesta no autorizada
+        responseUnauthorized = new ResponseServiceDto();
+        responseUnauthorized.setStatusCode(HttpResponseCodes.UNAUTHORIZED.getCode());
+        responseUnauthorized.setStatusDescription(HttpResponseMessages.UNAUTHORIZED.getMessage());
+        responseUnauthorized.setData(new HashMap<>());
+        responseUnauthorized.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+
+        // Respuesta sin contenido
+        responseNoContent = new ResponseServiceDto();
+        responseNoContent.setStatusCode(HttpResponseCodes.BUSINESS_MISTAKE.getCode());
+        responseNoContent.setStatusDescription(HttpResponseMessages.NO_CONTENT.getMessage());
+        responseNoContent.setData(new HashMap<>());
+        responseNoContent.setStatusCode(HttpStatus.NO_CONTENT.value());
+
+        // Respuesta de error
+        responseError = new ResponseServiceDto();
+        responseError.setStatusCode(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode());
+        responseError.setStatusDescription(HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage());
+        responseError.setData("Error message");
+        responseError.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @Test
-    void loginSuccessful() throws Exception {
+    public void loginSuccess() {
         // Arrange
-        ResponseServiceDto response = new ResponseServiceDto();
-        response.setStatusCode(CODIGO_200);
-        response.setStatusDescription(MENSAJE_200);
-        response.setData(new AgenteDto());
+        String tipoDocumento = "CC";
+        String numDocumento = "1010259487";
+        String contrasena = "Contrasena123!";
 
-        when(agenteService.login(TIPO_DOCUMENTO, NUMERO_DOCUMENTO, CONTRASENA))
-                .thenReturn(response);
+        when(agenteService.login(tipoDocumento, numDocumento, contrasena)).thenReturn(responseOk);
 
-        // Act & Assert
-        mockMvc.perform(get(BASE_URL)
-                        .param("tipoDocumentoAgente", TIPO_DOCUMENTO)
-                        .param("numDocumentoAgente", NUMERO_DOCUMENTO)
-                        .param("contrasena", CONTRASENA)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value(CODIGO_200))
-                .andExpect(jsonPath("$.statusDescription").value(MENSAJE_200));
+        // Act
+        ResponseEntity<ResponseServiceDto> response = agenteController.login(tipoDocumento, numDocumento, contrasena);
+
+        // Assert
+        assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
+        assertEquals(responseOk, response.getBody());
+
+        // Verify
+        verify(agenteService).login(tipoDocumento, numDocumento, contrasena);
     }
 
     @Test
-    void loginPartialContent() throws Exception {
+    public void loginUnauthorized() {
         // Arrange
-        ResponseServiceDto response = new ResponseServiceDto();
-        response.setStatusCode(CODIGO_206);
-        response.setStatusDescription(MENSAJE_206);
+        String tipoDocumento = "CC";
+        String numDocumento = "1010259487";
+        String contrasena = "ContrasenaMala!";
 
-        when(agenteService.login(TIPO_DOCUMENTO, NUMERO_DOCUMENTO, CONTRASENA))
-                .thenReturn(response);
+        when(agenteService.login(tipoDocumento, numDocumento, contrasena)).thenReturn(responseUnauthorized);
 
-        // Act & Assert
-        mockMvc.perform(get(BASE_URL)
-                        .param("tipoDocumentoAgente", TIPO_DOCUMENTO)
-                        .param("numDocumentoAgente", NUMERO_DOCUMENTO)
-                        .param("contrasena", CONTRASENA)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isPartialContent())
-                .andExpect(jsonPath("$.statusCode").value(CODIGO_206))
-                .andExpect(jsonPath("$.statusDescription").value(MENSAJE_206));
+        // Act
+        ResponseEntity<ResponseServiceDto> response = agenteController.login(tipoDocumento, numDocumento, contrasena);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCodeValue());
+        assertEquals(responseUnauthorized, response.getBody());
+        assertEquals(HttpResponseCodes.UNAUTHORIZED.getCode(), Objects.requireNonNull(response.getBody()).getStatusCode());
+        assertEquals(HttpResponseMessages.UNAUTHORIZED.getMessage(), response.getBody().getStatusDescription());
+
+        // Verify
+        verify(agenteService).login(tipoDocumento, numDocumento, contrasena);
     }
 
     @Test
-    void loginBadRequest() throws Exception {
+    public void loginNoContent() {
         // Arrange
-        ResponseServiceDto response = new ResponseServiceDto();
-        response.setStatusCode(CODIGO_400);
-        response.setStatusDescription("Bad Request");
+        String tipoDocumento = "CC";
+        String numDocumento = "9999999999"; // Usuario que no existe
+        String contrasena = "Contrasena123!";
 
-        when(agenteService.login(TIPO_DOCUMENTO, NUMERO_DOCUMENTO, CONTRASENA))
-                .thenReturn(response);
+        when(agenteService.login(tipoDocumento, numDocumento, contrasena)).thenReturn(responseNoContent);
 
-        // Act & Assert
-        mockMvc.perform(get(BASE_URL)
-                        .param("tipoDocumentoAgente", TIPO_DOCUMENTO)
-                        .param("numDocumentoAgente", NUMERO_DOCUMENTO)
-                        .param("contrasena", CONTRASENA)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(CODIGO_400));
+        // Act
+        ResponseEntity<ResponseServiceDto> response = agenteController.login(tipoDocumento, numDocumento, contrasena);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCodeValue());
+        assertEquals(responseNoContent, response.getBody());
+        assertEquals(HttpResponseCodes.NO_CONTENT.getCode(), Objects.requireNonNull(response.getBody()).getStatusCode());
+        assertEquals(HttpResponseMessages.NO_CONTENT.getMessage(), response.getBody().getStatusDescription());
+        assertInstanceOf(HashMap.class, response.getBody().getData());
+        assertTrue(((HashMap<?, ?>) response.getBody().getData()).isEmpty());
+
+        // Verify
+        verify(agenteService).login(tipoDocumento, numDocumento, contrasena);
     }
 
     @Test
-    void loginInternalServerError() throws Exception {
+    public void loginInternalServerError() {
         // Arrange
-        ResponseServiceDto response = new ResponseServiceDto();
-        response.setStatusCode(CODIGO_500);
-        response.setStatusDescription(MENSAJE_500);
+        String tipoDocumento = "CC";
+        String numDocumento = "1010259487";
+        String contrasena = "Contrasena123!";
 
-        when(agenteService.login(anyString(), anyString(), anyString()))
-                .thenReturn(response);
+        when(agenteService.login(tipoDocumento, numDocumento, contrasena)).thenReturn(responseError);
 
-        // Act & Assert
-        mockMvc.perform(get(BASE_URL)
-                        .param("tipoDocumentoAgente", TIPO_DOCUMENTO)
-                        .param("numDocumentoAgente", NUMERO_DOCUMENTO)
-                        .param("contrasena", CONTRASENA)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.statusCode").value(CODIGO_500))
-                .andExpect(jsonPath("$.statusDescription").value(MENSAJE_500));
+        // Act
+        ResponseEntity<ResponseServiceDto> response = agenteController.login(tipoDocumento, numDocumento, contrasena);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCodeValue());
+        assertEquals(responseError, response.getBody());
+        assertEquals(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(), Objects.requireNonNull(response.getBody()).getStatusCode());
+        assertEquals(HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), response.getBody().getStatusDescription());
+        assertEquals("Error message", response.getBody().getData());
+
+        // Verify
+        verify(agenteService).login(tipoDocumento, numDocumento, contrasena);
     }
 
     @Test
-    void pingTest() throws Exception {
-        // Act & Assert
-        mockMvc.perform(get("/ping"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("pong"));
+    public void pingTest() {
+        // Act
+        ResponseEntity<String> response = agenteController.ping();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("pong", response.getBody());
     }
 }

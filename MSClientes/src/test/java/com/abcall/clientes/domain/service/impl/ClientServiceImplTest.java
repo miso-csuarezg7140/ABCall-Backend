@@ -1,10 +1,11 @@
 package com.abcall.clientes.domain.service.impl;
 
-import com.abcall.clientes.config.SecurityConfig;
 import com.abcall.clientes.domain.dto.ClientDto;
+import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.persistence.repository.IClienteRepository;
+import com.abcall.clientes.security.EncoderConfig;
 import com.abcall.clientes.util.ApiUtils;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
 import com.abcall.clientes.util.enums.HttpResponseMessages;
@@ -16,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,7 +33,7 @@ class ClientServiceImplTest {
     private IClienteRepository clientRepository;
 
     @Mock
-    private SecurityConfig securityConfig;
+    private EncoderConfig encoderConfig;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -45,7 +47,7 @@ class ClientServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(securityConfig.passwordEncoder()).thenReturn(passwordEncoder);
+        when(encoderConfig.passwordEncoder()).thenReturn(passwordEncoder);
     }
 
     @Test
@@ -110,6 +112,71 @@ class ClientServiceImplTest {
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
         ResponseServiceDto response = clientServiceImpl.authenticateClient(username, password);
+
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), "Database error");
+    }
+
+    @Test
+    void registerClient_ReturnsCreatedResponse_WhenClientIsSuccessfullyRegistered() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("123456789")
+                .socialReason("ABC Corp")
+                .email("abc@corp.com")
+                .password("password123")
+                .build();
+
+        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenReturn(null);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(clientRepository.save(any(ClientDto.class))).thenAnswer(invocation -> {
+            ClientDto client = invocation.getArgument(0);
+            client.setClientId(1);
+            return client;
+        });
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.registerClient(request);
+
+        assertNotNull(response);
+        verify(clientRepository).save(any(ClientDto.class));
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.CREATED.getCode()),
+                eq(HttpResponseMessages.CREATED.getMessage()), any(Map.class));
+    }
+
+    @Test
+    void registerClient_ReturnsBusinessMistakeResponse_WhenClientAlreadyExists() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("123456789")
+                .socialReason("ABC Corp")
+                .email("abc@corp.com")
+                .password("password123")
+                .build();
+
+        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenReturn(new ClientDto());
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.registerClient(request);
+
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
+    }
+
+    @Test
+    void registerClient_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
+        ClientRegisterRequest request = ClientRegisterRequest.builder()
+                .documentNumber("123456789")
+                .socialReason("ABC Corp")
+                .email("abc@corp.com")
+                .password("password123")
+                .build();
+
+        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenThrow(
+                new RuntimeException("Database error"));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.registerClient(request);
 
         assertNotNull(response);
         verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
