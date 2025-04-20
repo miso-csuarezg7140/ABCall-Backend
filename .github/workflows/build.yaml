@@ -290,3 +290,45 @@ jobs:
         run: |
           kubectl get ingress
           kubectl describe ingress abcall-ingress
+
+  deploy-api-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: abcall-uniandes-g18a
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy OpenAPI spec to Cloud Endpoints
+        run: |
+          echo "Deploying OpenAPI specification to Cloud Endpoints..."
+          gcloud endpoints services deploy k8s/abcall-cloud-endpoints-config.yaml
+
+      - name: Deploy ESP to Cloud Run
+        run: |
+          echo "Deploying ESP proxy to Cloud Run..."
+          gcloud run deploy esp-abcall \
+            --image="gcr.io/endpoints-release/endpoints-runtime:2" \
+            --set-env-vars=ESPv2_ARGS=--cors_preset=basic,--cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000 \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated
+
+      - name: Configure CORS for frontend
+        run: |
+          echo "Configuring CORS for the frontend..."
+          gcloud endpoints services configure-cors abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog \
+            --methods=GET,POST,PUT,DELETE,OPTIONS \
+            --origins=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000 \
+            --allow-credentials
+
+      - name: Print Gateway URL
+        run: |
+          echo "API Gateway deployed successfully!"
+          echo "Gateway URL: https://abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog"
+          echo "Frontend can now consume this API Gateway using the URL above."
