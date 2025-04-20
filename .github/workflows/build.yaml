@@ -292,6 +292,7 @@ jobs:
           kubectl describe ingress abcall-ingress
 
   deploy-api-gateway:
+    needs: update-ingress
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
