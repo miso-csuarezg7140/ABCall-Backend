@@ -313,40 +313,33 @@ jobs:
           echo "Deploying OpenAPI specification to Cloud Endpoints..."
           gcloud endpoints services deploy k8s/abcall-cloud-endpoints-config.yaml
 
-      - name: Create environment variables file
+      - name: Get Service Config ID
         run: |
-          echo "Preparing environment variables for ESP..."
-          cat > env_vars.yaml << EOF
-          ESPv2_ARGS: --service=abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog --cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000
-          EOF
+          echo "Getting latest service config ID..."
+          CONFIG_ID=$(gcloud endpoints configs list --service=abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog --format="value(id)" --limit=1)
+          echo "SERVICE_CONFIG_ID=$CONFIG_ID" >> $GITHUB_ENV
 
       - name: Deploy ESP to Cloud Run
         run: |
-          echo "Deploying ESP proxy to Cloud Run..."
+          echo "Deploying ESP proxy to Cloud Run with config ID ${{ env.SERVICE_CONFIG_ID }}..."
           gcloud run deploy esp-abcall \
-            --image="gcr.io/endpoints-release/endpoints-runtime:2" \
-            --env-vars-file=env_vars.yaml \
+            --image="gcr.io/endpoints-release/endpoints-runtime-serverless:2" \
+            --set-env-vars=ESPv2_ARGS="--cors_preset=basic" \
+            --set-env-vars=ESPv2_ARGS="--service_json_path=/esp/endpoints_config.json" \
+            --set-env-vars=ENDPOINTS_SERVICE_NAME="abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog" \
+            --set-env-vars=ENDPOINTS_SERVICE_CONFIG_ID="${{ env.SERVICE_CONFIG_ID }}" \
             --region=us-central1 \
             --platform=managed \
-            --allow-unauthenticated \
-            --port=8080 \
-            --timeout=300s
+            --allow-unauthenticated
 
       - name: Configure IAM for ESP
         run: |
           echo "Configuring IAM permissions for ESP..."
           gcloud run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker esp-abcall
 
-      - name: Configure CORS for frontend
-        run: |
-          echo "Configuring CORS for the frontend..."
-          gcloud endpoints services configure-cors abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog \
-            --methods=GET,POST,PUT,DELETE,OPTIONS \
-            --origins=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000 \
-            --allow-credentials
-
       - name: Print Gateway URL
         run: |
           echo "API Gateway deployed successfully!"
-          echo "Gateway URL: https://abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog"
-          echo "Frontend can now consume this API Gateway using the URL above."
+          ESP_URL=$(gcloud run services describe esp-abcall --region=us-central1 --format='value(status.url)')
+          echo "ESP URL: $ESP_URL"
+          echo "You can send requests to this URL, and it will route to your services."
