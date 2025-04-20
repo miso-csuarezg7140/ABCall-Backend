@@ -313,12 +313,19 @@ jobs:
           echo "Deploying OpenAPI specification to Cloud Endpoints..."
           gcloud endpoints services deploy k8s/abcall-cloud-endpoints-config.yaml
 
+      - name: Create environment variables file
+        run: |
+          echo "Preparing environment variables for ESP..."
+          cat > env_vars.yaml << EOF
+          ESPv2_ARGS: --cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000
+          EOF
+
       - name: Deploy ESP to Cloud Run
         run: |
           echo "Deploying ESP proxy to Cloud Run..."
           gcloud run deploy esp-abcall \
             --image="gcr.io/endpoints-release/endpoints-runtime:2" \
-            --set-env-vars=ESPv2_ARGS="--cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000" \
+            --env-vars-file=env_vars.yaml \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated
