@@ -308,43 +308,34 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Deploy OpenAPI spec to Cloud Endpoints
+      - name: Deploy OpenAPI spec to API Gateway
         run: |
-          echo "Deploying OpenAPI specification to Cloud Endpoints..."
-          gcloud endpoints services deploy k8s/abcall-cloud-endpoints-config.yaml
+          echo "Creating API Gateway configuration..."
+          # Crear un gateway de API
+          gcloud api-gateway apis create abcall-api --project=${{ env.PROJECT_ID }}
 
-      - name: Get Service Config ID
-        run: |
-          echo "Getting latest service config ID..."
-          CONFIG_ID=$(gcloud endpoints configs list --service=abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog --format="value(id)" --limit=1)
-          echo "SERVICE_CONFIG_ID=$CONFIG_ID" >> $GITHUB_ENV
+          # Crear una configuración de API usando el archivo OpenAPI existente
+          gcloud api-gateway api-configs create abcall-config-v1 \
+            --api=abcall-api \
+            --openapi-spec=k8s/abcall-cloud-endpoints-config.yaml \
+            --backend-auth-service-account=933696033849-compute@developer.gserviceaccount.com \
+            --project=${{ env.PROJECT_ID }}
 
-      - name: Create env vars file
-        run: |
-          cat > env_vars.yaml << EOF
-          ESPv2_ARGS: --cors_preset=basic --service_json_path=/esp/endpoints_config.json
-          ENDPOINTS_SERVICE_NAME: abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog
-          ENDPOINTS_SERVICE_CONFIG_ID: ${{ env.SERVICE_CONFIG_ID }}
-          EOF
+          # Desplegar el gateway con la configuración
+          gcloud api-gateway gateways create abcall-gateway \
+            --api=abcall-api \
+            --api-config=abcall-config-v1 \
+            --location=us-central1 \
+            --project=${{ env.PROJECT_ID }}
 
-      - name: Deploy ESP to Cloud Run
+      - name: Get Gateway URL
         run: |
-          echo "Deploying ESP proxy to Cloud Run with config ID ${{ env.SERVICE_CONFIG_ID }}..."
-          gcloud run deploy esp-abcall \
-            --image="gcr.io/endpoints-release/endpoints-runtime-serverless:2" \
-            --env-vars-file=env_vars.yaml \
-            --region=us-central1 \
-            --platform=managed \
-            --allow-unauthenticated
+          echo "Getting API Gateway URL..."
+          GATEWAY_URL=$(gcloud api-gateway gateways describe abcall-gateway \
+            --location=us-central1 \
+            --format="value(defaultHostname)" \
+            --project=${{ env.PROJECT_ID }})
 
-      - name: Configure IAM for ESP
-        run: |
-          echo "Configuring IAM permissions for ESP..."
-          gcloud run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker esp-abcall
-
-      - name: Print Gateway URL
-        run: |
           echo "API Gateway deployed successfully!"
-          ESP_URL=$(gcloud run services describe esp-abcall --region=us-central1 --format='value(status.url)')
-          echo "ESP URL: $ESP_URL"
-          echo "You can send requests to this URL, and it will route to your services."
+          echo "Gateway URL: https://$GATEWAY_URL"
+          echo "Frontend can now consume this API Gateway using the URL above."
