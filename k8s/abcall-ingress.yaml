@@ -4,8 +4,8 @@ metadata:
   name: abcall-ingress
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
+    kubernetes.io/ingress.class: "gce"
 spec:
-  ingressClassName: gce
   rules:
     - http:
         paths:
