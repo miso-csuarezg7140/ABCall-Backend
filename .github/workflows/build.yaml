@@ -318,7 +318,7 @@ jobs:
           echo "Deploying ESP proxy to Cloud Run..."
           gcloud run deploy esp-abcall \
             --image="gcr.io/endpoints-release/endpoints-runtime:2" \
-            --set-env-vars="ESPv2_ARGS=--cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000" \
+            --set-env-vars=ESPv2_ARGS="--cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000" \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated
