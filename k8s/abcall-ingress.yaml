@@ -4,6 +4,7 @@ metadata:
   name: abcall-ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
+    ingress.gcp.kubernetes.io/pre-shared-cert: "gke-ingress-default-cert"
     cloud.google.com/neg: '{"ingress": true}'
 spec:
   rules:
