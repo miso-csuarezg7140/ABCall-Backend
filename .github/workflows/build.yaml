@@ -319,15 +319,20 @@ jobs:
           CONFIG_ID=$(gcloud endpoints configs list --service=abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog --format="value(id)" --limit=1)
           echo "SERVICE_CONFIG_ID=$CONFIG_ID" >> $GITHUB_ENV
 
+      - name: Create env vars file
+        run: |
+          cat > env_vars.yaml << EOF
+          ESPv2_ARGS: --cors_preset=basic --service_json_path=/esp/endpoints_config.json
+          ENDPOINTS_SERVICE_NAME: abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog
+          ENDPOINTS_SERVICE_CONFIG_ID: ${{ env.SERVICE_CONFIG_ID }}
+          EOF
+
       - name: Deploy ESP to Cloud Run
         run: |
           echo "Deploying ESP proxy to Cloud Run with config ID ${{ env.SERVICE_CONFIG_ID }}..."
           gcloud run deploy esp-abcall \
             --image="gcr.io/endpoints-release/endpoints-runtime-serverless:2" \
-            --set-env-vars=ESPv2_ARGS="--cors_preset=basic" \
-            --set-env-vars=ESPv2_ARGS="--service_json_path=/esp/endpoints_config.json" \
-            --set-env-vars=ENDPOINTS_SERVICE_NAME="abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog" \
-            --set-env-vars=ENDPOINTS_SERVICE_CONFIG_ID="${{ env.SERVICE_CONFIG_ID }}" \
+            --env-vars-file=env_vars.yaml \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated
