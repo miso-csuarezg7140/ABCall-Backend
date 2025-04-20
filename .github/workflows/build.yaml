@@ -318,22 +318,41 @@ jobs:
       - name: Deploy OpenAPI spec to API Gateway
         run: |
           echo "Creating API Gateway configuration..."
-          # Crear un gateway de API
-          gcloud api-gateway apis create abcall-api --project=${{ env.PROJECT_ID }}
 
-          # Crear una configuración de API usando el archivo OpenAPI existente
-          gcloud api-gateway api-configs create abcall-config-v1 \
+          # Skip API creation if it already exists
+          if ! gcloud api-gateway apis describe abcall-api --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            echo "Creating API Gateway API..."
+            gcloud api-gateway apis create abcall-api --project=${{ env.PROJECT_ID }}
+          else
+            echo "API Gateway API already exists, skipping creation."
+          fi
+
+          # Create a new config version with timestamp to avoid conflicts
+          CONFIG_VERSION="v1-$(date +%Y%m%d%H%M%S)"
+          echo "Creating API config version: $CONFIG_VERSION"
+
+          gcloud api-gateway api-configs create $CONFIG_VERSION \
             --api=abcall-api \
             --openapi-spec=k8s/abcall-cloud-endpoints-config.yaml \
             --backend-auth-service-account=${{ env.SERVICE_ACCOUNT }} \
             --project=${{ env.PROJECT_ID }}
 
-          # Desplegar el gateway con la configuración
-          gcloud api-gateway gateways create abcall-gateway \
-            --api=abcall-api \
-            --api-config=abcall-config-v1 \
-            --location=us-central1 \
-            --project=${{ env.PROJECT_ID }}
+          # Check if gateway exists and update or create
+          if gcloud api-gateway gateways describe abcall-gateway --location=us-central1 --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            echo "Updating existing gateway..."
+            gcloud api-gateway gateways update abcall-gateway \
+              --api=abcall-api \
+              --api-config=$CONFIG_VERSION \
+              --location=us-central1 \
+              --project=${{ env.PROJECT_ID }}
+          else
+            echo "Creating new gateway..."
+            gcloud api-gateway gateways create abcall-gateway \
+              --api=abcall-api \
+              --api-config=$CONFIG_VERSION \
+              --location=us-central1 \
+              --project=${{ env.PROJECT_ID }}
+          fi
 
       - name: Get Gateway URL
         run: |
