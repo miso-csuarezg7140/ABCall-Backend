@@ -16,7 +16,7 @@ paths:
       summary: Operaciones GET para cualquier microservicio
       operationId: genericGet
       x-google-backend:
-        address: http://34.144.226.68/service/abcall/{service}/v1/{path}
+        address: http://abcall-backend.abcall-internal.com/service/abcall/{service}/v1/{path}
       parameters:
         - name: service
           in: path
@@ -42,7 +42,7 @@ paths:
       summary: Operaciones POST para cualquier microservicio
       operationId: genericPost
       x-google-backend:
-        address: http://34.144.226.68/service/abcall/{service}/v1/{path}
+        address: http://abcall-backend.abcall-internal.com/service/abcall/{service}/v1/{path}
       parameters:
         - name: service
           in: path
@@ -73,7 +73,7 @@ paths:
       summary: Operaciones PUT para cualquier microservicio
       operationId: genericPut
       x-google-backend:
-        address: http://34.144.226.68/service/abcall/{service}/v1/{path}
+        address: http://abcall-backend.abcall-internal.com/service/abcall/{service}/v1/{path}
       parameters:
         - name: service
           in: path
