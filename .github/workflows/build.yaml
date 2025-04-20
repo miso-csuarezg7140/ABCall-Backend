@@ -317,7 +317,7 @@ jobs:
         run: |
           echo "Preparing environment variables for ESP..."
           cat > env_vars.yaml << EOF
-          ESPv2_ARGS: --cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000
+          ESPv2_ARGS: --service=abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog --cors_preset=basic --cors_allow_origin=https://abcall-932696033849.us-central1.run.app,http://localhost:4200,https://localhost:4200,http://localhost:5000,https://localhost:5000
           EOF
 
       - name: Deploy ESP to Cloud Run
@@ -328,7 +328,14 @@ jobs:
             --env-vars-file=env_vars.yaml \
             --region=us-central1 \
             --platform=managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --port=8080 \
+            --timeout=300s
+
+      - name: Configure IAM for ESP
+        run: |
+          echo "Configuring IAM permissions for ESP..."
+          gcloud run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker esp-abcall
 
       - name: Configure CORS for frontend
         run: |
