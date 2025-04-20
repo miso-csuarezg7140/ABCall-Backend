@@ -308,6 +308,13 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
+      - name: Get correct service account
+        run: |
+          echo "Finding service account..."
+          SERVICE_ACCOUNT=$(gcloud iam service-accounts list --format="value(email)" --filter="displayName:Compute Engine default service account" --limit=1)
+          echo "SERVICE_ACCOUNT=$SERVICE_ACCOUNT" >> $GITHUB_ENV
+          echo "Using service account: $SERVICE_ACCOUNT"
+
       - name: Deploy OpenAPI spec to API Gateway
         run: |
           echo "Creating API Gateway configuration..."
@@ -318,7 +325,7 @@ jobs:
           gcloud api-gateway api-configs create abcall-config-v1 \
             --api=abcall-api \
             --openapi-spec=k8s/abcall-cloud-endpoints-config.yaml \
-            --backend-auth-service-account=933696033849-compute@developer.gserviceaccount.com \
+            --backend-auth-service-account=${{ env.SERVICE_ACCOUNT }} \
             --project=${{ env.PROJECT_ID }}
 
           # Desplegar el gateway con la configuración
