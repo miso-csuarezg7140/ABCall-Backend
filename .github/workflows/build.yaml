@@ -290,3 +290,78 @@ jobs:
         run: |
           kubectl get ingress
           kubectl describe ingress abcall-ingress
+
+  deploy-api-gateway:
+    needs: update-ingress
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Get correct service account
+        run: |
+          echo "Finding service account..."
+          SERVICE_ACCOUNT=$(gcloud iam service-accounts list --format="value(email)" --filter="displayName:Compute Engine default service account" --limit=1)
+          echo "SERVICE_ACCOUNT=$SERVICE_ACCOUNT" >> $GITHUB_ENV
+          echo "Using service account: $SERVICE_ACCOUNT"
+
+      - name: Deploy OpenAPI spec to API Gateway
+        run: |
+          echo "Creating API Gateway configuration..."
+          
+          # Skip API creation if it already exists
+          if ! gcloud api-gateway apis describe abcall-api --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            echo "Creating API Gateway API..."
+            gcloud api-gateway apis create abcall-api --project=${{ env.PROJECT_ID }}
+          else
+            echo "API Gateway API already exists, skipping creation."
+          fi
+          
+          # Create a new config version with timestamp to avoid conflicts
+          CONFIG_VERSION="v1-$(date +%Y%m%d%H%M%S)"
+          echo "Creating API config version: $CONFIG_VERSION"
+          
+          gcloud api-gateway api-configs create $CONFIG_VERSION \
+            --api=abcall-api \
+            --openapi-spec=k8s/abcall-cloud-endpoints-config.yaml \
+            --backend-auth-service-account=${{ env.SERVICE_ACCOUNT }} \
+            --project=${{ env.PROJECT_ID }}
+          
+          # Check if gateway exists and update or create
+          if gcloud api-gateway gateways describe abcall-gateway --location=us-central1 --project=${{ env.PROJECT_ID }} &>/dev/null; then
+            echo "Updating existing gateway..."
+            gcloud api-gateway gateways update abcall-gateway \
+              --api=abcall-api \
+              --api-config=$CONFIG_VERSION \
+              --location=us-central1 \
+              --project=${{ env.PROJECT_ID }}
+          else
+            echo "Creating new gateway..."
+            gcloud api-gateway gateways create abcall-gateway \
+              --api=abcall-api \
+              --api-config=$CONFIG_VERSION \
+              --location=us-central1 \
+              --project=${{ env.PROJECT_ID }}
+          fi
+
+      - name: Get Gateway URL
+        run: |
+          echo "Getting API Gateway URL..."
+          GATEWAY_URL=$(gcloud api-gateway gateways describe abcall-gateway \
+            --location=us-central1 \
+            --format="value(defaultHostname)" \
+            --project=${{ env.PROJECT_ID }})
+          
+          echo "API Gateway deployed successfully!"
+          echo "Gateway URL: https://$GATEWAY_URL"
+          echo "Frontend can now consume this API Gateway using the URL above."
