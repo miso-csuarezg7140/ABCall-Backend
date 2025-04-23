@@ -333,7 +333,7 @@ jobs:
           
           gcloud api-gateway api-configs create $CONFIG_VERSION \
             --api=abcall-api \
-            --openapi-spec=k8s/abcall-cloud-endpoints-config.yaml \
+            --openapi-spec=k8s/abcall-cloud-apigateway-config.yaml \
             --backend-auth-service-account=${{ env.SERVICE_ACCOUNT }} \
             --project=${{ env.PROJECT_ID }}
           
