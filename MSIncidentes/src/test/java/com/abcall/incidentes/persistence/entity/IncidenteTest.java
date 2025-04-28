@@ -1,6 +1,6 @@
 package com.abcall.incidentes.persistence.entity;
 
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.util.ApiUtils;
@@ -38,13 +38,13 @@ class IncidenteTest {
 
     @Test
     void crearReturnsInternalServerErrorWhenServiceFails() {
-        IncidenteRequest incidenteRequest = new IncidenteRequest();
+        CrearIncidenteRequest crearIncidenteRequest = new CrearIncidenteRequest();
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
-        Mockito.when(incidenteService.crear(incidenteRequest)).thenReturn(responseServiceDto);
+        Mockito.when(incidenteService.crear(crearIncidenteRequest)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(incidenteRequest, Mockito.mock(BindingResult.class));
+        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(crearIncidenteRequest, Mockito.mock(BindingResult.class));
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());

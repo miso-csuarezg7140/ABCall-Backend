@@ -1,7 +1,8 @@
 package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
 import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
@@ -88,21 +89,20 @@ public class IncidenteServiceImpl implements IncidenteService {
     /**
      * Creates a new incident based on the provided incident request.
      *
-     * @param incidenteRequest the incident request containing the details of the incident to be created
+     * @param crearIncidenteRequest the incident request containing the details of the incident to be created
      * @return a {@link ResponseServiceDto} containing the response details, including the created incident or error information
      */
     @Override
-    public ResponseServiceDto crear(IncidenteRequest incidenteRequest) {
+    public ResponseServiceDto crear(CrearIncidenteRequest crearIncidenteRequest) {
         try {
-
-            UserClientDtoResponse userClientDtoResponse = obtenerUsuarioCliente(incidenteRequest);
+            UserClientDtoResponse userClientDtoResponse = obtenerUsuarioCliente(crearIncidenteRequest);
             if (null == userClientDtoResponse) {
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
             }
 
-            Incidente incidente = incidenteMapper.toEntity(incidenteRequest);
-            IncidenteRequest incidenteCreado = incidenteMapper.toDto(incidenteRepository.crear(incidente));
+            Incidente incidente = incidenteMapper.toEntity(crearIncidenteRequest);
+            CrearIncidenteRequest incidenteCreado = incidenteMapper.toDtoCrearRequest(incidenteRepository.crear(incidente));
             return apiUtils.buildResponse(HttpResponseCodes.CREATED.getCode(),
                     HttpResponseMessages.CREATED.getMessage(), incidenteCreado);
         } catch (Exception ex) {
@@ -112,16 +112,43 @@ public class IncidenteServiceImpl implements IncidenteService {
     }
 
     /**
+     * Updates an existing incident based on the provided update request.
+     *
+     * @param actualizarIncidenteRequest the request object containing the details of the incident to be updated
+     * @return a {@link ResponseServiceDto} containing the response details, including the updated incident details if successful,
+     *         or an appropriate message if the update fails or an error occurs
+     */
+    @Override
+    public ResponseServiceDto actualizar(ActualizarIncidenteRequest actualizarIncidenteRequest) {
+        try {
+            Incidente incidente = incidenteMapper.toEntityActualizar(actualizarIncidenteRequest);
+            IncidenteDetalleResponse incidenteDetalleResponse = incidenteMapper.toDtoDetalleResponse(
+                    incidenteRepository.actualizar(incidente));
+
+            if (null != incidenteDetalleResponse) {
+                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                        HttpResponseMessages.OK.getMessage(), incidenteDetalleResponse);
+            } else {
+                return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                        HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
+            }
+        } catch (Exception ex) {
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
+        }
+    }
+
+    /**
      * Retrieves the user client information based on the provided incident request.
      *
-     * @param incidenteRequest the incident request containing the client and user document details
+     * @param crearIncidenteRequest the incident request containing the client and user document details
      * @return a {@link UserClientDtoResponse} object containing the user client data
      * @throws NullPointerException if the response body or its data is null
      */
-    private UserClientDtoResponse obtenerUsuarioCliente(IncidenteRequest incidenteRequest) {
+    private UserClientDtoResponse obtenerUsuarioCliente(CrearIncidenteRequest crearIncidenteRequest) {
         ResponseEntity<ResponseServiceDto> response = clientService.validateUserClient(
-                incidenteRequest.getNumDocumentoCliente(), incidenteRequest.getTipoDocumentoUsuario(),
-                incidenteRequest.getNumDocumentoUsuario());
+                crearIncidenteRequest.getNumDocumentoCliente(), crearIncidenteRequest.getTipoDocumentoUsuario(),
+                crearIncidenteRequest.getNumDocumentoUsuario());
 
         if (response != null && response.getBody() != null && response.getBody().getData() != null) {
             try {

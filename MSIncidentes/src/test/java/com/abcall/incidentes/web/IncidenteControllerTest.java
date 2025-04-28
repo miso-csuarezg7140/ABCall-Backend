@@ -1,10 +1,10 @@
 package com.abcall.incidentes.web;
 
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.util.ApiUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class IncidenteControllerTest {
@@ -38,8 +40,8 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultar(tipoDocUsuario, numeroDocUsuario);
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
@@ -53,27 +55,27 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultar(tipoDocUsuario, numeroDocUsuario);
 
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
     void crearReturnsCreatedResponseWhenValidData() {
-        IncidenteRequest incidenteRequest = new IncidenteRequest();
+        CrearIncidenteRequest crearIncidenteRequest = new CrearIncidenteRequest();
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.CREATED.value());
 
-        Mockito.when(incidenteService.crear(incidenteRequest)).thenReturn(responseServiceDto);
+        Mockito.when(incidenteService.crear(crearIncidenteRequest)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(incidenteRequest, Mockito.mock(BindingResult.class));
+        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(crearIncidenteRequest, Mockito.mock(BindingResult.class));
 
-        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
     void crearReturnsBadRequestWhenValidationFails() {
-        IncidenteRequest incidenteRequest = new IncidenteRequest();
+        CrearIncidenteRequest crearIncidenteRequest = new CrearIncidenteRequest();
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -81,18 +83,18 @@ class IncidenteControllerTest {
         Mockito.when(bindingResult.hasErrors()).thenReturn(true);
         Mockito.when(apiUtils.badRequestResponse(bindingResult)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(incidenteRequest, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = incidenteController.crear(crearIncidenteRequest, bindingResult);
 
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
     void pingReturnsPongResponse() {
         ResponseEntity<String> response = incidenteController.ping();
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("pong", response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("pong", response.getBody());
     }
 
     @Test
@@ -105,8 +107,8 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
@@ -119,8 +121,8 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
 
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
@@ -133,8 +135,8 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
 
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
@@ -147,7 +149,37 @@ class IncidenteControllerTest {
 
         ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
 
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertEquals(responseServiceDto, response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void actualizarReturnsOkResponseWhenValidData() {
+        ActualizarIncidenteRequest actualizarIncidenteRequest = new ActualizarIncidenteRequest();
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        Mockito.when(incidenteService.actualizar(actualizarIncidenteRequest)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.actualizar(actualizarIncidenteRequest, Mockito.mock(BindingResult.class));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void actualizarReturnsBadRequestWhenValidationFails() {
+        ActualizarIncidenteRequest actualizarIncidenteRequest = new ActualizarIncidenteRequest();
+        BindingResult bindingResult = Mockito.mock(BindingResult.class);
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        Mockito.when(bindingResult.hasErrors()).thenReturn(true);
+        Mockito.when(apiUtils.badRequestResponse(bindingResult)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.actualizar(actualizarIncidenteRequest, bindingResult);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
     }
 }

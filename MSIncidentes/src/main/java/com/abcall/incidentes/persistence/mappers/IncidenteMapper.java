@@ -1,6 +1,7 @@
 package com.abcall.incidentes.persistence.mappers;
 
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
 import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.persistence.entity.Incidente;
@@ -11,13 +12,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface IncidenteMapper {
 
-    Incidente toEntity(IncidenteRequest incidenteRequest);
+    Incidente toEntity(CrearIncidenteRequest crearIncidenteRequest);
 
-    List<Incidente> toEntityList(List<IncidenteRequest> incidenteRequestList);
+    List<Incidente> toEntityList(List<CrearIncidenteRequest> crearIncidenteRequestList);
 
-    IncidenteRequest toDto(Incidente incidente);
+    CrearIncidenteRequest toDtoCrearRequest(Incidente incidente);
 
-    List<IncidenteRequest> toDtoList(List<Incidente> incidenteRequestList);
+    List<CrearIncidenteRequest> toDtoCrearRequestList(List<Incidente> incidenteRequestList);
 
     IncidenteResponse toDtoResponse(Incidente incidente);
 
@@ -26,4 +27,12 @@ public interface IncidenteMapper {
     IncidenteDetalleResponse toDtoDetalleResponse(Incidente incidente);
 
     List<IncidenteDetalleResponse> toDtoDetalleResponseList(List<Incidente> incidenteDtoList);
+
+    ActualizarIncidenteRequest toDtoActualizarRequest(Incidente incidente);
+
+    List<ActualizarIncidenteRequest> toDtoActualizarRequestList(List<Incidente> incidenteDtoList);
+
+    Incidente toEntityActualizar(ActualizarIncidenteRequest actualizarIncidenteRequest);
+
+    List<Incidente> toEntityActualizarList(List<ActualizarIncidenteRequest> actualizarIncidenteRequestList);
 }
