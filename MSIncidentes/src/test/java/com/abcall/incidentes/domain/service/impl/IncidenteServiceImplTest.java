@@ -1,7 +1,8 @@
 package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
 import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
@@ -60,8 +61,8 @@ class IncidenteServiceImplTest {
     private Long numeroDocUsuario;
     private Incidente incidente;
     private List<Incidente> incidenteList;
-    private IncidenteRequest incidenteRequest;
-    private List<IncidenteRequest> incidenteRequestList;
+    private CrearIncidenteRequest crearIncidenteRequest;
+    private List<CrearIncidenteRequest> crearIncidenteRequestList;
     private IncidenteResponse incidenteResponse;
     private List<IncidenteResponse> incidenteResponseList;
     private ResponseServiceDto responseServiceDto;
@@ -77,12 +78,12 @@ class IncidenteServiceImplTest {
         incidente = new Incidente();
         incidenteList.add(incidente);
 
-        incidenteRequestList = new ArrayList<>();
-        incidenteRequest = new IncidenteRequest();
-        incidenteRequest.setTipoDocumentoUsuario("CC");
-        incidenteRequest.setNumDocumentoUsuario("12345678");
-        incidenteRequest.setNumDocumentoCliente("87654321");
-        incidenteRequestList.add(incidenteRequest);
+        crearIncidenteRequestList = new ArrayList<>();
+        crearIncidenteRequest = new CrearIncidenteRequest();
+        crearIncidenteRequest.setTipoDocumentoUsuario("CC");
+        crearIncidenteRequest.setNumDocumentoUsuario("12345678");
+        crearIncidenteRequest.setNumDocumentoCliente("87654321");
+        crearIncidenteRequestList.add(crearIncidenteRequest);
 
         incidenteResponseList = new ArrayList<>();
         incidenteResponse = new IncidenteResponse();
@@ -169,30 +170,30 @@ class IncidenteServiceImplTest {
 
         // Mockear de forma que soporte múltiples llamadas al mismo metodo
         when(clientService.validateUserClient(anyString(), anyString(), anyString())).thenReturn(responseEntity);
-        when(incidenteMapper.toEntity(any(IncidenteRequest.class))).thenReturn(incidente);
+        when(incidenteMapper.toEntity(any(CrearIncidenteRequest.class))).thenReturn(incidente);
         when(incidenteRepository.crear(any(Incidente.class))).thenReturn(incidente);
-        when(incidenteMapper.toDto(any(Incidente.class))).thenReturn(incidenteRequest);
+        when(incidenteMapper.toDtoCrearRequest(any(Incidente.class))).thenReturn(crearIncidenteRequest);
         when(apiUtils.buildResponse(
                 eq(HttpResponseCodes.CREATED.getCode()),
                 eq(HttpResponseMessages.CREATED.getMessage()),
-                any(IncidenteRequest.class))).thenReturn(responseServiceDto);
+                any(CrearIncidenteRequest.class))).thenReturn(responseServiceDto);
 
         // Act
-        incidenteService.crear(incidenteRequest);
+        incidenteService.crear(crearIncidenteRequest);
 
         // Assert
         // No verificamos el número exacto de llamadas, solo que fue llamado al menos una vez
         verify(clientService, atLeastOnce()).validateUserClient(
-                incidenteRequest.getNumDocumentoCliente(),
-                incidenteRequest.getTipoDocumentoUsuario(),
-                incidenteRequest.getNumDocumentoUsuario());
-        verify(incidenteMapper).toEntity(incidenteRequest);
+                crearIncidenteRequest.getNumDocumentoCliente(),
+                crearIncidenteRequest.getTipoDocumentoUsuario(),
+                crearIncidenteRequest.getNumDocumentoUsuario());
+        verify(incidenteMapper).toEntity(crearIncidenteRequest);
         verify(incidenteRepository).crear(incidente);
-        verify(incidenteMapper).toDto(incidente);
+        verify(incidenteMapper).toDtoCrearRequest(incidente);
         verify(apiUtils).buildResponse(
                 eq(HttpResponseCodes.CREATED.getCode()),
                 eq(HttpResponseMessages.CREATED.getMessage()),
-                any(IncidenteRequest.class));
+                any(CrearIncidenteRequest.class));
     }
 
     @Test
@@ -210,13 +211,13 @@ class IncidenteServiceImplTest {
                 any(HashMap.class))).thenReturn(responseServiceDto);
 
         // Act
-        incidenteService.crear(incidenteRequest);
+        incidenteService.crear(crearIncidenteRequest);
 
         // Assert
         verify(clientService).validateUserClient(
-                incidenteRequest.getNumDocumentoCliente(),
-                incidenteRequest.getTipoDocumentoUsuario(),
-                incidenteRequest.getNumDocumentoUsuario());
+                crearIncidenteRequest.getNumDocumentoCliente(),
+                crearIncidenteRequest.getTipoDocumentoUsuario(),
+                crearIncidenteRequest.getNumDocumentoUsuario());
         verify(apiUtils).buildResponse(
                 eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
                 eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()),
@@ -235,13 +236,13 @@ class IncidenteServiceImplTest {
                 anyString())).thenReturn(responseServiceDto);
 
         // Act
-        incidenteService.crear(incidenteRequest);
+        incidenteService.crear(crearIncidenteRequest);
 
         // Assert
         verify(clientService).validateUserClient(
-                incidenteRequest.getNumDocumentoCliente(),
-                incidenteRequest.getTipoDocumentoUsuario(),
-                incidenteRequest.getNumDocumentoUsuario());
+                crearIncidenteRequest.getNumDocumentoCliente(),
+                crearIncidenteRequest.getTipoDocumentoUsuario(),
+                crearIncidenteRequest.getNumDocumentoUsuario());
         verify(apiUtils).buildResponse(
                 HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
                 HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(),
@@ -260,16 +261,16 @@ class IncidenteServiceImplTest {
         ResponseEntity<ResponseServiceDto> responseEntity = new ResponseEntity<>(responseServiceDto, HttpStatus.OK);
 
         when(clientService.validateUserClient(anyString(), anyString(), anyString())).thenReturn(responseEntity);
-        when(incidenteMapper.toEntity(any(IncidenteRequest.class))).thenReturn(incidente);
+        when(incidenteMapper.toEntity(any(CrearIncidenteRequest.class))).thenReturn(incidente);
         when(incidenteRepository.crear(any(Incidente.class))).thenReturn(incidente);
-        when(incidenteMapper.toDto(any(Incidente.class))).thenReturn(incidenteRequest);
+        when(incidenteMapper.toDtoCrearRequest(any(Incidente.class))).thenReturn(crearIncidenteRequest);
         when(apiUtils.buildResponse(
                 eq(HttpResponseCodes.CREATED.getCode()),
                 eq(HttpResponseMessages.CREATED.getMessage()),
-                any(IncidenteRequest.class))).thenReturn(responseServiceDto);
+                any(CrearIncidenteRequest.class))).thenReturn(responseServiceDto);
 
         // Act
-        ResponseServiceDto result = incidenteService.crear(incidenteRequest);
+        ResponseServiceDto result = incidenteService.crear(crearIncidenteRequest);
 
         // Assert
         // Verificamos que el resultado final sea el esperado después de que obtenerUsuarioCliente haya sido ejecutado
@@ -277,7 +278,7 @@ class IncidenteServiceImplTest {
         // El uso de atLeastOnce() permite que el metodo se llame más de una vez
         verify(clientService, atLeastOnce()).validateUserClient(anyString(), anyString(), anyString());
         // Verificamos que se utilizó el mapper y el repositorio, indicando que obtenerUsuarioCliente devolvió un valor válido
-        verify(incidenteMapper).toEntity(any(IncidenteRequest.class));
+        verify(incidenteMapper).toEntity(any(CrearIncidenteRequest.class));
         verify(incidenteRepository).crear(any(Incidente.class));
     }
 
@@ -298,13 +299,13 @@ class IncidenteServiceImplTest {
                 any(HashMap.class))).thenReturn(responseServiceDto);
 
         // Act
-        incidenteService.crear(incidenteRequest);
+        incidenteService.crear(crearIncidenteRequest);
 
         // Assert
         verify(clientService).validateUserClient(
-                incidenteRequest.getNumDocumentoCliente(),
-                incidenteRequest.getTipoDocumentoUsuario(),
-                incidenteRequest.getNumDocumentoUsuario());
+                crearIncidenteRequest.getNumDocumentoCliente(),
+                crearIncidenteRequest.getTipoDocumentoUsuario(),
+                crearIncidenteRequest.getNumDocumentoUsuario());
         verify(apiUtils).buildResponse(
                 eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
                 eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()),
@@ -385,6 +386,87 @@ class IncidenteServiceImplTest {
                 HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
                 HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(),
                 "For input string: \"no-es-numero\"");
+        assertEquals(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(), result.getStatusCode());
+    }
+
+    @Test
+    void actualizar_DeberiaRetornarRespuestaOK_CuandoActualizacionExitosa() {
+        ActualizarIncidenteRequest actualizarIncidenteRequest = new ActualizarIncidenteRequest();
+        Incidente incidente = new Incidente();
+        IncidenteDetalleResponse detalleResponse = new IncidenteDetalleResponse();
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.OK.getCode());
+        expectedResponse.setStatusDescription(HttpResponseMessages.OK.getMessage());
+        expectedResponse.setData(detalleResponse);
+
+        when(incidenteMapper.toEntityActualizar(actualizarIncidenteRequest)).thenReturn(incidente);
+        when(incidenteRepository.actualizar(incidente)).thenReturn(incidente);
+        when(incidenteMapper.toDtoDetalleResponse(incidente)).thenReturn(detalleResponse);
+        when(apiUtils.buildResponse(
+                HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(),
+                detalleResponse)).thenReturn(expectedResponse);
+
+        ResponseServiceDto result = incidenteService.actualizar(actualizarIncidenteRequest);
+
+        verify(incidenteMapper).toEntityActualizar(actualizarIncidenteRequest);
+        verify(incidenteRepository).actualizar(incidente);
+        verify(incidenteMapper).toDtoDetalleResponse(incidente);
+        verify(apiUtils).buildResponse(
+                HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(),
+                detalleResponse);
+        assertEquals(HttpResponseCodes.OK.getCode(), result.getStatusCode());
+    }
+
+    @Test
+    void actualizar_DeberiaRetornarBusinessMistake_CuandoIncidenteNoExiste() {
+        ActualizarIncidenteRequest actualizarIncidenteRequest = new ActualizarIncidenteRequest();
+        Incidente incidente = new Incidente();
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.BUSINESS_MISTAKE.getCode());
+        expectedResponse.setStatusDescription(HttpResponseMessages.NO_CONTENT.getMessage());
+
+        when(incidenteMapper.toEntityActualizar(actualizarIncidenteRequest)).thenReturn(incidente);
+        when(incidenteRepository.actualizar(incidente)).thenReturn(null);
+        when(apiUtils.buildResponse(
+                HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                HttpResponseMessages.NO_CONTENT.getMessage(),
+                new HashMap<>())).thenReturn(expectedResponse);
+
+        ResponseServiceDto result = incidenteService.actualizar(actualizarIncidenteRequest);
+
+        verify(incidenteMapper).toEntityActualizar(actualizarIncidenteRequest);
+        verify(incidenteRepository).actualizar(incidente);
+        verify(apiUtils).buildResponse(
+                HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                HttpResponseMessages.NO_CONTENT.getMessage(),
+                new HashMap<>());
+        assertEquals(HttpResponseCodes.BUSINESS_MISTAKE.getCode(), result.getStatusCode());
+    }
+
+    @Test
+    void actualizar_DeberiaRetornarError_CuandoOcurreExcepcion() {
+        ActualizarIncidenteRequest actualizarIncidenteRequest = new ActualizarIncidenteRequest();
+        String errorMessage = "Error al actualizar incidente";
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode());
+        expectedResponse.setStatusDescription(HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage());
+        expectedResponse.setData(errorMessage);
+
+        when(incidenteMapper.toEntityActualizar(actualizarIncidenteRequest)).thenThrow(new RuntimeException(errorMessage));
+        when(apiUtils.buildResponse(
+                HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(),
+                errorMessage)).thenReturn(expectedResponse);
+
+        ResponseServiceDto result = incidenteService.actualizar(actualizarIncidenteRequest);
+
+        verify(incidenteMapper).toEntityActualizar(actualizarIncidenteRequest);
+        verify(apiUtils).buildResponse(
+                HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(),
+                errorMessage);
         assertEquals(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(), result.getStatusCode());
     }
 }

@@ -1,6 +1,7 @@
 package com.abcall.incidentes.domain.service;
 
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 
 public interface IncidenteService {
@@ -9,5 +10,7 @@ public interface IncidenteService {
 
     ResponseServiceDto consultarDetalle(String idIncidenteStr);
 
-    ResponseServiceDto crear(IncidenteRequest incidenteRequest);
+    ResponseServiceDto crear(CrearIncidenteRequest crearIncidenteRequest);
+
+    ResponseServiceDto actualizar(ActualizarIncidenteRequest actualizarIncidenteRequest);
 }

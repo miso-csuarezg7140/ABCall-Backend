@@ -28,4 +28,10 @@ public class IncidenteRepositoryImpl implements IncidenteRepository {
     public Incidente crear(Incidente incidente) {
         return incidenteRepositoryJpa.save(incidente);
     }
+
+    @Override
+    public Incidente actualizar(Incidente incidente) {
+        boolean existeIncidente =  incidenteRepositoryJpa.existsById(incidente.getId());
+        return existeIncidente ? incidenteRepositoryJpa.save(incidente) : null;
+    }
 }
