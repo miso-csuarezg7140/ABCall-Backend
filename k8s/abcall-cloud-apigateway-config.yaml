@@ -14,7 +14,7 @@ paths:
   /service/abcall/auth/v1/ping:
     get:
       summary: Valida el estado del microservicio de autenticación
-      operationId: genericGet
+      operationId: pingAuth
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/auth/v1/ping
       responses:
@@ -30,7 +30,7 @@ paths:
   /service/abcall/agentes/v1/ping:
     get:
       summary: Valida el estado del microservicio de agentes
-      operationId: genericGet
+      operationId: pingAgentes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/ping
       responses:
@@ -46,7 +46,7 @@ paths:
   /service/abcall/clientes/v1/ping:
     get:
       summary: Valida el estado del microservicio de clientes
-      operationId: genericGet
+      operationId: pingClientes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/ping
       responses:
@@ -62,7 +62,7 @@ paths:
   /service/abcall/ia/v1/ping:
     get:
       summary: Valida el estado del microservicio de IA
-      operationId: genericGet
+      operationId: pingIA
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/ia/v1/ping
       responses:
@@ -78,7 +78,7 @@ paths:
   /service/abcall/incidentes/v1/ping:
     get:
       summary: Valida el estado del microservicio de incidentes
-      operationId: genericGet
+      operationId: pingIncidentes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/ping
       responses:
@@ -94,7 +94,7 @@ paths:
   /service/abcall/reporteria/v1/ping:
     get:
       summary: Valida el estado del microservicio de reportería
-      operationId: genericGet
+      operationId: pingReporteria
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/reporteria/v1/ping
       responses:
@@ -110,7 +110,7 @@ paths:
   /service/abcall/clientes/v1/authenticate:
     post:
       summary: Permite la autenticación de un cliente
-      operationId: genericPost
+      operationId: autenticarCliente
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/authenticate
       parameters:
@@ -132,7 +132,7 @@ paths:
   /service/abcall/incidentes/v1/crear:
     post:
       summary: Permite la creación de un incidente
-      operationId: genericPost
+      operationId: crearIncidente
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
       parameters:
@@ -154,7 +154,7 @@ paths:
   /service/abcall/incidentes/v1/consultar:
     get:
       summary: Valida el estado del microservicio de reportería
-      operationId: genericGet
+      operationId: consultarIncidentes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
       parameters:
@@ -181,7 +181,7 @@ paths:
   /service/abcall/incidentes/v1/consultarDetalle:
     get:
       summary: Valida el estado del microservicio de reportería
-      operationId: genericGet
+      operationId: consultarDetalleIncidente
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultarDetalle
       parameters:
