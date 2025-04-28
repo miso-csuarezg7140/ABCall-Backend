@@ -13,32 +13,22 @@ import java.time.LocalDateTime;
 @Setter
 public class IncidenteRequest {
 
-    private Integer id;
-
     @NotBlank(message = "El campo tipoDocumentoUsuario no puede ser nulo.")
     private String tipoDocumentoUsuario;
 
     @NotNull(message = "El campo numDocumentoUsuario no puede ser nulo.")
     @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo numDocumentoUsuario debe ser numérico.")
-    private Long numDocumentoUsuario;
+    private String numDocumentoUsuario;
 
     @NotNull(message = "El campo numDocumentoCliente no puede ser nulo.")
     @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo numDocumentoCliente debe ser numérico.")
-    private Long numDocumentoCliente;
+    private String numDocumentoCliente;
 
     @NotBlank(message = "El campo descripcion no puede ser nulo.")
     private String descripcion;
 
     private Boolean solucionado = false;
-    private Integer solucionId;
-    private String solucionadoPor;
-    private LocalDateTime fechaSolucion;
     private String estado = Constants.ESTADO_DEFAULT;
-
-    private String creadoPor = Constants.ESTADO_DEFAULT;
-
+    private String creadoPor;
     private LocalDateTime fechaCreacion = Constants.HOY;
-    private String modificadoPor;
-
-    private LocalDateTime fechaModificacion;
 }
