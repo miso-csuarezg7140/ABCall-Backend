@@ -2,6 +2,8 @@ package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
 import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
+import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.persistence.entity.Incidente;
@@ -40,7 +42,7 @@ public class IncidenteServiceImpl implements IncidenteService {
     public ResponseServiceDto consultar(String tipoDocUsuario, String numeroDocUsuarioStr) {
         try {
             Long numeroDocUsuario = Long.valueOf(numeroDocUsuarioStr);
-            List<IncidenteRequest> incidenteRequestList = incidenteMapper.toDtoList(
+            List<IncidenteResponse> incidenteRequestList = incidenteMapper.toDtoResponseList(
                     incidenteRepository.obtenerPorUsuario(tipoDocUsuario, numeroDocUsuario));
 
             if (incidenteRequestList != null && !incidenteRequestList.isEmpty()) {
@@ -57,11 +59,37 @@ public class IncidenteServiceImpl implements IncidenteService {
     }
 
     /**
+     * Retrieves the details of a specific incident based on its ID.
+     *
+     * @param idIncidenteStr the ID of the incident as a string
+     * @return a {@link ResponseServiceDto} containing the response details, including the incident details if found,
+     * or an appropriate message if the incident is not found or an error occurs
+     */
+    @Override
+    public ResponseServiceDto consultarDetalle(String idIncidenteStr) {
+        try {
+            Integer idIncidente = Integer.valueOf(idIncidenteStr);
+            IncidenteDetalleResponse incidenteDetalleResponse = incidenteMapper.toDtoDetalleResponse(
+                    incidenteRepository.obtenerPorId(idIncidente));
+
+            if (incidenteDetalleResponse != null) {
+                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
+                        incidenteDetalleResponse);
+            } else {
+                return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
+                        HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
+            }
+        } catch (Exception ex) {
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
+        }
+    }
+
+    /**
      * Creates a new incident based on the provided incident request.
      *
      * @param incidenteRequest the incident request containing the details of the incident to be created
      * @return a {@link ResponseServiceDto} containing the response details, including the created incident or error information
-     * @throws Exception if an error occurs during the creation process
      */
     @Override
     public ResponseServiceDto crear(IncidenteRequest incidenteRequest) {
@@ -72,10 +100,6 @@ public class IncidenteServiceImpl implements IncidenteService {
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
             }
-
-            clientService.validateUserClient(
-                    incidenteRequest.getNumDocumentoCliente(), incidenteRequest.getTipoDocumentoUsuario(),
-                    incidenteRequest.getNumDocumentoUsuario());
 
             Incidente incidente = incidenteMapper.toEntity(incidenteRequest);
             IncidenteRequest incidenteCreado = incidenteMapper.toDto(incidenteRepository.crear(incidente));
@@ -99,7 +123,7 @@ public class IncidenteServiceImpl implements IncidenteService {
                 incidenteRequest.getNumDocumentoCliente(), incidenteRequest.getTipoDocumentoUsuario(),
                 incidenteRequest.getNumDocumentoUsuario());
 
-        if (response.getBody() != null && response.getBody().getData() != null) {
+        if (response != null && response.getBody() != null && response.getBody().getData() != null) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.findAndRegisterModules();

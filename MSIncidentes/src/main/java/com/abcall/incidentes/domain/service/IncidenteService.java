@@ -7,5 +7,7 @@ public interface IncidenteService {
 
     ResponseServiceDto consultar(String tipoDocUsuario, String numeroDocUsuarioStr);
 
+    ResponseServiceDto consultarDetalle(String idIncidenteStr);
+
     ResponseServiceDto crear(IncidenteRequest incidenteRequest);
 }
