@@ -8,5 +8,7 @@ public interface IncidenteRepository {
 
     List<Incidente> obtenerPorUsuario(String tipoDocumentoUsuario, Long numDocumentoUsuario);
 
+    Incidente obtenerPorId(Integer idIncidente);
+
     Incidente crear(Incidente incidente);
 }

@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IncidenteRepositoryJpa extends JpaRepository<Incidente, Integer> {
 
     @Query("SELECT i FROM Incidente i " +
             "WHERE i.tipoDocumentoUsuario = :tipoDocumentoUsuario AND i.numDocumentoUsuario = :numDocumentoUsuario")
-    List<Incidente> obtenerPorUsuario(@Param("tipoDocumentoUsuario") String tipoDocumentoUsuario,
-                                      @Param("numDocumentoUsuario") Long numDocumentoUsuario);
+    Optional<List<Incidente>> obtenerPorUsuario(@Param("tipoDocumentoUsuario") String tipoDocumentoUsuario,
+                                                @Param("numDocumentoUsuario") Long numDocumentoUsuario);
 }

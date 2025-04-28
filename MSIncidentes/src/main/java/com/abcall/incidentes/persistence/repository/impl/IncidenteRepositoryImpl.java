@@ -16,7 +16,12 @@ public class IncidenteRepositoryImpl implements IncidenteRepository {
 
     @Override
     public List<Incidente> obtenerPorUsuario(String tipoDocumentoUsuario, Long numDocumentoUsuario) {
-        return incidenteRepositoryJpa.obtenerPorUsuario(tipoDocumentoUsuario, numDocumentoUsuario);
+        return incidenteRepositoryJpa.obtenerPorUsuario(tipoDocumentoUsuario, numDocumentoUsuario).orElse(null);
+    }
+
+    @Override
+    public Incidente obtenerPorId(Integer idIncidente) {
+        return incidenteRepositoryJpa.findById(idIncidente).orElse(null);
     }
 
     @Override

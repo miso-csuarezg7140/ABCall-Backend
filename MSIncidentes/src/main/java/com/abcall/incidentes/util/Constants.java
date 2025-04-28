@@ -9,6 +9,7 @@ public class Constants {
     public static final LocalDateTime HOY = LocalDateTime.now();
     public static final String VALIDACION_NUMERICO = "^\\d+$";
     public static final String ESTADO_DEFAULT = "ACTIVO";
+    public static final String USUARIO_DEFAULT = "USUARIO";
 
     Constants() {
         throw new IllegalStateException("Utility class");
