@@ -128,6 +128,44 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
+    options:
+      summary: CORS preflight para autenticar cliente
+      operationId: corsAutenticarCliente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/authenticate
+
+  /service/abcall/clientes/v1/register:
+    post:
+      summary: Permite el registro de un cliente
+      operationId: registrarCliente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+    options:
+      summary: CORS preflight para registrar cliente
+      operationId: corsRegistrarCliente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
 
   /service/abcall/incidentes/v1/crear:
     post:
@@ -150,6 +188,14 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
+    options:
+      summary: CORS preflight para crear incidente
+      operationId: corsCrearIncidente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
 
   /service/abcall/incidentes/v1/consultar:
     get:
@@ -221,6 +267,14 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
+    options:
+      summary: CORS preflight para actualizar incidente
+      operationId: corsActualizarIncidente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/actualizar
 
 # Sección para CORS y seguridad
 x-google-management:
@@ -241,3 +295,22 @@ x-google-management:
 x-google-endpoints:
   - name: abcall-api.endpoints.abcall-uniandes-g18a.cloud.goog
     allowCors: true
+
+x-google-cors:
+  allow-origins:
+    - https://abcall-932696033849.us-central1.run.app
+  allow-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allow-headers:
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+  expose-headers:
+    - Content-Length
+    - X-Kuma-Revision
+  max-age: 3600
+  allow-credentials: true
