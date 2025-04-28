@@ -89,4 +89,31 @@ class IncidenteRepositoryImplTest {
         assertNotNull(result);
         assertEquals(savedIncidente, result);
     }
+
+    @Test
+    void actualizarReturnsUpdatedIncidenteWhenExists() {
+        Incidente incidenteToUpdate = new Incidente();
+        incidenteToUpdate.setId(1);
+        Incidente updatedIncidente = new Incidente();
+
+        when(incidenteRepositoryJpa.existsById(incidenteToUpdate.getId())).thenReturn(true);
+        when(incidenteRepositoryJpa.save(incidenteToUpdate)).thenReturn(updatedIncidente);
+
+        Incidente result = incidenteRepositoryImpl.actualizar(incidenteToUpdate);
+
+        assertNotNull(result);
+        assertEquals(updatedIncidente, result);
+    }
+
+    @Test
+    void actualizarReturnsNullWhenIncidenteDoesNotExist() {
+        Incidente incidenteToUpdate = new Incidente();
+        incidenteToUpdate.setId(1);
+
+        when(incidenteRepositoryJpa.existsById(incidenteToUpdate.getId())).thenReturn(false);
+
+        Incidente result = incidenteRepositoryImpl.actualizar(incidenteToUpdate);
+
+        assertNull(result);
+    }
 }

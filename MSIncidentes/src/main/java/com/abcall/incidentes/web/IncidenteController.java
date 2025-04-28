@@ -1,6 +1,7 @@
 package com.abcall.incidentes.web;
 
-import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.util.ApiUtils;
@@ -17,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,14 +51,14 @@ public class IncidenteController {
 
     @Operation(summary = "Método que permite la creación de un incidente nuevo.")
     @PostMapping("/crear")
-    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody IncidenteRequest incidenteRequest,
+    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody CrearIncidenteRequest crearIncidenteRequest,
                                                     BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         } else {
-            ResponseServiceDto response = incidentesService.crear(incidenteRequest);
+            ResponseServiceDto response = incidentesService.crear(crearIncidenteRequest);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         }
     }
@@ -73,6 +75,18 @@ public class IncidenteController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @Operation(summary = "Método que permite la actualización de un incidente.")
+    @PutMapping("/actualizar")
+    public ResponseEntity<ResponseServiceDto> actualizar(
+            @Valid @RequestBody ActualizarIncidenteRequest actualizarIncidenteRequest, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        } else {
+            ResponseServiceDto response = incidentesService.actualizar(actualizarIncidenteRequest);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        }
+    }
 
     @Operation(summary = "Permite monitorear el estado del MS en el despliegue.")
     @GetMapping("/ping")

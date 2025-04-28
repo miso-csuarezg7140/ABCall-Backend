@@ -153,7 +153,7 @@ paths:
 
   /service/abcall/incidentes/v1/consultar:
     get:
-      summary: Valida el estado del microservicio de reportería
+      summary: Permite la consulta de incidentes
       operationId: consultarIncidentes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
@@ -180,7 +180,7 @@ paths:
 
   /service/abcall/incidentes/v1/consultarDetalle:
     get:
-      summary: Valida el estado del microservicio de reportería
+      summary: Permite la consulta de detalles de un incidente
       operationId: consultarDetalleIncidente
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultarDetalle
@@ -190,6 +190,28 @@ paths:
           required: true
           type: string
           description: ID del incidente
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/incidentes/v1/actualizar:
+    put:
+      summary: Permite la actualización de un incidente
+      operationId: actualizarIncidente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/actualizar
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
       responses:
         '200':
           description: Operación exitosa

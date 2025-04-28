@@ -11,4 +11,6 @@ public interface IncidenteRepository {
     Incidente obtenerPorId(Integer idIncidente);
 
     Incidente crear(Incidente incidente);
+
+    Incidente actualizar(Incidente incidente);
 }

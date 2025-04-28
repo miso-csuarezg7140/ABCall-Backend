@@ -11,24 +11,31 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class IncidenteRequest {
+public class ActualizarIncidenteRequest {
+
+    @NotBlank(message = "El campo idIncidente no puede ser nulo.")
+    @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo idIncidente debe ser numérico.")
+    private String idIncidente;
 
     @NotBlank(message = "El campo tipoDocumentoUsuario no puede ser nulo.")
     private String tipoDocumentoUsuario;
 
-    @NotNull(message = "El campo numDocumentoUsuario no puede ser nulo.")
+    @NotBlank(message = "El campo numDocumentoUsuario no puede ser nulo.")
     @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo numDocumentoUsuario debe ser numérico.")
     private String numDocumentoUsuario;
 
-    @NotNull(message = "El campo numDocumentoCliente no puede ser nulo.")
+    @NotBlank(message = "El campo numDocumentoCliente no puede ser nulo.")
     @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo numDocumentoCliente debe ser numérico.")
     private String numDocumentoCliente;
 
-    @NotBlank(message = "El campo descripcion no puede ser nulo.")
-    private String descripcion;
+    @NotNull(message = "El campo solucionado no puede ser nulo.")
+    private Boolean solucionado;
 
-    private Boolean solucionado = false;
-    private String estado = Constants.ESTADO_DEFAULT;
-    private String creadoPor = Constants.USUARIO_DEFAULT;
-    private LocalDateTime fechaCreacion = Constants.HOY;
+    @NotBlank(message = "El campo estado no puede ser nulo.")
+    private String estado;
+
+    @NotBlank(message = "El campo modificadoPor no puede ser nulo.")
+    private String modificadoPor;
+
+    private LocalDateTime fechaModificacion = Constants.HOY;
 }
