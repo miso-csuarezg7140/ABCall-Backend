@@ -2,6 +2,7 @@ package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
 import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
 import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
@@ -63,18 +64,17 @@ public class IncidenteServiceImpl implements IncidenteService {
      * @param idIncidenteStr the ID of the incident as a string
      * @return a {@link ResponseServiceDto} containing the response details, including the incident details if found,
      * or an appropriate message if the incident is not found or an error occurs
-     * @throws Exception if an error occurs during the creation process
      */
     @Override
     public ResponseServiceDto consultarDetalle(String idIncidenteStr) {
         try {
             Integer idIncidente = Integer.valueOf(idIncidenteStr);
-            IncidenteResponse incidenteResponse = incidenteMapper.toDtoResponse(
+            IncidenteDetalleResponse incidenteDetalleResponse = incidenteMapper.toDtoDetalleResponse(
                     incidenteRepository.obtenerPorId(idIncidente));
 
-            if (incidenteResponse != null) {
+            if (incidenteDetalleResponse != null) {
                 return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
-                        incidenteResponse);
+                        incidenteDetalleResponse);
             } else {
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
@@ -90,7 +90,6 @@ public class IncidenteServiceImpl implements IncidenteService {
      *
      * @param incidenteRequest the incident request containing the details of the incident to be created
      * @return a {@link ResponseServiceDto} containing the response details, including the created incident or error information
-     * @throws Exception if an error occurs during the creation process
      */
     @Override
     public ResponseServiceDto crear(IncidenteRequest incidenteRequest) {

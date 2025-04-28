@@ -29,6 +29,6 @@ public class IncidenteRequest {
 
     private Boolean solucionado = false;
     private String estado = Constants.ESTADO_DEFAULT;
-    private String creadoPor;
+    private String creadoPor = Constants.USUARIO_DEFAULT;
     private LocalDateTime fechaCreacion = Constants.HOY;
 }

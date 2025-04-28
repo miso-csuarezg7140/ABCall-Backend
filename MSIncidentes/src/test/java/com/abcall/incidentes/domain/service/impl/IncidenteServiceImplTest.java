@@ -2,6 +2,7 @@ package com.abcall.incidentes.domain.service.impl;
 
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
 import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
+import com.abcall.incidentes.domain.dto.response.IncidenteDetalleResponse;
 import com.abcall.incidentes.domain.dto.response.IncidenteResponse;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.persistence.entity.Incidente;
@@ -57,12 +58,12 @@ class IncidenteServiceImplTest {
     private String tipoDocUsuario;
     private String numeroDocUsuarioStr;
     private Long numeroDocUsuario;
-    private IncidenteRequest incidenteRequest;
-    private List<Incidente> incidenteList;
-    private IncidenteResponse incidenteResponse;
-    private List<IncidenteRequest> incidenteRequestList;
-    private List<IncidenteResponse> incidenteResponseList;
     private Incidente incidente;
+    private List<Incidente> incidenteList;
+    private IncidenteRequest incidenteRequest;
+    private List<IncidenteRequest> incidenteRequestList;
+    private IncidenteResponse incidenteResponse;
+    private List<IncidenteResponse> incidenteResponseList;
     private ResponseServiceDto responseServiceDto;
     private UserClientDtoResponse userClientDtoResponse;
 
@@ -132,7 +133,7 @@ class IncidenteServiceImplTest {
                 any())).thenReturn(responseServiceDto);
 
         // Act
-       incidenteService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
+        incidenteService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
 
         // Assert
         verify(incidenteRepository).obtenerPorUsuario(tipoDocUsuario, numeroDocUsuario);
@@ -312,23 +313,31 @@ class IncidenteServiceImplTest {
 
     @Test
     void consultarDetalle_DeberiaRetornarRespuestaOK_CuandoIncidenteExiste() {
+        // Arrange
         Integer idIncidente = 1;
-        IncidenteResponse incidenteResponse = new IncidenteResponse();
+        IncidenteDetalleResponse detalleResponse = new IncidenteDetalleResponse();
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.OK.getCode());
+        expectedResponse.setStatusDescription(HttpResponseMessages.OK.getMessage());
+        expectedResponse.setData(detalleResponse);
+
         when(incidenteRepository.obtenerPorId(idIncidente)).thenReturn(new Incidente());
-        when(incidenteMapper.toDtoResponse(any(Incidente.class))).thenReturn(incidenteResponse);
+        when(incidenteMapper.toDtoDetalleResponse(any(Incidente.class))).thenReturn(detalleResponse);
         when(apiUtils.buildResponse(
                 HttpResponseCodes.OK.getCode(),
                 HttpResponseMessages.OK.getMessage(),
-                incidenteResponse)).thenReturn(responseServiceDto);
+                detalleResponse)).thenReturn(expectedResponse);
 
+        // Act
         ResponseServiceDto result = incidenteService.consultarDetalle(idIncidente.toString());
 
+        // Assert
         verify(incidenteRepository).obtenerPorId(idIncidente);
-        verify(incidenteMapper).toDtoResponse(any(Incidente.class));
+        verify(incidenteMapper).toDtoDetalleResponse(any(Incidente.class));
         verify(apiUtils).buildResponse(
                 HttpResponseCodes.OK.getCode(),
                 HttpResponseMessages.OK.getMessage(),
-                incidenteResponse);
+                (detalleResponse));
         assertEquals(HttpResponseCodes.OK.getCode(), result.getStatusCode());
     }
 

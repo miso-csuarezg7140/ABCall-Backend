@@ -41,7 +41,7 @@ public class IncidenteController {
             @Parameter(description = "Tipo de documento del usuario", example = "1010258471")
             @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El parámetro numeroDocUsuario debe ser numérico")
             @NotBlank(message = "El parámetro numeroDocUsuario no puede ser nulo")
-            @RequestParam(required = false) String numeroDocUsuarioStr) {
+            @RequestParam(required = false, value = "numeroDocUsuario") String numeroDocUsuarioStr) {
 
         ResponseServiceDto response = incidentesService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
         return ResponseEntity.status(response.getStatusCode()).body(response);
