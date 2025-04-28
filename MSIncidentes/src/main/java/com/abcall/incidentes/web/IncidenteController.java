@@ -4,6 +4,7 @@ import com.abcall.incidentes.domain.dto.request.IncidenteRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
 import com.abcall.incidentes.domain.service.IncidenteService;
 import com.abcall.incidentes.util.ApiUtils;
+import com.abcall.incidentes.util.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -21,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.abcall.incidentes.util.Constants.VALIDACION_NUMERICO;
-
 @Validated
 @RestController
 @RequestMapping
@@ -36,13 +35,14 @@ public class IncidenteController {
     @GetMapping("/consultar")
     public ResponseEntity<ResponseServiceDto> consultar(
             @Parameter(description = "Tipo de documento del usuario", example = "CC")
-            @NotBlank(message = "El parámetro tipoDocUsuario no puede ser nulo.")
-            @RequestParam(value = "tipoDocUsuario") String tipoDocUsuario,
+            @NotBlank(message = "El parámetro tipoDocUsuario no puede ser nulo")
+            @RequestParam(required = false) String tipoDocUsuario,
 
             @Parameter(description = "Tipo de documento del usuario", example = "1010258471")
-            @Pattern(regexp = VALIDACION_NUMERICO, message = "El parámetro numeroDocUsuario debe ser numérico")
-            @NotBlank(message = "El parámetro numeroDocUsuario no puede ser nulo.")
-            @RequestParam(value = "numeroDocUsuario") String numeroDocUsuarioStr) {
+            @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El parámetro numeroDocUsuario debe ser numérico")
+            @NotBlank(message = "El parámetro numeroDocUsuario no puede ser nulo")
+            @RequestParam(required = false, value = "numeroDocUsuario") String numeroDocUsuarioStr) {
+
         ResponseServiceDto response = incidentesService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -60,6 +60,19 @@ public class IncidenteController {
             return ResponseEntity.status(response.getStatusCode()).body(response);
         }
     }
+
+    @Operation(summary = "Método que permite la consulta del detalle de un incidente.")
+    @GetMapping("/consultarDetalle")
+    public ResponseEntity<ResponseServiceDto> consultarDetalle(
+            @Parameter(description = "Id de la incidencia a consultar detalle", example = "1")
+            @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El parámetro idIncidente debe ser numérico")
+            @NotBlank(message = "El parámetro idIncidente no puede ser nulo")
+            @RequestParam(required = false) String idIncidente) {
+
+        ResponseServiceDto response = incidentesService.consultarDetalle(idIncidente);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 
     @Operation(summary = "Permite monitorear el estado del MS en el despliegue.")
     @GetMapping("/ping")

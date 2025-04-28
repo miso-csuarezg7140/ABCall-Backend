@@ -94,4 +94,60 @@ class IncidenteControllerTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("pong", response.getBody());
     }
+
+    @Test
+    void consultarDetalleReturnsOkResponseWhenIdIsValid() {
+        String idIncidente = "1";
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        Mockito.when(incidenteService.consultarDetalle(idIncidente)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void consultarDetalleReturnsBadRequestWhenIdIsNull() {
+        String idIncidente = null;
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        Mockito.when(incidenteService.consultarDetalle(idIncidente)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assertions.assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void consultarDetalleReturnsBadRequestWhenIdIsNotNumeric() {
+        String idIncidente = "abc";
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+        Mockito.when(incidenteService.consultarDetalle(idIncidente)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assertions.assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void consultarDetalleReturnsNotFoundWhenIdDoesNotExist() {
+        String idIncidente = "999";
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.NOT_FOUND.value());
+
+        Mockito.when(incidenteService.consultarDetalle(idIncidente)).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = incidenteController.consultarDetalle(idIncidente);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Assertions.assertEquals(responseServiceDto, response.getBody());
+    }
 }

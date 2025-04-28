@@ -11,18 +11,92 @@ consumes:
 produces:
   - application/json
 paths:
+  /service/abcall/auth/v1/ping:
+    get:
+      summary: Valida el estado del microservicio de autenticación
+      operationId: pingAuth
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/ping
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/agentes/v1/ping:
+    get:
+      summary: Valida el estado del microservicio de agentes
+      operationId: pingAgentes
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/ping
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
   /service/abcall/clientes/v1/ping:
     get:
-      summary: Operaciones GET para cualquier microservicio
-      operationId: genericGet
+      summary: Valida el estado del microservicio de clientes
+      operationId: pingClientes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/ping
-#      parameters:
-#        - name: route
-#          in: path
-#          required: true
-#          type: string
-#          description: Ruta específica del endpoint
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/ia/v1/ping:
+    get:
+      summary: Valida el estado del microservicio de IA
+      operationId: pingIA
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/ia/v1/ping
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/incidentes/v1/ping:
+    get:
+      summary: Valida el estado del microservicio de incidentes
+      operationId: pingIncidentes
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/ping
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/reporteria/v1/ping:
+    get:
+      summary: Valida el estado del microservicio de reportería
+      operationId: pingReporteria
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/reporteria/v1/ping
       responses:
         '200':
           description: Operación exitosa
@@ -35,16 +109,11 @@ paths:
 
   /service/abcall/clientes/v1/authenticate:
     post:
-      summary: Operaciones POST para cualquier microservicio
-      operationId: genericPost
+      summary: Permite la autenticación de un cliente
+      operationId: autenticarCliente
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/authenticate
       parameters:
-#        - name: route
-#          in: path
-#          required: true
-#          type: string
-#          description: Ruta específica del endpoint
         - name: body
           in: body
           schema:
@@ -60,31 +129,76 @@ paths:
         '500':
           description: Error interno del servidor
 
-#    put:
-#      summary: Operaciones PUT para cualquier microservicio
-#      operationId: genericPut
-#      x-google-backend:
-#        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/{route}
-#      parameters:
-#        - name: route
-#          in: path
-#          required: true
-#          type: string
-#          description: Ruta específica del endpoint
-#        - name: body
-#          in: body
-#          schema:
-#            type: object
-#          description: Cuerpo de la solicitud
-#      responses:
-#        '200':
-#          description: Operación exitosa
-#        '206':
-#          description: Contenido parcial
-#        '400':
-#          description: Solicitud incorrecta
-#        '500':
-#          description: Error interno del servidor
+  /service/abcall/incidentes/v1/crear:
+    post:
+      summary: Permite la creación de un incidente
+      operationId: crearIncidente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
+      responses:
+        '201':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/incidentes/v1/consultar:
+    get:
+      summary: Valida el estado del microservicio de reportería
+      operationId: consultarIncidentes
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
+      parameters:
+        - name: tipoDocUsuario
+          in: path
+          required: true
+          type: string
+          description: Tipo de documento del usuario
+        - name: numeroDocUsuario
+          in: path
+          required: true
+          type: string
+          description: Número de documento del usuario
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+
+  /service/abcall/incidentes/v1/consultarDetalle:
+    get:
+      summary: Valida el estado del microservicio de reportería
+      operationId: consultarDetalleIncidente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultarDetalle
+      parameters:
+        - name: idIncidente
+          in: path
+          required: true
+          type: string
+          description: ID del incidente
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
 
 # Sección para CORS y seguridad
 x-google-management:
