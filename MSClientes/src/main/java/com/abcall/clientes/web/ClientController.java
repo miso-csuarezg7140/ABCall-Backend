@@ -100,6 +100,13 @@ public class ClientController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @Operation(summary = "Permite realizar la consulta de la lista de clientes.")
+    @GetMapping("/listar")
+    public ResponseEntity<ResponseServiceDto> listarClientes() {
+        ResponseServiceDto response = clientService.listarClientes();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @Operation(summary = "Permite monitorear el estado del MS en el despliegue.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Servicio disponible",
