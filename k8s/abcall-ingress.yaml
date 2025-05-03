@@ -11,6 +11,13 @@ spec:
         paths:
           - backend:
               service:
+                name: ms-abcall-auth-service
+                port:
+                  number: 8080
+            path: /service/abcall/auth/v1
+            pathType: Prefix
+          - backend:
+              service:
                 name: ms-abcall-agentes-service
                 port:
                   number: 8080
@@ -36,18 +43,4 @@ spec:
                 port:
                   number: 8080
             path: /service/abcall/incidentes/v1
-            pathType: Prefix
-          - backend:
-              service:
-                name: ms-abcall-reporteria-service
-                port:
-                  number: 8080
-            path: /service/abcall/reporteria/v1
-            pathType: Prefix
-          - backend:
-              service:
-                name: ms-abcall-auth-service
-                port:
-                  number: 8080
-            path: /service/abcall/auth/v1
             pathType: Prefix
