@@ -10,4 +10,6 @@ public interface IClientService {
     ResponseServiceDto registerClient(ClientRegisterRequest clientRegisterRequest);
 
     ResponseServiceDto validateUserClient(String documentClient, String documentTypeUser, String documentUser);
+
+    ResponseServiceDto listarClientes();
 }

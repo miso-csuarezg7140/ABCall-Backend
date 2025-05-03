@@ -1,6 +1,7 @@
 package com.abcall.clientes.domain.service.impl;
 
 import com.abcall.clientes.domain.dto.ClientDto;
+import com.abcall.clientes.domain.dto.response.ListClientResponse;
 import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
@@ -17,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -177,6 +179,44 @@ class ClientServiceImplTest {
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
         ResponseServiceDto response = clientServiceImpl.registerClient(request);
+
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), "Database error");
+    }
+
+    @Test
+    void listarClientes_ReturnsOkResponse_WhenClientsAreFound() {
+        List<ListClientResponse> clientDtoList = List.of(new ListClientResponse(), new ListClientResponse());
+
+        when(clientRepository.findActiveClients()).thenReturn(clientDtoList);
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.listarClientes();
+
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), clientDtoList);
+    }
+
+    @Test
+    void listarClientes_ReturnsNoContentResponse_WhenNoClientsAreFound() {
+        when(clientRepository.findActiveClients()).thenReturn(List.of());
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.listarClientes();
+
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.NO_CONTENT.getCode(),
+                HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
+    }
+
+    @Test
+    void listarClientes_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
+        when(clientRepository.findActiveClients()).thenThrow(new RuntimeException("Database error"));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        ResponseServiceDto response = clientServiceImpl.listarClientes();
 
         assertNotNull(response);
         verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),

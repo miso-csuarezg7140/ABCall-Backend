@@ -46,8 +46,6 @@ jobs:
             sonar_project_id: -MSIA
           - service: MSIncidentes
             sonar_project_id: -MSIncidentes
-          - service: MSReporteria
-            sonar_project_id: -MSReporteria
           - service: MSAuth
             sonar_project_id: -MSAuth
     steps:
@@ -152,8 +150,6 @@ jobs:
             service: MSIA
           - artifact-registry: ms-incidentes
             service: MSIncidentes
-          - artifact-registry: ms-reporteria
-            service: MSReporteria
           - artifact-registry: ms-auth
             service: MSAuth
     steps:
@@ -228,9 +224,6 @@ jobs:
           - service: MSIncidentes
             artifact-registry: ms-incidentes
             service-name: ms-abcall-incidentes
-          - service: MSReporteria
-            artifact-registry: ms-reporteria
-            service-name: ms-abcall-reporteria
           - service: MSAuth
             artifact-registry: ms-auth
             service-name: ms-abcall-auth

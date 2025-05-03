@@ -39,10 +39,10 @@ public class SecurityConfig {
                 );*/
         httpSecurity
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
-                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register", "/validateUserClient"))
+                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register", "/validateUserClient", "/listar"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**", "/register", "/validateUserClient")
+                                "/v3/api-docs/**", "/register", "/validateUserClient", "/listar")
                         .permitAll().anyRequest().authenticated()
                 );
 
