@@ -1,6 +1,7 @@
 package com.abcall.clientes.domain.service.impl;
 
 import com.abcall.clientes.domain.dto.ClientDto;
+import com.abcall.clientes.domain.dto.response.ListClientResponse;
 import com.abcall.clientes.domain.dto.UserClientDto;
 import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
 import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
@@ -156,6 +157,32 @@ public class ClientServiceImpl implements IClientService {
             else
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
+        } catch (Exception ex) {
+            return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves a list of active clients from the repository and builds a response.
+     *
+     * @return ResponseServiceDto containing:
+     * - An OK response with the list of active clients if found.
+     * - A NO_CONTENT response if no active clients are found.
+     * - An INTERNAL_SERVER_ERROR response if an exception occurs.
+     */
+    @Override
+    public ResponseServiceDto listarClientes() {
+        try {
+            List<ListClientResponse> clientDtoList = clientRepository.findActiveClients();
+
+            if (clientDtoList.isEmpty()) {
+                return apiUtils.buildResponse(HttpResponseCodes.NO_CONTENT.getCode(),
+                        HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
+            } else {
+                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                        HttpResponseMessages.OK.getMessage(), clientDtoList);
+            }
         } catch (Exception ex) {
             return apiUtils.buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
                     HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), ex.getMessage());
