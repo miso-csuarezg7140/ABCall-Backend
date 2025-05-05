@@ -263,31 +263,31 @@ paths:
       operationId: validarUsuario
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/validarUsuario
-        parameters:
-          - name: numeroDocumentoCliente
-            in: path
-            required: true
-            type: string
-            description: Número de documento del cliente
-          - name: tipoDocumentoUsuario
-            in: path
-            required: true
-            type: string
-            description: Tipo de documento del usuario
-          - name: numeroDocumentoUsuario
-            in: path
-            required: true
-            type: string
-            description: Número de documento del usuario
-        responses:
-          '200':
-            description: Operación exitosa
-          '206':
-            description: Contenido parcial
-          '400':
-            description: Solicitud incorrecta
-          '500':
-            description: Error interno del servidor
+      parameters:
+        - name: numeroDocumentoCliente
+          in: path
+          required: true
+          type: string
+          description: Número de documento del cliente
+        - name: tipoDocumentoUsuario
+          in: path
+          required: true
+          type: string
+          description: Tipo de documento del usuario
+        - name: numeroDocumentoUsuario
+          in: path
+          required: true
+          type: string
+          description: Número de documento del usuario
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
 
   /service/abcall/clientes/v1/listar:
     get:
