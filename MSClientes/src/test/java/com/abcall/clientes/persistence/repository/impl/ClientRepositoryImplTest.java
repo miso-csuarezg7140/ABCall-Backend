@@ -1,6 +1,7 @@
 package com.abcall.clientes.persistence.repository.impl;
 
 import com.abcall.clientes.domain.dto.ClientDto;
+import com.abcall.clientes.domain.dto.response.ListClientResponse;
 import com.abcall.clientes.persistence.entity.Client;
 import com.abcall.clientes.persistence.mappers.IClientMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,5 +72,30 @@ class ClientRepositoryImplTest {
         clientRepositoryImpl.save(clientDto);
 
         verify(clienteRepositoryJpa, times(1)).save(client);
+    }
+
+    @Test
+    void findActiveClients_ReturnsListOfClients_WhenActiveClientsExist() {
+        List<Client> activeClients = List.of(new Client(), new Client());
+        List<ListClientResponse> activeClientDtos = List.of(new ListClientResponse(), new ListClientResponse());
+
+        when(clienteRepositoryJpa.findActiveClients()).thenReturn(Optional.of(activeClients));
+        when(clientMapper.toListDtoList(activeClients)).thenReturn(activeClientDtos);
+
+        List<ListClientResponse> result = clientRepositoryImpl.findActiveClients();
+
+        assertNotNull(result);
+        assertEquals(activeClientDtos, result);
+    }
+
+    @Test
+    void findActiveClients_ReturnsEmptyList_WhenNoActiveClientsExist() {
+        when(clienteRepositoryJpa.findActiveClients()).thenReturn(Optional.empty());
+        when(clientMapper.toListDtoList(null)).thenReturn(List.of());
+
+        List<ListClientResponse> result = clientRepositoryImpl.findActiveClients();
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 }
