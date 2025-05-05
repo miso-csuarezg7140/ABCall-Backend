@@ -37,7 +37,7 @@ public class JwtTokenProvider {
         return ClientAuthenticationInfo.builder()
                 .subject(claims.getSubject())
                 .clientId(Integer.parseInt(claims.get("clientId").toString()))
-                .documentNumber(claims.get("documentNumber", Long.class))
+                .documentNumber(Long.valueOf(claims.get("documentNumber").toString()))
                 .socialReason(claims.get("socialReason").toString())
                 .email(claims.get("email").toString())
                 .roles((List<String>) claims.get("roles"))

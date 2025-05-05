@@ -7,7 +7,7 @@ public class Constants {
     public static final String ROLES = "roles";
     public static final String USER_TYPE = "userType";
     public static final String TOKEN_TYPE = "tokenType";
-    public static final String CLIENT_ID = "client_id";
+    public static final String CLIENT_ID = "clientId";
     public static final String CLIENT = "client";
     public static final String AGENT = "agent";
     public static final String REFRESH = "refresh";

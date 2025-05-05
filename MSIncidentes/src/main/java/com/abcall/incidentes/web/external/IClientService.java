@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "clientes", url = "${client.service.url}")
 public interface IClientService {
 
-    @GetMapping("/validateUserClient")
+    @GetMapping("/validarUsuario")
     ResponseEntity<ResponseServiceDto> validateUserClient(@RequestParam String documentClient,
                                                           @RequestParam String documentTypeUser,
                                                           @RequestParam String documentUser);
