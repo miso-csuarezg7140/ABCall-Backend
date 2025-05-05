@@ -1,5 +1,7 @@
 package com.abcall.auth.security;
 
+import com.abcall.auth.domain.dto.response.AgentAuthResponse;
+import com.abcall.auth.domain.dto.response.ClientAuthResponse;
 import com.abcall.auth.util.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -21,72 +23,211 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey key;
+    final SecretKey key;
     private final int jwtExpirationMs;
+    private final int refreshTokenExpirationMs;
 
+    // Añadir expiración para refresh token
     public JwtTokenProvider(@Value("${jwt.secret}") String jwtSecret,
-                            @Value("${jwt.access.expiration.ms}") int jwtExpirationMs) {
+                            @Value("${jwt.access.expiration.ms}") int jwtExpirationMs,
+                            @Value("${jwt.refresh.expiration.ms}") int refreshTokenExpirationMs) {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         this.jwtExpirationMs = jwtExpirationMs;
+        this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
     /**
-     * Generates a JWT token for an agent.
-     *
-     * @param agentId  the ID of the agent
-     * @param username the username of the agent
-     * @param roles    the roles assigned to the agent
-     * @return the generated JWT token
+     * Genera tokens (access y refresh) para un agente
      */
-    public String generateAgentToken(Integer agentId, String username, List<String> roles) {
+    public TokenPair generateAgentTokens(AgentAuthResponse agentAuthResponse) {
+        // Generar access token
+        String accessToken = generateAgentAccessToken(agentAuthResponse);
+
+        // Generar refresh token
+        String refreshToken = generateAgentRefreshToken(agentAuthResponse);
+
+        return new TokenPair(accessToken, refreshToken);
+    }
+
+    /**
+     * Genera tokens (access y refresh) para un cliente
+     */
+    public TokenPair generateClientTokens(ClientAuthResponse clientAuthResponse) {
+        // Generar access token
+        String accessToken = generateClientAccessToken(clientAuthResponse);
+
+        // Generar refresh token
+        String refreshToken = generateClientRefreshToken(clientAuthResponse);
+
+        return new TokenPair(accessToken, refreshToken);
+    }
+
+    /**
+     * Genera el access token para un agente
+     */
+    public String generateAgentAccessToken(AgentAuthResponse agentAuthResponse) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(Constants.USER_TYPE, "agent");
-        claims.put("agentId", agentId);
-        claims.put(Constants.ROLES, roles);
+        claims.put(Constants.USER_TYPE, Constants.AGENT);
+        claims.put(Constants.TOKEN_TYPE, "access");
+        claims.put(Constants.DOCUMENT_TYPE, agentAuthResponse.getDocumentType());
+        claims.put(Constants.DOCUMENT_NUMBER, agentAuthResponse.getDocumentNumber());
+        claims.put("names", agentAuthResponse.getNames());
+        claims.put("surnames", agentAuthResponse.getSurnames());
+        claims.put(Constants.ROLES, agentAuthResponse.getRoles());
 
-        return generateToken(claims, username);
+        String subject = "agent:" + agentAuthResponse.getDocumentType() + "-"
+                + agentAuthResponse.getDocumentNumber();
+
+        return generateToken(claims, subject, jwtExpirationMs);
     }
 
     /**
-     * Generates a JWT token for a client.
-     *
-     * @param clientId the ID of the client
-     * @param username the username of the client
-     * @param roles    the roles assigned to the client
-     * @return the generated JWT token
+     * Genera el refresh token para un agente
      */
-    public String generateClientToken(Integer clientId, String username, List<String> roles) {
+    public String generateAgentRefreshToken(AgentAuthResponse agentAuthResponse) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(Constants.USER_TYPE, "client");
-        claims.put("clientId", clientId);
-        claims.put(Constants.ROLES, roles);
+        claims.put(Constants.USER_TYPE, Constants.AGENT);
+        claims.put(Constants.TOKEN_TYPE, Constants.REFRESH);
+        claims.put(Constants.DOCUMENT_TYPE, agentAuthResponse.getDocumentType());
+        claims.put(Constants.DOCUMENT_NUMBER, agentAuthResponse.getDocumentNumber());
 
-        return generateToken(claims, username);
+        String subject = "agent:" + agentAuthResponse.getDocumentType() + "-"
+                + agentAuthResponse.getDocumentNumber();
+
+        return generateToken(claims, subject, refreshTokenExpirationMs);
     }
 
     /**
-     * Generates a JWT token with the specified claims and subject.
-     *
-     * @param claims  a map containing the claims to be included in the token
-     * @param subject the subject (typically the username) to be included in the token
-     * @return the generated JWT token as a String
+     * Genera el access token para un cliente
      */
-    private String generateToken(Map<String, Object> claims, String subject) {
+    public String generateClientAccessToken(ClientAuthResponse clientAuthResponse) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(Constants.USER_TYPE, Constants.CLIENT);
+        claims.put(Constants.TOKEN_TYPE, "access");
+        claims.put(Constants.CLIENT_ID, clientAuthResponse.getClientId());
+        claims.put(Constants.DOCUMENT_NUMBER, clientAuthResponse.getDocumentNumber());
+        claims.put("socialReason", clientAuthResponse.getSocialReason());
+        claims.put("email", clientAuthResponse.getEmail());
+        claims.put(Constants.ROLES, clientAuthResponse.getRoles());
+
+        String subject = "client:" + clientAuthResponse.getClientId();
+
+        return generateToken(claims, subject, jwtExpirationMs);
+    }
+
+    /**
+     * Genera el refresh token para un cliente
+     */
+    public String generateClientRefreshToken(ClientAuthResponse clientAuthResponse) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(Constants.USER_TYPE, Constants.CLIENT);
+        claims.put(Constants.TOKEN_TYPE, Constants.REFRESH);
+        claims.put(Constants.CLIENT_ID, clientAuthResponse.getClientId());
+        claims.put(Constants.DOCUMENT_NUMBER, clientAuthResponse.getDocumentNumber());
+
+        String subject = "client:" + clientAuthResponse.getClientId();
+
+        return generateToken(claims, subject, refreshTokenExpirationMs);
+    }
+
+    /**
+     * Metodo común para generar tokens con tiempo de expiración específico
+     */
+    private String generateToken(Map<String, Object> claims, String subject, int expirationMs) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)
                 .compact();
     }
 
     /**
-     * Validates the given JWT token.
-     *
-     * @param token the JWT token to validate
-     * @return true if the token is valid, false otherwise
+     * Refresca los tokens usando un refresh token válido
      */
+    public TokenPair refreshTokens(String refreshToken) {
+        try {
+            // Validar el refresh token
+            Claims claims = getClaimsFromToken(refreshToken);
+
+            // Verificar que es un refresh token
+            String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
+            if (!Constants.REFRESH.equals(tokenType)) {
+                throw new RuntimeException("Token is not a refresh token");
+            }
+
+            String userType = claims.get(Constants.USER_TYPE, String.class);
+
+            // Generar nuevos tokens según el tipo de usuario
+            if (Constants.AGENT.equals(userType)) {
+                return refreshAgentTokens(claims);
+            } else if (Constants.CLIENT.equals(userType)) {
+                return refreshClientTokens(claims);
+            } else {
+                throw new RuntimeException("Invalid user type");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to refresh token", e);
+        }
+    }
+
+    private TokenPair refreshAgentTokens(Claims refreshClaims) {
+        Integer documentType = refreshClaims.get(Constants.DOCUMENT_TYPE, Integer.class);
+        String documentNumber = refreshClaims.get(Constants.DOCUMENT_NUMBER, String.class);
+
+        // Crear un objeto AgentAuthResponse mínimo con la información del refresh token
+        AgentAuthResponse agentData = new AgentAuthResponse();
+        agentData.setDocumentType(documentType);
+        agentData.setDocumentNumber(documentNumber);
+        agentData.setAuthenticated(true);
+
+        // Idealmente, consultarías la base de datos para obtener información actualizada
+        // Aquí simplificamos asumiendo que podemos usar la información del token
+        List<String> roles = getRolesFromToken(refreshClaims);
+        agentData.setRoles(roles);
+
+        // Generar nuevos tokens
+        return generateAgentTokens(agentData);
+    }
+
+    private TokenPair refreshClientTokens(Claims refreshClaims) {
+        Integer clientId = refreshClaims.get(Constants.CLIENT_ID, Integer.class);
+        String documentNumber = refreshClaims.get(Constants.DOCUMENT_NUMBER, String.class);
+
+        // Crear un objeto ClientAuthResponse mínimo con la información del refresh token
+        ClientAuthResponse clientData = new ClientAuthResponse();
+        clientData.setClientId(clientId);
+        clientData.setDocumentNumber(documentNumber);
+        clientData.setAuthenticated(true);
+
+        // Idealmente, consultarías la base de datos para obtener información actualizada
+        // Aquí simplificamos asumiendo que podemos usar la información del token
+        List<String> roles = getRolesFromToken(refreshClaims);
+        clientData.setRoles(roles);
+
+        // Generar nuevos tokens
+        return generateClientTokens(clientData);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getRolesFromToken(Claims claims) {
+        return claims.get(Constants.ROLES, List.class);
+    }
+
+    /**
+     * Obtiene el tiempo de expiración del token en segundos
+     */
+    public Long getTokenExpirationInSeconds(String token) {
+        try {
+            Claims claims = getClaimsFromToken(token);
+            Date expiration = claims.getExpiration();
+            return (expiration.getTime() - System.currentTimeMillis()) / 1000;
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -97,12 +238,6 @@ public class JwtTokenProvider {
         }
     }
 
-    /**
-     * Extracts the claims from the given JWT token.
-     *
-     * @param token the JWT token from which to extract the claims
-     * @return the claims extracted from the token
-     */
     public Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -111,33 +246,15 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    /**
-     * Extracts the username from the given JWT token.
-     *
-     * @param token the JWT token from which to extract the username
-     * @return the username extracted from the token
-     */
     public String getUsernameFromToken(String token) {
         return getClaimsFromToken(token).getSubject();
     }
 
-    /**
-     * Extracts the user type from the given JWT token.
-     *
-     * @param token the JWT token from which to extract the user type
-     * @return the user type extracted from the token
-     */
     public String getUserTypeFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.get(Constants.USER_TYPE, String.class);
     }
 
-    /**
-     * Checks if the given JWT token is expired.
-     *
-     * @param token the JWT token to check
-     * @return true if the token is expired, false otherwise
-     */
     public boolean isTokenExpired(String token) {
         try {
             Claims claims = getClaimsFromToken(token);
@@ -148,52 +265,19 @@ public class JwtTokenProvider {
         }
     }
 
-    /**
-     * Refreshes the given JWT token by updating its issued at and expiration dates.
-     *
-     * @param token the JWT token to refresh
-     * @return the refreshed JWT token, or null if an error occurs
-     */
-    public String refreshToken(String token) {
-        try {
-            Claims claims = getClaimsFromToken(token);
-            claims.setIssuedAt(new Date());
-            claims.setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs));
-
-            return Jwts.builder()
-                    .setClaims(claims)
-                    .signWith(key)
-                    .compact();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * Extracts the user ID from the given JWT token.
-     *
-     * @param token the JWT token from which to extract the user ID
-     * @return the user ID extracted from the token, or null if the user type is not recognized
-     */
     public Integer getUserIdFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         String userType = claims.get(Constants.USER_TYPE, String.class);
 
-        if ("agent".equals(userType)) {
+        if (Constants.AGENT.equals(userType)) {
             return claims.get("agentId", Integer.class);
-        } else if ("client".equals(userType)) {
-            return claims.get("clientId", Integer.class);
+        } else if (Constants.CLIENT.equals(userType)) {
+            return claims.get(Constants.CLIENT_ID, Integer.class);
         }
 
         return null;
     }
 
-    /**
-     * Extracts the roles from the given JWT token.
-     *
-     * @param token the JWT token from which to extract the roles
-     * @return the roles extracted from the token as a List of Strings
-     */
     @SuppressWarnings("unchecked")
     public List<String> getRolesFromToken(String token) {
         Claims claims = getClaimsFromToken(token);

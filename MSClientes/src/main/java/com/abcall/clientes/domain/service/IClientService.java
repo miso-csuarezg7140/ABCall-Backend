@@ -5,11 +5,13 @@ import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 
 public interface IClientService {
 
-    ResponseServiceDto authenticateClient(String username, String password);
+    ResponseServiceDto authenticate(String documentClient, String password);
 
-    ResponseServiceDto registerClient(ClientRegisterRequest clientRegisterRequest);
+    ResponseServiceDto register(ClientRegisterRequest clientRegisterRequest);
 
-    ResponseServiceDto validateUserClient(String documentClient, String documentTypeUser, String documentUser);
+    ResponseServiceDto validateUser(String documentClient, String documentTypeUser, String documentUser);
 
-    ResponseServiceDto listarClientes();
+    ResponseServiceDto list();
+
+    ResponseServiceDto documentTypeList();
 }

@@ -10,13 +10,13 @@ class UserClientPKTest {
     @Test
     void equalsAndHashCode_ReturnsTrue_ForSameValues() {
         UserClientPK pk1 = new UserClientPK();
-        pk1.setDocumentTypeUser("CC");
-        pk1.setDocumentNumberUser(123456L);
+        pk1.setDocumentTypeUser(1);
+        pk1.setDocumentUser(123456L);
         pk1.setIdClient(789012);
 
         UserClientPK pk2 = new UserClientPK();
-        pk2.setDocumentTypeUser("CC");
-        pk2.setDocumentNumberUser(123456L);
+        pk2.setDocumentTypeUser(1);
+        pk2.setDocumentUser(123456L);
         pk2.setIdClient(789012);
 
         assertEquals(pk1, pk2);
@@ -26,13 +26,13 @@ class UserClientPKTest {
     @Test
     void equalsAndHashCode_ReturnsFalse_ForDifferentValues() {
         UserClientPK pk1 = new UserClientPK();
-        pk1.setDocumentTypeUser("CC");
-        pk1.setDocumentNumberUser(123456L);
+        pk1.setDocumentTypeUser(1);
+        pk1.setDocumentUser(123456L);
         pk1.setIdClient(789012);
 
         UserClientPK pk2 = new UserClientPK();
-        pk2.setDocumentTypeUser("TI");
-        pk2.setDocumentNumberUser(654321L);
+        pk2.setDocumentTypeUser(2);
+        pk2.setDocumentUser(654321L);
         pk2.setIdClient(210987);
 
         assertNotEquals(pk1, pk2);
@@ -42,8 +42,8 @@ class UserClientPKTest {
     @Test
     void equals_ReturnsFalse_WhenComparedWithNull() {
         UserClientPK pk = new UserClientPK();
-        pk.setDocumentTypeUser("CC");
-        pk.setDocumentNumberUser(123456L);
+        pk.setDocumentTypeUser(1);
+        pk.setDocumentUser(123456L);
         pk.setIdClient(789012);
 
         assertNotEquals(null, pk);
@@ -52,8 +52,8 @@ class UserClientPKTest {
     @Test
     void equals_ReturnsFalse_WhenComparedWithDifferentClass() {
         UserClientPK pk = new UserClientPK();
-        pk.setDocumentTypeUser("CC");
-        pk.setDocumentNumberUser(123456L);
+        pk.setDocumentTypeUser(1);
+        pk.setDocumentUser(123456L);
         pk.setIdClient(789012);
 
         assertNotEquals("SomeString", pk);

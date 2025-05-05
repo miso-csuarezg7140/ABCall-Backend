@@ -1,23 +1,25 @@
 package com.abcall.auth.domain.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-public class JwtResponse {
-
+@Getter
+@Setter
+public abstract class JwtResponse {
     private String token;
     private String type = "Bearer";
     private String refreshToken;
-    private Integer id;
-    private String username;
-    private String userType;
+    private Long expiresIn;
     private List<String> roles;
+    private String userType;
 
-    public JwtResponse(String token) {
+    protected JwtResponse(String token, String refreshToken, Long expiresIn, List<String> roles, String userType) {
         this.token = token;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
+        this.roles = roles;
+        this.userType = userType;
     }
 }

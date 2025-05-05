@@ -1,12 +1,18 @@
 package com.abcall.auth.domain.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class ClientAuthRequest {
 
-    private String username;
+    @JsonProperty("numeroDocumento")
+    private String documentNumber;
+
+    @JsonProperty("contrasena")
     private String password;
 }

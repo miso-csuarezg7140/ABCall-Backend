@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 import static com.abcall.clientes.util.Constants.ESTADO_DEFAULT;
 import static com.abcall.clientes.util.Constants.HOY;
-import static com.abcall.clientes.util.Constants.VALIDACION_NUMERICO;
+import static com.abcall.clientes.util.Constants.VALIDACION_DOCUMENTO_CLIENTE;
 
 @Getter
 @Setter
@@ -25,17 +25,17 @@ public class ClientDto {
 
     private Integer idClient;
 
-    @JsonProperty("numeroDocumento")
+    @Pattern(regexp = VALIDACION_DOCUMENTO_CLIENTE, message = "El campo numeroDocumento cumple las validaciones.")
     @NotNull(message = "El campo numeroDocumento cumple las validaciones.")
-    @Pattern(regexp = VALIDACION_NUMERICO, message = "El campo numeroDocumento cumple las validaciones.")
+    @JsonProperty("numeroDocumento")
     private Long documentNumber;
 
-    @JsonProperty("contrasena")
     @NotBlank(message = "El campo contrasena no cumple las validaciones.")
+    @JsonProperty("contrasena")
     private String password;
 
-    @JsonProperty("razonSocial")
     @NotBlank(message = "El campo razonSocial cumple las validacioneso.")
+    @JsonProperty("razonSocial")
     private String socialReason;
 
     @JsonProperty("correo")
@@ -43,6 +43,7 @@ public class ClientDto {
     private String email;
 
     @NotBlank(message = "El campo plan no cumple las validaciones.")
+    @JsonProperty("plan")
     private String plan;
 
     private LocalDateTime createdDate = HOY;

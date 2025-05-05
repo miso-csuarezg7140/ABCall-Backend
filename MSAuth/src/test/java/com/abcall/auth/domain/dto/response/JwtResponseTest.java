@@ -6,39 +6,58 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtResponseTest {
 
     @Test
-    void jwtResponseShouldStoreAllFields() {
-        JwtResponse response = new JwtResponse("token", "Bearer", "refreshToken", 1,
-                "username", "userType", List.of("ROLE_USER", "ROLE_ADMIN"));
-        assertEquals("token", response.getToken());
-        assertEquals("Bearer", response.getType());
-        assertEquals("refreshToken", response.getRefreshToken());
-        assertEquals(1, response.getId());
-        assertEquals("username", response.getUsername());
-        assertEquals("userType", response.getUserType());
-        assertEquals(List.of("ROLE_USER", "ROLE_ADMIN"), response.getRoles());
+    void shouldInitializeFieldsCorrectly() {
+        JwtResponse jwtResponse = new JwtResponseImpl(
+                "sampleToken",
+                "sampleRefreshToken",
+                3600L,
+                List.of("ROLE_USER", "ROLE_ADMIN"),
+                "client"
+        );
+
+        assertEquals("sampleToken", jwtResponse.getToken());
+        assertEquals("Bearer", jwtResponse.getType());
+        assertEquals("sampleRefreshToken", jwtResponse.getRefreshToken());
+        assertEquals(3600L, jwtResponse.getExpiresIn());
+        assertEquals(List.of("ROLE_USER", "ROLE_ADMIN"), jwtResponse.getRoles());
+        assertEquals("client", jwtResponse.getUserType());
     }
 
     @Test
-    void jwtResponseShouldHandleEmptyRoles() {
-        JwtResponse response = new JwtResponse("token", "Bearer", "refreshToken", 1,
-                "username", "userType", List.of());
-        assertEquals(List.of(), response.getRoles());
+    void shouldHandleNullRoles() {
+        JwtResponse jwtResponse = new JwtResponseImpl(
+                "sampleToken",
+                "sampleRefreshToken",
+                3600L,
+                null,
+                "client"
+        );
+
+        assertNull(jwtResponse.getRoles());
     }
 
     @Test
-    void jwtResponseShouldHandleNullRoles() {
-        JwtResponse response = new JwtResponse("token", "Bearer", "refreshToken", 1,
-                "username", "userType", null);
-        assertNull(response.getRoles());
+    void shouldHandleEmptyRoles() {
+        JwtResponse jwtResponse = new JwtResponseImpl(
+                "sampleToken",
+                "sampleRefreshToken",
+                3600L,
+                List.of(),
+                "client"
+        );
+
+        assertTrue(jwtResponse.getRoles().isEmpty());
     }
 
-    @Test
-    void jwtResponseShouldStoreTokenOnly() {
-        JwtResponse response = new JwtResponse("token");
-        assertEquals("token", response.getToken());
+    // Helper class to test the abstract JwtResponse
+    private static class JwtResponseImpl extends JwtResponse {
+        protected JwtResponseImpl(String token, String refreshToken, Long expiresIn, List<String> roles, String userType) {
+            super(token, refreshToken, expiresIn, roles, userType);
+        }
     }
 }
