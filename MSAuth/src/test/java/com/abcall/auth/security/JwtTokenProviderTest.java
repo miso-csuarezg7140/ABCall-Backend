@@ -1,143 +1,161 @@
 package com.abcall.auth.security;
 
+import com.abcall.auth.domain.dto.response.AgentAuthResponse;
+import com.abcall.auth.domain.dto.response.ClientAuthResponse;
 import com.abcall.auth.util.Constants;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtTokenProviderTest {
 
-    private JwtTokenProvider jwtTokenProvider;
-    private SecretKey secretKey;
+    @Test
+    void shouldRefreshAgentTokensSuccessfully() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        AgentAuthResponse agentAuthResponse = new AgentAuthResponse(
+                1,
+                "12345678",
+                List.of("ROLE_AGENT"),
+                true,
+                "John",
+                "Doe"
+        );
+        String refreshToken = jwtTokenProvider.generateAgentRefreshToken(agentAuthResponse);
 
-    @BeforeEach
-    void setUp() {
-        String jwtSecret = "mySecretKeymySecretKeymySecretKeymySecretKey";
-        int jwtExpirationMs = 3600000;
+        TokenPair refreshedTokens = jwtTokenProvider.refreshTokens(refreshToken);
 
-        // Don't mock the key - use a real key instead
-        secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-
-        // Create the provider with the same secret
-        jwtTokenProvider = new JwtTokenProvider(jwtSecret, jwtExpirationMs);
+        assertNotNull(refreshedTokens.getAccessToken());
+        assertNotNull(refreshedTokens.getRefreshToken());
     }
 
     @Test
-    void generateAgentTokenShouldReturnValidToken() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
+    void shouldRefreshClientTokensSuccessfully() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        ClientAuthResponse clientAuthResponse = new ClientAuthResponse(
+                123,
+                "87654321",
+                List.of("ROLE_CLIENT"),
+                true,
+                "Sample Company",
+                "client@example.com"
+        );
+        String refreshToken = jwtTokenProvider.generateClientRefreshToken(clientAuthResponse);
 
-        // Use the same key for validation that the provider used
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        TokenPair refreshedTokens = jwtTokenProvider.refreshTokens(refreshToken);
 
-        assertEquals("agent", claims.getSubject());
-        assertEquals("agent", claims.get(Constants.USER_TYPE));
-        assertEquals(1, claims.get("agentId"));
-        assertEquals(List.of("ROLE_USER"), claims.get(Constants.ROLES));
+        assertNotNull(refreshedTokens.getAccessToken());
+        assertNotNull(refreshedTokens.getRefreshToken());
     }
 
     @Test
-    void generateClientTokenShouldReturnValidToken() {
-        String token = jwtTokenProvider.generateClientToken(1, "client", List.of("ROLE_USER"));
+    void shouldValidateTokenSuccessfully() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        AgentAuthResponse agentAuthResponse = new AgentAuthResponse(
+                1,
+                "12345678",
+                List.of("ROLE_AGENT"),
+                true,
+                "John",
+                "Doe"
+        );
+        String token = jwtTokenProvider.generateAgentAccessToken(agentAuthResponse);
 
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        assertEquals("client", claims.getSubject());
-        assertEquals("client", claims.get(Constants.USER_TYPE));
-        assertEquals(1, claims.get("clientId"));
-        assertEquals(List.of("ROLE_USER"), claims.get(Constants.ROLES));
-    }
-
-    @Test
-    void validateTokenShouldReturnTrueForValidToken() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
         assertTrue(jwtTokenProvider.validateToken(token));
     }
 
     @Test
-    void validateTokenShouldReturnFalseForInvalidToken() {
-        String token = "invalidToken";
-        assertFalse(jwtTokenProvider.validateToken(token));
+    void shouldReturnCorrectUserTypeFromToken() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        AgentAuthResponse agentAuthResponse = new AgentAuthResponse(
+                1,
+                "12345678",
+                List.of("ROLE_AGENT"),
+                true,
+                "John",
+                "Doe"
+        );
+        String token = jwtTokenProvider.generateAgentAccessToken(agentAuthResponse);
+
+        assertEquals(Constants.AGENT, jwtTokenProvider.getUserTypeFromToken(token));
     }
 
     @Test
-    void getClaimsFromTokenShouldReturnClaims() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        Claims claims = jwtTokenProvider.getClaimsFromToken(token);
-        assertEquals("agent", claims.getSubject());
+    void shouldReturnCorrectRolesFromToken() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        AgentAuthResponse agentAuthResponse = new AgentAuthResponse(
+                1,
+                "12345678",
+                List.of("ROLE_AGENT"),
+                true,
+                "John",
+                "Doe"
+        );
+        String token = jwtTokenProvider.generateAgentAccessToken(agentAuthResponse);
+
+        List<String> roles = jwtTokenProvider.getRolesFromToken(token);
+
+        assertNotNull(roles);
+        assertEquals(1, roles.size());
+        assertEquals("ROLE_AGENT", roles.getFirst());
     }
 
     @Test
-    void getUsernameFromTokenShouldReturnUsername() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        assertEquals("agent", jwtTokenProvider.getUsernameFromToken(token));
+    void shouldGenerateAgentTokensSuccessfully() {
+        AgentAuthResponse agentAuthResponse = new AgentAuthResponse();
+        agentAuthResponse.setDocumentType(1);
+        agentAuthResponse.setDocumentNumber("12345678");
+        agentAuthResponse.setNames("John");
+        agentAuthResponse.setSurnames("Doe");
+        agentAuthResponse.setRoles(List.of("ROLE_AGENT"));
+
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        TokenPair tokenPair = jwtTokenProvider.generateAgentTokens(agentAuthResponse);
+
+        assertNotNull(tokenPair.getAccessToken());
+        assertNotNull(tokenPair.getRefreshToken());
     }
 
     @Test
-    void getUserTypeFromTokenShouldReturnUserType() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        assertEquals("agent", jwtTokenProvider.getUserTypeFromToken(token));
+    void shouldGenerateClientTokensSuccessfully() {
+        ClientAuthResponse clientAuthResponse = new ClientAuthResponse();
+        clientAuthResponse.setClientId(123);
+        clientAuthResponse.setDocumentNumber("87654321");
+        clientAuthResponse.setSocialReason("Sample Company");
+        clientAuthResponse.setEmail("client@example.com");
+        clientAuthResponse.setRoles(List.of("ROLE_CLIENT"));
+
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
+        TokenPair tokenPair = jwtTokenProvider.generateClientTokens(clientAuthResponse);
+
+        assertNotNull(tokenPair.getAccessToken());
+        assertNotNull(tokenPair.getRefreshToken());
     }
 
     @Test
-    void isTokenExpiredShouldReturnTrueForExpiredToken() {
-        // Use the same key generation as in the provider
-        String token = Jwts.builder()
-                .setSubject("agent")
-                .setExpiration(new Date(System.currentTimeMillis() - 1000))
-                .signWith(secretKey)
-                .compact();
+    void shouldReturnFalseForInvalidTokenValidation() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+                "c2VjcmV0S2V5VGhhdElzTG9uZ0Vub3VnaFRvQmVTZWN1cmVGb3JKV1RTaWduaW5n", 60000,
+                120000);
 
-        assertTrue(jwtTokenProvider.isTokenExpired(token));
-    }
-
-    @Test
-    void isTokenExpiredShouldReturnFalseForValidToken() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        assertFalse(jwtTokenProvider.isTokenExpired(token));
-    }
-
-    @Test
-    void refreshTokenShouldReturnNewToken() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        String refreshedToken = jwtTokenProvider.refreshToken(token);
-        Claims claims = jwtTokenProvider.getClaimsFromToken(refreshedToken);
-        assertEquals("agent", claims.getSubject());
-    }
-
-    @Test
-    void getUserIdFromTokenShouldReturnAgentId() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        assertEquals(1, jwtTokenProvider.getUserIdFromToken(token));
-    }
-
-    @Test
-    void getUserIdFromTokenShouldReturnClientId() {
-        String token = jwtTokenProvider.generateClientToken(1, "client", List.of("ROLE_USER"));
-        assertEquals(1, jwtTokenProvider.getUserIdFromToken(token));
-    }
-
-    @Test
-    void getRolesFromTokenShouldReturnRoles() {
-        String token = jwtTokenProvider.generateAgentToken(1, "agent", List.of("ROLE_USER"));
-        assertEquals(List.of("ROLE_USER"), jwtTokenProvider.getRolesFromToken(token));
+        assertFalse(jwtTokenProvider.validateToken("invalidToken"));
     }
 }

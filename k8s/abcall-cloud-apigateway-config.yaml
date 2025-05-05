@@ -91,12 +91,18 @@ paths:
         '500':
           description: Error interno del servidor
 
-  /service/abcall/clientes/v1/listar:
-    get:
-      summary: Retorna la lista de clientes en estado activo
-      operationId: listarClientes
+  /service/abcall/auth/v1/login:
+    post:
+      summary: Permite la autenticación de un usuario
+      operationId: autenticarUsuario
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/listar
+        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
       responses:
         '200':
           description: Operación exitosa
@@ -106,6 +112,74 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
+      options:
+        summary: CORS preflight para autenticar un usuario
+        operationId: corsAutenticarUsuario
+        responses:
+          '204':
+            description: Respuesta preflight CORS exitosa
+        x-google-backend:
+          address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
+
+  /service/abcall/agentes/v1/authenticate:
+    post:
+      summary: Permite la autenticación de un agente
+      operationId: autenticarAgente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/authenticate
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+    options:
+      summary: CORS preflight para autenticar cliente
+      operationId: corsAutenticarAgente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/authenticate
+
+  /service/abcall/clientes/v1/register:
+    post:
+      summary: Permite el registro de un cliente
+      operationId: registrarCliente
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
+      responses:
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
+    options:
+      summary: CORS preflight para registrar cliente
+      operationId: corsRegistrarCliente
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
 
   /service/abcall/clientes/v1/authenticate:
     post:
@@ -137,18 +211,12 @@ paths:
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/authenticate
 
-  /service/abcall/clientes/v1/register:
-    post:
-      summary: Permite el registro de un cliente
-      operationId: registrarCliente
+  /service/abcall/clientes/v1/listar:
+    get:
+      summary: Retorna la lista de clientes en estado activo
+      operationId: listarClientes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
-          description: Cuerpo de la solicitud
+        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/listar
       responses:
         '200':
           description: Operación exitosa
@@ -158,14 +226,6 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
-    options:
-      summary: CORS preflight para registrar cliente
-      operationId: corsRegistrarCliente
-      responses:
-        '204':
-          description: Respuesta preflight CORS exitosa
-      x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/register
 
   /service/abcall/incidentes/v1/crear:
     post:

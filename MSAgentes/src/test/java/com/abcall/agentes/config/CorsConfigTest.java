@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,8 +21,7 @@ class CorsConfigTest {
         CorsConfig corsConfig = new CorsConfig();
 
         // Assert
-        assertTrue(corsConfig instanceof WebMvcConfigurer,
-                "CorsConfig debe implementar WebMvcConfigurer");
+        assertInstanceOf(WebMvcConfigurer.class, corsConfig, "CorsConfig debe implementar WebMvcConfigurer");
     }
 
     @Test

@@ -35,8 +35,11 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 
         return ClientAuthenticationInfo.builder()
-                .clientId(Long.parseLong(claims.getSubject()))
-                .username((String) claims.get("username"))
+                .subject(claims.getSubject())
+                .clientId(Integer.parseInt(claims.get("clientId").toString()))
+                .documentNumber(claims.get("documentNumber", Long.class))
+                .socialReason(claims.get("socialReason").toString())
+                .email(claims.get("email").toString())
                 .roles((List<String>) claims.get("roles"))
                 .build();
 

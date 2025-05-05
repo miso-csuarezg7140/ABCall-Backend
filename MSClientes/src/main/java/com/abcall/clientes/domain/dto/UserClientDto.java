@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserClientDto {
 
-    private String documentTypeUser;
-    private Long documentNumberUser;
+    private Integer documentTypeUser;
+    private Long documentUser;
     private Integer idClient;
 }
