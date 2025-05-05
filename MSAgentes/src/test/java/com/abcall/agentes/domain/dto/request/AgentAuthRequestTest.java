@@ -64,14 +64,14 @@ class AgentAuthRequestTest {
         AgentAuthRequest request = new AgentAuthRequest();
         request.setDocumentType("DNI");
         request.setDocumentNumber("12345678");
-        request.setPassword("pass123");
+        request.setPassword("securePass");
 
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(request);
 
         assertTrue(json.contains("\"tipoDocumento\":\"DNI\""));
         assertTrue(json.contains("\"numeroDocumento\":\"12345678\""));
-        assertTrue(json.contains("\"contrasena\":\"pass123\""));
+        assertTrue(json.contains("\"contrasena\":\"securePass\""));
     }
 
     @Test
