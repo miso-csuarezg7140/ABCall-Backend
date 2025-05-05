@@ -30,7 +30,7 @@ class JwtAuthenticationFilterTest {
         FilterChain filterChain = mock(FilterChain.class);
 
         ClientAuthenticationInfo clientInfo = ClientAuthenticationInfo.builder()
-                .username("user123")
+                .documentNumber(123456L)
                 .roles(List.of("ROLE_USER"))
                 .build();
 
@@ -43,7 +43,7 @@ class JwtAuthenticationFilterTest {
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         assertNotNull(authentication);
-        assertEquals("user123", authentication.getPrincipal());
+        assertEquals(123456L, authentication.getPrincipal());
         assertEquals(1, authentication.getAuthorities().size());
         verify(filterChain).doFilter(request, response);
     }

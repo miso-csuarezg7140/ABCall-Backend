@@ -1,6 +1,8 @@
 package com.abcall.clientes.domain.dto.request;
 
 import com.abcall.clientes.util.Constants;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -12,12 +14,17 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Request para autenticar un cliente")
 public class ClientAuthRequest {
 
-    @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El campo username no cumple las validaciones.")
-    @NotBlank(message = "El campo username no cumple las validaciones.")
-    private String username;
+    @Schema(description = "Tipo de documento del cliente")
+    @Pattern(regexp = Constants.VALIDACION_DOCUMENTO_CLIENTE, message = "El campo numeroDocumento no cumple las validaciones.")
+    @NotBlank(message = "El campo numeroDocumento no cumple las validaciones.")
+    @JsonProperty("numeroDocumento")
+    private String documentNumber;
 
-    @NotBlank(message = "El campo password no cumple las validaciones.")
+    @Schema(description = "Contraseña del cliente")
+    @NotBlank(message = "El campo contrasena no cumple las validaciones.")
+    @JsonProperty("contrasena")
     private String password;
 }

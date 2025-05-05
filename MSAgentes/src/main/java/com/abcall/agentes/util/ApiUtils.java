@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,24 +81,5 @@ public class ApiUtils {
                 .statusDescription(statusDescription)
                 .data(response)
                 .build();
-    }
-
-    /**
-     * Decodifica una cadena en formato Base64 a su valor original.
-     * Este metodo convierte una cadena codificada en Base64 a su representación original en texto plano.
-     *
-     * @param encodedPassword La cadena codificada en Base64 que se desea decodificar.
-     *                        No debe ser null ni estar vacía.
-     * @return La cadena decodificada en su formato original.
-     */
-    public static String decodeFromBase64(String encodedPassword) {
-        try {
-            byte[] decodedBytes = Base64.getDecoder().decode(
-                    encodedPassword.getBytes(StandardCharsets.UTF_8)
-            );
-            return new String(decodedBytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al decodificar la contraseña", e);
-        }
     }
 }

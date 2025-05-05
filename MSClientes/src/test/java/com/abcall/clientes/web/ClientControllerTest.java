@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ClientControllerTest {
@@ -37,22 +38,22 @@ class ClientControllerTest {
     }
 
     @Test
-    void authenticateClient_ReturnsOkResponse_WhenCredentialsAreValid() {
+    void authenticate_ReturnsOkResponse_WhenCredentialsAreValid() {
         ClientAuthRequest request = new ClientAuthRequest("123", "password");
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.OK.value());
 
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(clientService.authenticateClient(request.getUsername(), request.getPassword())).thenReturn(responseServiceDto);
+        when(clientService.authenticate(request.getDocumentNumber(), request.getPassword())).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.authenticateClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.authenticate(request, bindingResult);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
-    void authenticateClient_ReturnsBadRequestResponse_WhenRequestHasErrors() {
+    void authenticate_ReturnsBadRequestResponse_WhenRequestHasErrors() {
         ClientAuthRequest request = new ClientAuthRequest("123", "password");
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -60,22 +61,22 @@ class ClientControllerTest {
         when(bindingResult.hasErrors()).thenReturn(true);
         when(apiUtils.badRequestResponse(bindingResult)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.authenticateClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.authenticate(request, bindingResult);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
-    void authenticateClient_ReturnsNotFoundResponse_WhenClientNotFound() {
+    void authenticateClient_ReturnsNotFoundResponse_WhenNotFound() {
         ClientAuthRequest request = new ClientAuthRequest("123", "password");
         ResponseServiceDto responseServiceDto = new ResponseServiceDto();
         responseServiceDto.setStatusCode(HttpStatus.NOT_FOUND.value());
 
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(clientService.authenticateClient(request.getUsername(), request.getPassword())).thenReturn(responseServiceDto);
+        when(clientService.authenticate(request.getDocumentNumber(), request.getPassword())).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.authenticateClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.authenticate(request, bindingResult);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
@@ -90,7 +91,7 @@ class ClientControllerTest {
     }
 
     @Test
-    void registerClient_ReturnsBadRequestResponse_WhenRequestHasErrors() {
+    void register_ReturnsBadRequestResponse_WhenRequestHasErrors() {
         ClientRegisterRequest request = ClientRegisterRequest.builder()
                 .documentNumber("")
                 .socialReason("")
@@ -103,14 +104,14 @@ class ClientControllerTest {
         when(bindingResult.hasErrors()).thenReturn(true);
         when(apiUtils.badRequestResponse(bindingResult)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.register(request, bindingResult);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
-    void registerClient_ReturnsCreatedResponse_WhenClientIsSuccessfullyRegistered() {
+    void registerClient_ReturnsCreatedResponse_WhenIsSuccessfullyRegistered() {
         ClientRegisterRequest request = ClientRegisterRequest.builder()
                 .documentNumber("123456789")
                 .socialReason("ABC Corp")
@@ -121,16 +122,16 @@ class ClientControllerTest {
         responseServiceDto.setStatusCode(HttpStatus.CREATED.value());
 
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(clientService.registerClient(request)).thenReturn(responseServiceDto);
+        when(clientService.register(request)).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.register(request, bindingResult);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
     }
 
     @Test
-    void registerClient_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
+    void register_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
         ClientRegisterRequest request = ClientRegisterRequest.builder()
                 .documentNumber("123456789")
                 .socialReason("ABC Corp")
@@ -141,14 +142,77 @@ class ClientControllerTest {
         responseServiceDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(clientService.registerClient(request)).thenReturn(responseServiceDto);
+        when(clientService.register(request)).thenReturn(responseServiceDto);
         when(apiUtils.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 "Unexpected error")).thenReturn(responseServiceDto);
 
-        ResponseEntity<ResponseServiceDto> response = clientController.registerClient(request, bindingResult);
+        ResponseEntity<ResponseServiceDto> response = clientController.register(request, bindingResult);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void validateUser_ReturnsOkResponse_WhenParametersAreValid() {
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        when(clientService.validateUser("1010258471", "1", "1010258471")).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.validateUser(
+                "1010258471", "1", "1010258471");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void validateUser_ReturnsServiceResponse_WhenCalled() {
+        // Arrange
+        String numeroDocumentoCliente = "1010258471";
+        String tipoDocumentoUsuario = "1";
+        String numeroDocumentoUsuario = "1010478914";
+
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        when(clientService.validateUser(numeroDocumentoCliente, tipoDocumentoUsuario, numeroDocumentoUsuario))
+                .thenReturn(responseServiceDto);
+
+        // Act
+        ResponseEntity<ResponseServiceDto> response = clientController.validateUser(
+                numeroDocumentoCliente, tipoDocumentoUsuario, numeroDocumentoUsuario);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+        verify(clientService).validateUser(numeroDocumentoCliente, tipoDocumentoUsuario, numeroDocumentoUsuario);
+    }
+
+    @Test
+    void list_ReturnsOkResponse_WhenClientsExist() {
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        when(clientService.list()).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.list();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseServiceDto, response.getBody());
+    }
+
+    @Test
+    void documentList_ReturnsOkResponse_WhenDocumentTypesExist() {
+        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
+        responseServiceDto.setStatusCode(HttpStatus.OK.value());
+
+        when(clientService.documentTypeList()).thenReturn(responseServiceDto);
+
+        ResponseEntity<ResponseServiceDto> response = clientController.documentList();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseServiceDto, response.getBody());
     }
 }
