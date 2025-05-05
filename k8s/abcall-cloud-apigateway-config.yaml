@@ -112,14 +112,14 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
-      options:
-        summary: CORS preflight para autenticar un usuario
-        operationId: corsAutenticarUsuario
-        responses:
-          '204':
-            description: Respuesta preflight CORS exitosa
-        x-google-backend:
-          address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
+    options:
+      summary: CORS preflight para autenticar un usuario
+      operationId: corsAutenticarUsuario
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
 
   /service/abcall/auth/v1/refrescar:
     post:
@@ -142,14 +142,14 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
-      options:
-        summary: CORS preflight para autenticar un usuario
-        operationId: corsRefrescarToken
-        responses:
-          '204':
-            description: Respuesta preflight CORS exitosa
-        x-google-backend:
-          address: http://34.144.226.68.nip.io/service/abcall/auth/v1/refrescar
+    options:
+      summary: CORS preflight para autenticar un usuario
+      operationId: corsRefrescarToken
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/refrescar
 
   /service/abcall/agentes/v1/autenticar:
     post:
