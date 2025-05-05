@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "client-service", url = "${client.service.url}")
 public interface IClientService {
 
-    @PostMapping("/authenticate")
+    @PostMapping("/autenticar")
     ResponseEntity<ResponseServiceDto> authenticateClient(@RequestBody ClientAuthRequest clientAuthRequest);
 }

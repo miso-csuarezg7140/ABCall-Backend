@@ -1,10 +1,14 @@
 package com.abcall.clientes.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -17,9 +21,9 @@ public class SecurityConfig {
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
-        /*httpSecurity
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
-                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register"))
+        httpSecurity
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping",
+                        "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar", "/autenticar", "/tiposDocumento"))
                 .cors(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((
@@ -33,20 +37,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**", "/register").permitAll()
-                        .anyRequest().authenticated()
-                );*/
-        httpSecurity
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/ping", "/authenticate",
-                        "/swagger-ui.html/**", "/v3/api-docs/**", "/register", "/validateUserClient", "/listar"))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/ping", "/authenticate", "/swagger-ui.html/**",
-                                "/v3/api-docs/**", "/register", "/validateUserClient", "/listar")
+                        .requestMatchers("/ping", "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar",
+                                "/autenticar", "/tiposDocumento")
                         .permitAll().anyRequest().authenticated()
-                );
-
-        httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

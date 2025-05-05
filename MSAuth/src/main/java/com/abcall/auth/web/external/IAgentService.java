@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "agent-service", url = "${agent.service.url}")
 public interface IAgentService {
 
-    @PostMapping("/authenticate")
+    @PostMapping("/autenticar")
     ResponseEntity<ResponseServiceDto> authenticateAgent(@RequestBody AgentAuthRequest agentAuthRequest);
 }

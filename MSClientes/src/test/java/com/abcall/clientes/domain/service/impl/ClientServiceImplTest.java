@@ -1,41 +1,48 @@
 package com.abcall.clientes.domain.service.impl;
 
 import com.abcall.clientes.domain.dto.ClientDto;
-import com.abcall.clientes.domain.dto.response.ListClientResponse;
+import com.abcall.clientes.domain.dto.DocumentTypeDto;
+import com.abcall.clientes.domain.dto.UserClientDto;
 import com.abcall.clientes.domain.dto.request.ClientRegisterRequest;
-import com.abcall.clientes.domain.dto.response.ClientAuthResponse;
+import com.abcall.clientes.domain.dto.response.ListClientResponse;
 import com.abcall.clientes.domain.dto.response.ResponseServiceDto;
 import com.abcall.clientes.persistence.repository.IClientRepository;
-import com.abcall.clientes.security.EncoderConfig;
+import com.abcall.clientes.persistence.repository.IDocumentTypeRepository;
+import com.abcall.clientes.persistence.repository.IUserClientRepository;
 import com.abcall.clientes.util.ApiUtils;
 import com.abcall.clientes.util.enums.HttpResponseCodes;
 import com.abcall.clientes.util.enums.HttpResponseMessages;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ClientServiceImplTest {
 
     @Mock
     private IClientRepository clientRepository;
 
     @Mock
-    private EncoderConfig encoderConfig;
+    private IUserClientRepository userClientRepository;
+
+    @Mock
+    private IDocumentTypeRepository documentTypeRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -44,182 +51,358 @@ class ClientServiceImplTest {
     private ApiUtils apiUtils;
 
     @InjectMocks
-    private ClientServiceImpl clientServiceImpl;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        when(encoderConfig.passwordEncoder()).thenReturn(passwordEncoder);
-    }
+    private ClientServiceImpl clientService;
 
     @Test
-    void authenticateClient_ReturnsOkResponse_WhenCredentialsAreValid() {
-        String username = "123";
-        String password = "password";
+    void authenticate_ReturnsOkResponse_WhenCredentialsAreValid() {
         ClientDto clientDto = new ClientDto();
-        clientDto.setPassword("password");
+        clientDto.setPassword("encodedPassword");
+        clientDto.setIdClient(1);
+        clientDto.setDocumentNumber(123456L);
+        clientDto.setSocialReason("Test Company");
+        clientDto.setEmail("test@example.com");
 
-        when(clientRepository.findByDocumentNumber(Long.parseLong(username))).thenReturn(clientDto);
-        when(passwordEncoder.matches(password, clientDto.getPassword())).thenReturn(true);
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(clientDto);
+        when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.authenticateClient(username, password);
+        ResponseServiceDto response = clientService.authenticate("123456", "password");
 
         assertNotNull(response);
         verify(clientRepository).save(clientDto);
-        verify(apiUtils).buildResponse(eq(HttpResponseCodes.OK.getCode()), eq(HttpResponseMessages.OK.getMessage()),
-                any(ClientAuthResponse.class));
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.OK.getCode()),
+                eq(HttpResponseMessages.OK.getMessage()), any());
     }
 
     @Test
-    void authenticateClient_ReturnsNoContentResponse_WhenClientDoesNotExist() {
-        String username = "123";
-        String password = "password";
-
-        when(clientRepository.findByDocumentNumber(Long.parseLong(username))).thenReturn(null);
-        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
-
-        ResponseServiceDto response = clientServiceImpl.authenticateClient(username, password);
-
-        assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
-                HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
-    }
-
-    @Test
-    void authenticateClient_ReturnsUnauthorizedResponse_WhenPasswordIsInvalid() {
-        String username = "123";
-        String password = "password";
+    void authenticate_ReturnsUnauthorizedResponse_WhenPasswordIsInvalid() {
         ClientDto clientDto = new ClientDto();
         clientDto.setPassword("encodedPassword");
 
-        when(clientRepository.findByDocumentNumber(Long.parseLong(username))).thenReturn(clientDto);
-        when(passwordEncoder.matches(password, clientDto.getPassword())).thenReturn(false);
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(clientDto);
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.authenticateClient(username, password);
+        ResponseServiceDto response = clientService.authenticate("123456", "wrongPassword");
 
         assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.UNAUTHORIZED.getCode(),
-                HttpResponseMessages.UNAUTHORIZED.getMessage(), new HashMap<>());
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.UNAUTHORIZED.getCode()),
+                eq(HttpResponseMessages.UNAUTHORIZED.getMessage()), any());
     }
 
     @Test
-    void authenticateClient_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
-        String username = "123";
-        String password = "password";
-
-        when(clientRepository.findByDocumentNumber(Long.parseLong(username))).thenThrow(
-                new RuntimeException("Database error"));
+    void authenticate_ReturnsBusinessMistakeResponse_WhenClientNotFound() {
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(null);
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.authenticateClient(username, password);
+        ResponseServiceDto response = clientService.authenticate("123456", "password");
 
         assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
-                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), "Database error");
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
+                eq(HttpResponseMessages.NO_CONTENT.getMessage()), any());
     }
 
     @Test
-    void registerClient_ReturnsCreatedResponse_WhenClientIsSuccessfullyRegistered() {
-        ClientRegisterRequest request = ClientRegisterRequest.builder()
-                .documentNumber("123456789")
-                .socialReason("ABC Corp")
-                .email("abc@corp.com")
-                .password("password123")
-                .build();
+    void register_ReturnsCreatedResponse_WhenClientIsRegisteredSuccessfully() {
+        ClientRegisterRequest request = new ClientRegisterRequest();
+        request.setDocumentNumber("123456");
+        request.setPassword("password");
+        request.setSocialReason("Test Company");
+        request.setEmail("test@example.com");
 
-        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenReturn(null);
-        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
-        when(clientRepository.save(any(ClientDto.class))).thenAnswer(invocation -> {
-            ClientDto client = invocation.getArgument(0);
-            client.setIdClient(1);
-            return client;
-        });
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(null);
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        when(clientRepository.save(any(ClientDto.class))).thenReturn(new ClientDto());
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.registerClient(request);
+        ResponseServiceDto response = clientService.register(request);
 
         assertNotNull(response);
         verify(clientRepository).save(any(ClientDto.class));
         verify(apiUtils).buildResponse(eq(HttpResponseCodes.CREATED.getCode()),
-                eq(HttpResponseMessages.CREATED.getMessage()), any(Map.class));
+                eq(HttpResponseMessages.CREATED.getMessage()), any());
     }
 
     @Test
-    void registerClient_ReturnsBusinessMistakeResponse_WhenClientAlreadyExists() {
-        ClientRegisterRequest request = ClientRegisterRequest.builder()
-                .documentNumber("123456789")
-                .socialReason("ABC Corp")
-                .email("abc@corp.com")
-                .password("password123")
-                .build();
+    void register_ReturnsBusinessMistakeResponse_WhenClientAlreadyExists() {
+        ClientRegisterRequest request = new ClientRegisterRequest();
+        request.setDocumentNumber("123456");
 
-        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenReturn(new ClientDto());
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(new ClientDto());
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.registerClient(request);
+        ResponseServiceDto response = clientService.register(request);
 
         assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
-                HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
+                eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()), any());
     }
 
     @Test
-    void registerClient_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
-        ClientRegisterRequest request = ClientRegisterRequest.builder()
-                .documentNumber("123456789")
-                .socialReason("ABC Corp")
-                .email("abc@corp.com")
-                .password("password123")
-                .build();
+    void validateUser_ReturnsOkResponse_WhenUserClientAssociationExists() {
+        // Arrange
+        String documentClientStr = "123456";
+        String documentTypeUserStr = "1";
+        String documentUserStr = "123456789";
 
-        when(clientRepository.findByDocumentNumber(Long.parseLong(request.getDocumentNumber()))).thenThrow(
-                new RuntimeException("Database error"));
-        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+        ClientDto clientDto = new ClientDto();
+        clientDto.setIdClient(1);
 
-        ResponseServiceDto response = clientServiceImpl.registerClient(request);
+        UserClientDto userClientDto = new UserClientDto(1, 123456789L, 1);
 
-        assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
-                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), "Database error");
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.OK.getCode());
+
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(clientDto);
+        when(userClientRepository.findById(any(UserClientDto.class))).thenReturn(userClientDto);
+        when(apiUtils.buildResponse(
+                eq(HttpResponseCodes.OK.getCode()),
+                eq(HttpResponseMessages.OK.getMessage()),
+                any(UserClientDto.class)))
+                .thenReturn(expectedResponse);
+
+        // Act
+        ResponseServiceDto actualResponse = clientService.validateUser(
+                documentClientStr, documentTypeUserStr, documentUserStr);
+
+        // Assert
+        assertNotNull(actualResponse);
+        assertEquals(HttpResponseCodes.OK.getCode(), actualResponse.getStatusCode());
+
+        // Verify
+        verify(clientRepository).findByDocumentNumber(123456L);
+        verify(userClientRepository).findById(argThat((UserClientDto dto) ->
+                dto.getDocumentTypeUser() == 1 &&
+                        dto.getDocumentUser() == 123456789L &&
+                        dto.getIdClient() == 1
+        ));
+        verify(apiUtils).buildResponse(
+                eq(HttpResponseCodes.OK.getCode()),
+                eq(HttpResponseMessages.OK.getMessage()),
+                argThat((UserClientDto dto) ->
+                        dto.getDocumentTypeUser() == 1 &&
+                                dto.getDocumentUser() == 123456789L &&
+                                dto.getIdClient() == 1
+                )
+        );
     }
 
     @Test
-    void listarClientes_ReturnsOkResponse_WhenClientsAreFound() {
-        List<ListClientResponse> clientDtoList = List.of(new ListClientResponse(), new ListClientResponse());
+    void validateUser_ReturnsBusinessMistakeResponse_WhenUserClientAssociationNotFound() {
+        // Arrange
+        String documentClientStr = "123456";
+        String documentTypeUserStr = "1";
+        String documentUserStr = "123456789";
 
-        when(clientRepository.findActiveClients()).thenReturn(clientDtoList);
+        ClientDto clientDto = new ClientDto();
+        clientDto.setIdClient(1);
+
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.BUSINESS_MISTAKE.getCode());
+
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(clientDto);
+        when(userClientRepository.findById(any(UserClientDto.class))).thenReturn(null);
+        when(apiUtils.buildResponse(
+                eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
+                eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()),
+                any(HashMap.class)))
+                .thenReturn(expectedResponse);
+
+        // Act
+        ResponseServiceDto response = clientService.validateUser(
+                documentClientStr, documentTypeUserStr, documentUserStr);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpResponseCodes.BUSINESS_MISTAKE.getCode(), response.getStatusCode());
+
+        // Verify
+        verify(clientRepository).findByDocumentNumber(123456L);
+        verify(userClientRepository).findById(argThat((UserClientDto dto) ->
+                dto.getDocumentTypeUser() == 1 &&
+                        dto.getDocumentUser() == 123456789L &&
+                        dto.getIdClient() == 1
+        ));
+        verify(apiUtils).buildResponse(
+                eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
+                eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()),
+                any(HashMap.class)
+        );
+    }
+
+    @Test
+    void validateUser_ReturnsBusinessMistakeResponse_WhenClientNotFound() {
+        when(clientRepository.findByDocumentNumber(123456L)).thenReturn(null);
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.listarClientes();
+        ResponseServiceDto response = clientService.validateUser("123456", "1",
+                "123456789");
 
         assertNotNull(response);
+        verify(apiUtils).buildResponse(eq(HttpResponseCodes.BUSINESS_MISTAKE.getCode()),
+                eq(HttpResponseMessages.BUSINESS_MISTAKE.getMessage()), any());
+    }
+
+    @Test
+    void list_ReturnsOkResponse_WhenActiveClientsExist() {
+        // Arrange
+        List<ListClientResponse> mockClients = List.of(new ListClientResponse());
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.OK.getCode());
+
+        when(clientRepository.findActiveClients()).thenReturn(mockClients);
+        when(apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), mockClients))
+                .thenReturn(expectedResponse);
+
+        // Act
+        ResponseServiceDto response = clientService.list();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpResponseCodes.OK.getCode(), response.getStatusCode());
+        verify(clientRepository).findActiveClients();
         verify(apiUtils).buildResponse(HttpResponseCodes.OK.getCode(),
-                HttpResponseMessages.OK.getMessage(), clientDtoList);
+                HttpResponseMessages.OK.getMessage(), mockClients);
     }
 
     @Test
-    void listarClientes_ReturnsNoContentResponse_WhenNoClientsAreFound() {
+    void list_ReturnsNoContentResponse_WhenNoActiveClientsExist() {
+        // Arrange
         when(clientRepository.findActiveClients()).thenReturn(List.of());
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.listarClientes();
+        // Act
+        ResponseServiceDto response = clientService.list();
 
+        // Assert
         assertNotNull(response);
-        verify(apiUtils).buildResponse(HttpResponseCodes.NO_CONTENT.getCode(),
-                HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
+        verify(apiUtils).buildResponse(
+                eq(HttpResponseCodes.NO_CONTENT.getCode()),
+                eq(HttpResponseMessages.NO_CONTENT.getMessage()),
+                any(HashMap.class));
     }
 
     @Test
-    void listarClientes_ReturnsInternalServerErrorResponse_WhenExceptionIsThrown() {
-        when(clientRepository.findActiveClients()).thenThrow(new RuntimeException("Database error"));
+    void list_ReturnsErrorResponse_WhenExceptionOccurs() {
+        // Arrange
+        String errorMessage = "Database error";
+        when(clientRepository.findActiveClients()).thenThrow(new RuntimeException(errorMessage));
         when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
 
-        ResponseServiceDto response = clientServiceImpl.listarClientes();
+        // Act
+        ResponseServiceDto response = clientService.list();
 
+        // Assert
         assertNotNull(response);
         verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
-                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), "Database error");
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), errorMessage);
+    }
+
+    @Test
+    void register_ReturnsErrorResponse_WhenExceptionOccurs() {
+        // Arrange
+        String errorMessage = "Database error";
+        ClientRegisterRequest request = new ClientRegisterRequest();
+        request.setDocumentNumber("123456");
+        when(clientRepository.findByDocumentNumber(123456L)).thenThrow(new RuntimeException(errorMessage));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        // Act
+        ResponseServiceDto response = clientService.register(request);
+
+        // Assert
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), errorMessage);
+    }
+
+    @Test
+    void authenticate_ReturnsErrorResponse_WhenExceptionOccurs() {
+        // Arrange
+        String errorMessage = "Database error";
+        when(clientRepository.findByDocumentNumber(any())).thenThrow(new RuntimeException(errorMessage));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        // Act
+        ResponseServiceDto response = clientService.authenticate("123456", "password");
+
+        // Assert
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), errorMessage);
+    }
+
+    @Test
+    void validateUser_ReturnsErrorResponse_WhenExceptionOccurs() {
+        // Arrange
+        String errorMessage = "Database error";
+        when(clientRepository.findByDocumentNumber(any())).thenThrow(new RuntimeException(errorMessage));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        // Act
+        ResponseServiceDto response = clientService.validateUser("123456", "1",
+                "123456789");
+
+        // Assert
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), errorMessage);
+    }
+
+    @Test
+    void documentTypeList_ReturnsOkResponse_WhenDocumentTypesExist() {
+        // Arrange
+        List<DocumentTypeDto> mockDocumentTypes = List.of(new DocumentTypeDto());
+        ResponseServiceDto expectedResponse = new ResponseServiceDto();
+        expectedResponse.setStatusCode(HttpResponseCodes.OK.getCode());
+
+        when(documentTypeRepository.getList()).thenReturn(mockDocumentTypes);
+        when(apiUtils.buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), mockDocumentTypes))
+                .thenReturn(expectedResponse);
+
+        // Act
+        ResponseServiceDto response = clientService.documentTypeList();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpResponseCodes.OK.getCode(), response.getStatusCode());
+        verify(documentTypeRepository).getList();
+        verify(apiUtils).buildResponse(HttpResponseCodes.OK.getCode(),
+                HttpResponseMessages.OK.getMessage(), mockDocumentTypes);
+    }
+
+    @Test
+    void documentTypeList_ReturnsNoContentResponse_WhenNoDocumentTypesExist() {
+        // Arrange
+        when(documentTypeRepository.getList()).thenReturn(List.of());
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        // Act
+        ResponseServiceDto response = clientService.documentTypeList();
+
+        // Assert
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(
+                eq(HttpResponseCodes.NO_CONTENT.getCode()),
+                eq(HttpResponseMessages.NO_CONTENT.getMessage()),
+                any(HashMap.class));
+    }
+
+    @Test
+    void documentTypeList_ReturnsErrorResponse_WhenExceptionOccurs() {
+        // Arrange
+        String errorMessage = "Database error";
+        when(documentTypeRepository.getList()).thenThrow(new RuntimeException(errorMessage));
+        when(apiUtils.buildResponse(anyInt(), anyString(), any())).thenReturn(new ResponseServiceDto());
+
+        // Act
+        ResponseServiceDto response = clientService.documentTypeList();
+
+        // Assert
+        assertNotNull(response);
+        verify(apiUtils).buildResponse(HttpResponseCodes.INTERNAL_SERVER_ERROR.getCode(),
+                HttpResponseMessages.INTERNAL_SERVER_ERROR.getMessage(), errorMessage);
     }
 }

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,5 +21,4 @@ public class ClientAuthResponse {
     private boolean authenticated;
     private String socialReason;
     private String email;
-    private LocalDateTime lastLogin;
 }

@@ -11,7 +11,10 @@ import java.util.List;
 @Builder
 public class ClientAuthenticationInfo {
 
-    private Long clientId;
-    private String username;
+    private String subject;
+    private Integer clientId;
+    private Long documentNumber;
+    private String socialReason;
+    private String email;
     private List<String> roles;
 }
