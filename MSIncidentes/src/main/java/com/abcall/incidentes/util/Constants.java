@@ -3,7 +3,7 @@ package com.abcall.incidentes.util;
 public class Constants {
 
     public static final String PAGINATION_VALUE = "paginacion";
-    public static final String RESPONSE_VALUE = "info";
+    public static final String RESPONSE_VALUE = "data";
     public static final String VALIDACION_NUMERICO = "^\\d+$";
     public static final String ESTADO_DEFAULT = "TODOS";
     public static final String USUARIO_DEFAULT = "USUARIO";

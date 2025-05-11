@@ -1,5 +1,6 @@
 package com.abcall.incidentes.domain.service.impl;
 
+import com.abcall.incidentes.domain.dto.PaginationDto;
 import com.abcall.incidentes.domain.dto.UserClientDtoResponse;
 import com.abcall.incidentes.domain.dto.request.ConsultIncidentRequest;
 import com.abcall.incidentes.domain.dto.request.CreateIncidentRequest;
@@ -78,7 +79,7 @@ public class IncidentServiceImpl implements IIncidentService {
             );
 
             if (null != consultIncidentRequest.getPage())
-                pageable = PageRequest.of(Integer.parseInt(consultIncidentRequest.getPage()),
+                pageable = PageRequest.of(Integer.parseInt(consultIncidentRequest.getPage()) - 1,
                         Integer.parseInt(consultIncidentRequest.getPageSize()), sort);
 
             Long numeroDocumentoCliente = null != consultIncidentRequest.getClientDocumentNumber()
@@ -86,20 +87,24 @@ public class IncidentServiceImpl implements IIncidentService {
             Integer tipoDocumentoUsuario = null != consultIncidentRequest.getUserDocumentType()
                     ? Integer.valueOf(consultIncidentRequest.getUserDocumentType()) : null;
 
-            Page<IncidentResponse> incidenteRequestList;
+            Page<IncidentResponse> incidenteRequestPage;
 
             if (!datesValidation.isEmpty())
-                incidenteRequestList = incidenteRepository.getIncidents(numeroDocumentoCliente, tipoDocumentoUsuario,
+                incidenteRequestPage = incidenteRepository.getIncidents(numeroDocumentoCliente, tipoDocumentoUsuario,
                         consultIncidentRequest.getUserDocumentNumber(), consultIncidentRequest.getStatus(),
                         datesValidation.getFirst(), datesValidation.get(1), true, pageable);
             else
-                incidenteRequestList = incidenteRepository.getIncidents(numeroDocumentoCliente, tipoDocumentoUsuario,
+                incidenteRequestPage = incidenteRepository.getIncidents(numeroDocumentoCliente, tipoDocumentoUsuario,
                         consultIncidentRequest.getUserDocumentNumber(), consultIncidentRequest.getStatus(),
                         null, null, false, pageable);
 
-            if (incidenteRequestList != null && !incidenteRequestList.isEmpty())
+            PaginationDto paginationDto = new PaginationDto(Integer.valueOf(consultIncidentRequest.getPage()),
+                    incidenteRequestPage.getSize(), incidenteRequestPage.getTotalPages(),
+                    incidenteRequestPage.getTotalElements());
+
+            if (!incidenteRequestPage.getContent().isEmpty())
                 return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
-                        incidenteRequestList.getContent());
+                        incidenteRequestPage.getContent(), paginationDto);
             else
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
