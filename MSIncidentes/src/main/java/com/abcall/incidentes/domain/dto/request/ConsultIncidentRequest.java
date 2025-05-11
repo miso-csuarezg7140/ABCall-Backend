@@ -51,4 +51,8 @@ public class ConsultIncidentRequest {
     @Pattern(regexp = Constants.VALIDACION_3_DIGITOS, message = "El paránetro tamanioPagina no cumple las validaciones.")
     @JsonProperty("tamanioPagina")
     private String pageSize;
+
+    @Schema(description = "Indica si se desea descargar el reporte", example = "false")
+    @JsonProperty("descargar")
+    private Boolean download = false;
 }
