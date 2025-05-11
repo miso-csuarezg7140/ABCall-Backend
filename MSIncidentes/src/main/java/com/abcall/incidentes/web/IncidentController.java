@@ -1,9 +1,10 @@
 package com.abcall.incidentes.web;
 
-import com.abcall.incidentes.domain.dto.request.ActualizarIncidenteRequest;
-import com.abcall.incidentes.domain.dto.request.CrearIncidenteRequest;
+import com.abcall.incidentes.domain.dto.request.ConsultIncidentRequest;
+import com.abcall.incidentes.domain.dto.request.CreateIncidentRequest;
+import com.abcall.incidentes.domain.dto.request.UpdateIncidentRequest;
 import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
-import com.abcall.incidentes.domain.service.IncidenteService;
+import com.abcall.incidentes.domain.service.IIncidentService;
 import com.abcall.incidentes.util.ApiUtils;
 import com.abcall.incidentes.util.Constants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,37 +29,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-public class IncidenteController {
+public class IncidentController {
 
-    private final IncidenteService incidentesService;
+    private final IIncidentService incidentesService;
     private final ApiUtils apiUtils;
 
     @Operation(summary = "Obtiene la lista de incidentes de un usuario dado.")
-    @GetMapping("/consultar")
+    @PostMapping("/consultar")
     public ResponseEntity<ResponseServiceDto> consultar(
-            @Parameter(description = "Tipo de documento del usuario", example = "CC")
-            @NotBlank(message = "El parámetro tipoDocUsuario no puede ser nulo")
-            @RequestParam(required = false) String tipoDocUsuario,
+            @Valid @RequestBody ConsultIncidentRequest consultIncidentRequest, BindingResult bindingResult) {
 
-            @Parameter(description = "Tipo de documento del usuario", example = "1010258471")
-            @Pattern(regexp = Constants.VALIDACION_NUMERICO, message = "El parámetro numeroDocUsuario debe ser numérico")
-            @NotBlank(message = "El parámetro numeroDocUsuario no puede ser nulo")
-            @RequestParam(required = false, value = "numeroDocUsuario") String numeroDocUsuarioStr) {
+        if (bindingResult.hasErrors()) {
+            ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        }
 
-        ResponseServiceDto response = incidentesService.consultar(tipoDocUsuario, numeroDocUsuarioStr);
+        ResponseServiceDto response = incidentesService.consultar(consultIncidentRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @Operation(summary = "Método que permite la creación de un incidente nuevo.")
     @PostMapping("/crear")
-    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody CrearIncidenteRequest crearIncidenteRequest,
+    public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody CreateIncidentRequest createIncidentRequest,
                                                     BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         } else {
-            ResponseServiceDto response = incidentesService.crear(crearIncidenteRequest);
+            ResponseServiceDto response = incidentesService.crear(createIncidentRequest);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         }
     }
@@ -78,12 +77,12 @@ public class IncidenteController {
     @Operation(summary = "Método que permite la actualización de un incidente.")
     @PutMapping("/actualizar")
     public ResponseEntity<ResponseServiceDto> actualizar(
-            @Valid @RequestBody ActualizarIncidenteRequest actualizarIncidenteRequest, BindingResult bindingResult) {
+            @Valid @RequestBody UpdateIncidentRequest updateIncidentRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             ResponseServiceDto response = apiUtils.badRequestResponse(bindingResult);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         } else {
-            ResponseServiceDto response = incidentesService.actualizar(actualizarIncidenteRequest);
+            ResponseServiceDto response = incidentesService.actualizar(updateIncidentRequest);
             return ResponseEntity.status(response.getStatusCode()).body(response);
         }
     }
