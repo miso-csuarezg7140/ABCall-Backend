@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class IncidentesApplication {
+public class IncidentsApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(IncidentesApplication.class, args);
+        SpringApplication.run(IncidentsApplication.class, args);
     }
 
 }

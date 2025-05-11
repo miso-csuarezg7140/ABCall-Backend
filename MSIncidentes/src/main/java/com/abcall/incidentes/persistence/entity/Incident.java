@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "incidente")
-public class Incidente {
+public class Incident {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,41 +23,41 @@ public class Incidente {
     private Integer id;
 
     @Column(name = "tipo_doc_usuario", nullable = false)
-    private String tipoDocumentoUsuario;
+    private Integer userDocumentType;
 
     @Column(name = "num_doc_usuario", nullable = false)
-    private Long numDocumentoUsuario;
+    private String userDocumentNumber;
 
     @Column(name = "num_doc_cliente", nullable = false)
-    private Long numDocumentoCliente;
+    private Long clientDocumentNumber;
 
     @Column(name = "descripcion", nullable = false)
-    private String descripcion;
+    private String description;
 
     @Column(name = "solucionado", nullable = false)
-    private Boolean solucionado;
+    private Boolean solved;
 
     @Column(name = "solucion_id")
-    private Integer solucionId;
+    private Integer idSolution;
 
     @Column(name = "solucionado_por")
-    private String solucionadoPor;
+    private String solvedBy;
 
     @Column(name = "fecha_solucion")
-    private LocalDateTime fechaSolucion;
+    private LocalDateTime solvedDate;
 
     @Column(name = "estado", nullable = false)
-    private String estado;
+    private String status;
 
     @Column(name = "creado_por", nullable = false)
-    private String creadoPor;
+    private String createdBy;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime createdDate;
 
     @Column(name = "modificado_por")
-    private String modificadoPor;
+    private String modifiedBy;
 
     @Column(name = "fecha_modificacion")
-    private LocalDateTime fechaModificacion;
+    private LocalDateTime modifiedDate;
 }
