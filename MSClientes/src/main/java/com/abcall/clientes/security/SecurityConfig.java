@@ -23,7 +23,8 @@ public class SecurityConfig {
     protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/ping",
-                        "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar", "/autenticar", "/tiposDocumento"))
+                        "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar", "/autenticar", "/tiposDocumento",
+                        "/listar"))
                 .cors(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((

@@ -27,7 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/registrar",
             "/autenticar",
-            "/tiposDocumento"
+            "/tiposDocumento",
+            "/listar"
     );
     private final JwtTokenProvider jwtTokenProvider;
 
