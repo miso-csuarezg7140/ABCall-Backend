@@ -11,7 +11,7 @@ public class Constants {
     public static final String VALIDACION_DOCUMENTO_CLIENTE = "^[0-9]{9,10}$";
     public static final String VALIDACION_DOCUMENTO_USUARIO = "^[A-Z0-9]{5,10}$";
     public static final String VALIDACION_FECHA = "^(19[0-9]{2}|20[0-9]{2}|2100)/(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])$";
-    public static final String VALIDACION_3_DIGITOS = "^[1-9][0-9]{2}$";
+    public static final String VALIDACION_3_DIGITOS = "^[1-9][0-9]{0,2}$";
     public static final String VALIDACION_ESTADO = "^(ACTIVO|EN PROCESO|CERRADO|TODOS)$";
 
     Constants() {

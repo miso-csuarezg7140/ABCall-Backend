@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class IncidentResponse {
@@ -18,4 +20,8 @@ public class IncidentResponse {
     private Long clientDocumentNumber;
     @JsonProperty("descripcion")
     private String description;
+    @JsonProperty("estado")
+    private String status;
+    @JsonProperty("fechaCreacion")
+    private LocalDateTime createdDate;
 }

@@ -73,8 +73,8 @@ public class IncidentServiceImpl implements IIncidentService {
             Pageable pageable = Pageable.unpaged();
 
             Sort sort = Sort.by(
-                    Sort.Order.asc("estado"),
-                    Sort.Order.desc("fechaCreacion")
+                    Sort.Order.asc("status"),
+                    Sort.Order.desc("createdDate")
             );
 
             if (null != consultIncidentRequest.getPage())
