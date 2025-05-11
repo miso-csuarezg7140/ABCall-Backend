@@ -312,14 +312,14 @@ paths:
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/tiposDocumento
       responses:
-          '200':
-              description: Operación exitosa
-          '206':
-              description: Contenido parcial
-          '400':
-              description: Solicitud incorrecta
-          '500':
-              description: Error interno del servidor
+        '200':
+          description: Operación exitosa
+        '206':
+          description: Contenido parcial
+        '400':
+          description: Solicitud incorrecta
+        '500':
+          description: Error interno del servidor
 
   /service/abcall/incidentes/v1/crear:
     post:
@@ -352,22 +352,17 @@ paths:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
 
   /service/abcall/incidentes/v1/consultar:
-    get:
+    post:
       summary: Permite la consulta de incidentes
       operationId: consultarIncidentes
       x-google-backend:
         address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
       parameters:
-        - name: tipoDocUsuario
-          in: path
-          required: true
-          type: string
-          description: Tipo de documento del usuario
-        - name: numeroDocUsuario
-          in: path
-          required: true
-          type: string
-          description: Número de documento del usuario
+        - name: body
+          in: body
+          schema:
+            type: object
+          description: Cuerpo de la solicitud
       responses:
         '200':
           description: Operación exitosa
@@ -377,6 +372,14 @@ paths:
           description: Solicitud incorrecta
         '500':
           description: Error interno del servidor
+    options:
+      summary: CORS preflight para consultar incidentes
+      operationId: corsConsultarIncidentes
+      responses:
+        '204':
+          description: Respuesta preflight CORS exitosa
+      x-google-backend:
+        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
 
   /service/abcall/incidentes/v1/consultarDetalle:
     get:
