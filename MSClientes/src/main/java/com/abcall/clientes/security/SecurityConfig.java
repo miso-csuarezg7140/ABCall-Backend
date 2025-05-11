@@ -39,7 +39,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ping", "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar",
-                                "/autenticar", "/tiposDocumento")
+                                "/autenticar", "/tiposDocumento", "/listar")
                         .permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
