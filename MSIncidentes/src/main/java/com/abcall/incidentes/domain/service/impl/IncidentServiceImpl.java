@@ -108,7 +108,7 @@ public class IncidentServiceImpl implements IIncidentService {
                         null, null, false, pageable);
 
             PaginationDto paginationDto = new PaginationDto(null != consultIncidentRequest.getPage()
-                    ? Integer.valueOf(consultIncidentRequest.getPage()) : null, incidenteRequestPage.getSize(),
+                    ? Integer.parseInt(consultIncidentRequest.getPage()) : 1, incidenteRequestPage.getSize(),
                     incidenteRequestPage.getTotalPages(), incidenteRequestPage.getTotalElements());
 
             if (!incidenteRequestPage.getContent().isEmpty()) {
