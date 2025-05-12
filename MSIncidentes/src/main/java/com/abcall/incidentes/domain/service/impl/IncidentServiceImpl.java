@@ -15,6 +15,7 @@ import com.abcall.incidentes.util.enums.HttpResponseCodes;
 import com.abcall.incidentes.util.enums.HttpResponseMessages;
 import com.abcall.incidentes.web.external.IClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,13 +24,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,21 +43,28 @@ public class IncidentServiceImpl implements IIncidentService {
     private final IIncidentRepository incidenteRepository;
     private final IClientService clientService;
     private final ApiUtils apiUtils;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Handles the consultation of incidents based on the provided request parameters.
+     * <p>
+     * This method validates the date range and pagination parameters, retrieves the incidents
+     * from the repository, and returns the results in a paginated format. If the `download` flag
+     * is set, the incidents are converted to a Base64-encoded CSV string.
      *
      * @param consultIncidentRequest the request object containing the parameters for the consultation, including:
-     *                               - fechaInicio: the start date of the consultation period (format: "yyyy/MM/dd")
-     *                               - fechaFin: the end date of the consultation period (format: "yyyy/MM/dd")
-     *                               - pagina: the page number for pagination (optional)
-     *                               - tamanioPagina: the size of the page for pagination (optional)
-     *                               - numeroDocCliente: the client document number (optional)
-     *                               - tipoDocUsuario: the user document type (optional)
-     *                               - numeroDocUsuario: the user document number (optional)
-     *                               - estado: the state of the incidents to filter by (optional)
+     *                               - startDate: the start date of the consultation period (format: "yyyy/MM/dd")
+     *                               - endDate: the end date of the consultation period (format: "yyyy/MM/dd")
+     *                               - page: the page number for pagination (optional)
+     *                               - pageSize: the size of the page for pagination (optional)
+     *                               - clientDocumentNumber: the client document number (optional)
+     *                               - userDocumentType: the user document type (optional)
+     *                               - userDocumentNumber: the user document number (optional)
+     *                               - status: the state of the incidents to filter by (optional)
+     *                               - download: a flag indicating whether to download the results as a CSV (optional)
      * @return a {@link ResponseServiceDto} containing the response details, including a list of incidents if found,
-     * or an appropriate message if no incidents are found or an error occurs
+     * a Base64-encoded CSV string if `download` is true, or an appropriate message if no incidents are found
+     * @throws Exception if an error occurs during the process
      */
     @Override
     public ResponseServiceDto consultar(ConsultIncidentRequest consultIncidentRequest) {
@@ -73,14 +85,11 @@ public class IncidentServiceImpl implements IIncidentService {
 
             Pageable pageable = Pageable.unpaged();
 
-            Sort sort = Sort.by(
-                    Sort.Order.asc("status"),
-                    Sort.Order.desc("createdDate")
-            );
-
-            if (null != consultIncidentRequest.getPage())
+            if (null != consultIncidentRequest.getPage()) {
+                Sort sort = Sort.by(Sort.Order.asc("status"), Sort.Order.desc("createdDate"));
                 pageable = PageRequest.of(Integer.parseInt(consultIncidentRequest.getPage()) - 1,
                         Integer.parseInt(consultIncidentRequest.getPageSize()), sort);
+            }
 
             Long numeroDocumentoCliente = null != consultIncidentRequest.getClientDocumentNumber()
                     ? Long.valueOf(consultIncidentRequest.getClientDocumentNumber()) : null;
@@ -98,14 +107,22 @@ public class IncidentServiceImpl implements IIncidentService {
                         consultIncidentRequest.getUserDocumentNumber(), consultIncidentRequest.getStatus(),
                         null, null, false, pageable);
 
-            PaginationDto paginationDto = new PaginationDto(Integer.valueOf(consultIncidentRequest.getPage()),
-                    incidenteRequestPage.getSize(), incidenteRequestPage.getTotalPages(),
-                    incidenteRequestPage.getTotalElements());
+            PaginationDto paginationDto = new PaginationDto(null != consultIncidentRequest.getPage()
+                    ? Integer.valueOf(consultIncidentRequest.getPage()) : null, incidenteRequestPage.getSize(),
+                    incidenteRequestPage.getTotalPages(), incidenteRequestPage.getTotalElements());
 
-            if (!incidenteRequestPage.getContent().isEmpty())
-                return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
-                        incidenteRequestPage.getContent(), paginationDto);
-            else
+            if (!incidenteRequestPage.getContent().isEmpty()) {
+                if (null == consultIncidentRequest.getPage() && consultIncidentRequest.getDownload()) {
+                    objectMapper.registerModule(new JavaTimeModule());
+                    String jsonString = objectMapper.writeValueAsString(incidenteRequestPage.getContent());
+                    List<Map<String, Object>> jsonData = objectMapper.readValue(jsonString,
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
+                    return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
+                            convertJsonToCsvBase64(jsonData));
+                } else
+                    return apiUtils.buildResponse(HttpResponseCodes.OK.getCode(), HttpResponseMessages.OK.getMessage(),
+                            incidenteRequestPage.getContent(), paginationDto);
+            } else
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.NO_CONTENT.getMessage(), new HashMap<>());
         } catch (Exception ex) {
@@ -252,5 +269,64 @@ public class IncidentServiceImpl implements IIncidentService {
             }
         }
         return null;
+    }
+
+    /**
+     * Converts a list of JSON objects into a CSV string and encodes it in Base64 format.
+     * <p>
+     * This method takes a list of maps representing JSON data, converts it into a CSV format,
+     * and then encodes the resulting CSV string into Base64. If the input list is empty,
+     * the method returns an empty Base64 string. Special characters in the data are escaped
+     * to ensure CSV compatibility.
+     *
+     * @param jsonData a list of maps where each map represents a JSON object with key-value pairs
+     * @return a Base64-encoded string representing the CSV data
+     * @throws RuntimeException if an error occurs during the conversion or encoding process
+     */
+    public String convertJsonToCsvBase64(List<Map<String, Object>> jsonData) {
+        try {
+            StringBuilder csv = new StringBuilder();
+
+            if (!jsonData.isEmpty()) {
+                Map<String, Object> firstItem = jsonData.getFirst();
+                csv.append(String.join(",", firstItem.keySet()));
+                csv.append("\n");
+
+                for (Map<String, Object> item : jsonData) {
+                    csv.append(item.values().stream()
+                            .map(this::escapeSpecialCharacters)
+                            .collect(Collectors.joining(",")));
+                    csv.append("\n");
+                }
+            }
+
+            byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+            return Base64.getEncoder().encodeToString(csvBytes);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al convertir JSON a CSV Base64", e);
+        }
+    }
+
+    /**
+     * Escapes special characters in a given value to make it CSV-compatible.
+     * <p>
+     * This method ensures that values containing commas, double quotes, or newlines
+     * are properly escaped to conform to CSV formatting rules. If the value is null,
+     * an empty string is returned.
+     *
+     * @param value the object to be converted to a CSV-compatible string
+     * @return a string with special characters escaped for CSV formatting
+     */
+    private String escapeSpecialCharacters(Object value) {
+        if (value == null) {
+            return "";
+        }
+        String result = value.toString();
+        // Escapar comillas y caracteres especiales para CSV
+        if (result.contains(",") || result.contains("\"") || result.contains("\n")) {
+            result = "\"" + result.replace("\"", "\"\"") + "\"";
+        }
+        return result;
     }
 }
