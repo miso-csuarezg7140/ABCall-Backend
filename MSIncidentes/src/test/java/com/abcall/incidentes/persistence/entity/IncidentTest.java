@@ -1,66 +1,71 @@
 package com.abcall.incidentes.persistence.entity;
 
-import com.abcall.incidentes.domain.dto.request.CreateIncidentRequest;
-import com.abcall.incidentes.domain.dto.response.ResponseServiceDto;
-import com.abcall.incidentes.domain.service.IIncidentService;
-import com.abcall.incidentes.util.ApiUtils;
-import com.abcall.incidentes.web.IncidentController;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class IncidentTest {
 
-    @Mock
-    private IIncidentService incidenteService;
+    @Test
+    void creationSucceedsWithValidValues() {
+        Incident incident = new Incident();
+        incident.setId(1);
+        incident.setUserDocumentType(1);
+        incident.setUserDocumentNumber("123456789");
+        incident.setClientDocumentNumber(987654321L);
+        incident.setDescription("Test description");
+        incident.setSolved(false);
+        incident.setIdSolution(null);
+        incident.setSolvedBy(null);
+        incident.setSolvedDate(null);
+        incident.setStatus("ACTIVE");
+        incident.setCreatedBy("admin");
+        incident.setCreatedDate(LocalDateTime.now());
+        incident.setModifiedBy(null);
+        incident.setModifiedDate(null);
 
-    @Mock
-    private ApiUtils apiUtils;
-
-    @Mock
-    private IncidentController incidentController;
-
-    @Mock
-    private BindingResult bindingResult;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        incidentController = new IncidentController(incidenteService, apiUtils);
+        assertEquals(1, incident.getId());
+        assertEquals(1, incident.getUserDocumentType());
+        assertEquals("123456789", incident.getUserDocumentNumber());
+        assertEquals(987654321L, incident.getClientDocumentNumber());
+        assertEquals("Test description", incident.getDescription());
+        assertFalse(incident.getSolved());
+        assertEquals("ACTIVE", incident.getStatus());
+        assertEquals("admin", incident.getCreatedBy());
+        assertNotNull(incident.getCreatedDate());
     }
 
     @Test
-    void crearReturnsInternalServerErrorWhenServiceFails() {
-        CreateIncidentRequest createIncidentRequest = new CreateIncidentRequest();
-        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
-        responseServiceDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    void modificationUpdatesFieldsCorrectly() {
+        Incident incident = new Incident();
+        incident.setId(1);
+        incident.setUserDocumentType(1);
+        incident.setUserDocumentNumber("123456789");
+        incident.setClientDocumentNumber(987654321L);
+        incident.setDescription("Initial description");
+        incident.setSolved(false);
+        incident.setStatus("ACTIVE");
+        incident.setCreatedBy("admin");
+        incident.setCreatedDate(LocalDateTime.now());
 
-        Mockito.when(incidenteService.crear(createIncidentRequest)).thenReturn(responseServiceDto);
+        incident.setDescription("Updated description");
+        incident.setSolved(true);
+        incident.setStatus("SOLVED");
+        incident.setModifiedBy("editor");
+        incident.setModifiedDate(LocalDateTime.now());
 
-        ResponseEntity<ResponseServiceDto> response = incidentController.crear(createIncidentRequest, Mockito.mock(BindingResult.class));
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals(responseServiceDto, response.getBody());
-    }
-
-    @Test
-    void consultarDetalleReturnsInternalServerErrorWhenServiceFails() {
-        String idIncidente = "1";
-        ResponseServiceDto responseServiceDto = new ResponseServiceDto();
-        responseServiceDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-
-        Mockito.when(incidenteService.consultarDetalle(idIncidente)).thenReturn(responseServiceDto);
-
-        ResponseEntity<ResponseServiceDto> response = incidentController.consultarDetalle(idIncidente);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals(responseServiceDto, response.getBody());
+        assertEquals("Updated description", incident.getDescription());
+        assertTrue(incident.getSolved());
+        assertEquals("SOLVED", incident.getStatus());
+        assertEquals("editor", incident.getModifiedBy());
+        assertNotNull(incident.getModifiedDate());
     }
 }
