@@ -32,13 +32,6 @@ spec:
             pathType: Prefix
           - backend:
               service:
-                name: ms-abcall-ia-service
-                port:
-                  number: 8080
-            path: /service/abcall/ia/v1
-            pathType: Prefix
-          - backend:
-              service:
                 name: ms-abcall-incidentes-service
                 port:
                   number: 8080
