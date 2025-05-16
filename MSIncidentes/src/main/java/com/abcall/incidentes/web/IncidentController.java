@@ -58,13 +58,13 @@ public class IncidentController {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":401,\"statusDescription\":\"Autenticación requerida.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor",
                     content = @Content(examples = {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":500,\"statusDescription\":\"Error interno del servidor.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
     })
     @PostMapping("/consultar")
     public ResponseEntity<ResponseServiceDto> consultar(
@@ -98,13 +98,13 @@ public class IncidentController {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":401,\"statusDescription\":\"Autenticación requerida.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor",
                     content = @Content(examples = {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":500,\"statusDescription\":\"Error interno del servidor.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
     })
     @PostMapping("/crear")
     public ResponseEntity<ResponseServiceDto> crear(@Valid @RequestBody CreateIncidentRequest createIncidentRequest,
@@ -138,13 +138,13 @@ public class IncidentController {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":401,\"statusDescription\":\"Autenticación requerida.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor",
                     content = @Content(examples = {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":500,\"statusDescription\":\"Error interno del servidor.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
     })
     @GetMapping("/consultarDetalle")
     public ResponseEntity<ResponseServiceDto> consultarDetalle(
@@ -176,13 +176,13 @@ public class IncidentController {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":401,\"statusDescription\":\"Autenticación requerida.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor",
                     content = @Content(examples = {
                             @ExampleObject(name = "Credenciales inválidas",
                                     summary = "Ejemplo de respuesta de error",
                                     value = "{\"statusCode\":500,\"statusDescription\":\"Error interno del servidor.\",\"data\":{}}")
-                    },mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
+                    }, mediaType = "application/json", schema = @Schema(implementation = ResponseServiceDto.class)))
     })
     @PutMapping("/actualizar")
     public ResponseEntity<ResponseServiceDto> actualizar(

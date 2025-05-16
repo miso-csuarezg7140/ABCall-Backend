@@ -1,4 +1,4 @@
-package com.abcall.incidentes.persistence.repository.jpa;
+package com.abcall.incidentes.persistence.repository.impl;
 
 import com.abcall.incidentes.persistence.entity.Incident;
 import org.springframework.data.domain.Page;
