@@ -253,9 +253,9 @@ public class IncidentServiceImpl implements IIncidentService {
      * @return a {@link UserClientDtoResponse} object containing the user client data
      * @throws NullPointerException if the response body or its data is null
      */
-    private UserClientDtoResponse obtenerUsuarioCliente(CreateIncidentRequest createIncidentRequest) {
+    UserClientDtoResponse obtenerUsuarioCliente(CreateIncidentRequest createIncidentRequest) {
         ResponseEntity<ResponseServiceDto> response = clientService.validateUserClient(
-                createIncidentRequest.getUserDocumentClient(), createIncidentRequest.getUserDocumentType(),
+                createIncidentRequest.getClientDocumentNumber(), createIncidentRequest.getUserDocumentType(),
                 createIncidentRequest.getUserDocumentNumber());
 
         if (response != null && response.getBody() != null && response.getBody().getData() != null) {
