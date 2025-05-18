@@ -7,7 +7,6 @@ import com.abcall.incidentes.domain.dto.response.IncidentResponse;
 import com.abcall.incidentes.persistence.entity.Incident;
 import com.abcall.incidentes.persistence.mappers.IIncidentMapper;
 import com.abcall.incidentes.persistence.repository.IIncidentRepository;
-import com.abcall.incidentes.persistence.repository.jpa.IIncidentRepositoryJpa;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
