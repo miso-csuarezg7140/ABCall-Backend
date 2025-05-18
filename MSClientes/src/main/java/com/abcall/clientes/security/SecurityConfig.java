@@ -24,7 +24,7 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/ping",
                         "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar", "/autenticar", "/tiposDocumento",
-                        "/listar", "/validar Usuario"))
+                        "/listar", "/validarUsuario"))
                 .cors(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((
@@ -39,7 +39,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ping", "/swagger-ui.html/**", "/v3/api-docs/**", "/registrar",
-                                "/autenticar", "/tiposDocumento", "/listar", "/validar Usuario" )
+                                "/autenticar", "/tiposDocumento", "/listar", "/validarUsuario" )
                         .permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
