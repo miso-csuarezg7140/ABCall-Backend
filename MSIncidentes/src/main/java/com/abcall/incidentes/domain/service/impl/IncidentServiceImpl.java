@@ -208,7 +208,7 @@ public class IncidentServiceImpl implements IIncidentService {
     public ResponseServiceDto crear(CreateIncidentRequest createIncidentRequest) {
         try {
             UserClientDtoResponse userClientDtoResponse = obtenerUsuarioCliente(createIncidentRequest);
-            if (null == userClientDtoResponse)
+            if (null == userClientDtoResponse || null == userClientDtoResponse.getIdClient())
                 return apiUtils.buildResponse(HttpResponseCodes.BUSINESS_MISTAKE.getCode(),
                         HttpResponseMessages.BUSINESS_MISTAKE.getMessage(), new HashMap<>());
 
