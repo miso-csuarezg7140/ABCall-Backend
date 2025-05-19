@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/registrar",
             "/autenticar",
             "/tiposDocumento",
-            "/listar"
+            "/listar", "/validarUsuario" 
     );
     private final JwtTokenProvider jwtTokenProvider;
 
