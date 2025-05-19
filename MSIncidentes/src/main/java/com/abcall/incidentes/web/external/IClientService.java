@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface IClientService {
 
     @GetMapping("/validarUsuario")
-    ResponseEntity<ResponseServiceDto> validateUserClient(@RequestParam String documentClient,
-                                                          @RequestParam String documentTypeUser,
-                                                          @RequestParam String documentUser);
+    ResponseEntity<ResponseServiceDto> validateUserClient(
+            @RequestParam(value = "numeroDocumentoCliente") String documentClient,
+            @RequestParam(value = "tipoDocumentoUsuario") String documentTypeUser,
+            @RequestParam(value = "numeroDocumentoUsuario") String documentUser);
 }
