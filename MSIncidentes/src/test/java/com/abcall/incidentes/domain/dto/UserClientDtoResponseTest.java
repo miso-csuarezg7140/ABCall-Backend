@@ -15,7 +15,7 @@ class UserClientDtoResponseTest {
         UserClientDtoResponse response = new UserClientDtoResponse("DNI", 12345678L, 1);
 
         assertEquals("DNI", response.getDocumentTypeUser());
-        assertEquals(12345678L, response.getDocumentNumberUser());
+        assertEquals(12345678L, response.getDocumentUser());
         assertEquals(1, response.getIdClient());
     }
 
@@ -24,11 +24,11 @@ class UserClientDtoResponseTest {
         UserClientDtoResponse response = new UserClientDtoResponse();
 
         response.setDocumentTypeUser("PASSPORT");
-        response.setDocumentNumberUser(98765432L);
+        response.setDocumentUser(98765432L);
         response.setIdClient(2);
 
         assertEquals("PASSPORT", response.getDocumentTypeUser());
-        assertEquals(98765432L, response.getDocumentNumberUser());
+        assertEquals(98765432L, response.getDocumentUser());
         assertEquals(2, response.getIdClient());
     }
 
@@ -37,7 +37,7 @@ class UserClientDtoResponseTest {
         UserClientDtoResponse response = new UserClientDtoResponse(null, 12345678L, 1);
 
         assertNull(response.getDocumentTypeUser());
-        assertEquals(12345678L, response.getDocumentNumberUser());
+        assertEquals(12345678L, response.getDocumentUser());
         assertEquals(1, response.getIdClient());
     }
 
@@ -46,7 +46,7 @@ class UserClientDtoResponseTest {
         UserClientDtoResponse response = new UserClientDtoResponse("DNI", null, 1);
 
         assertEquals("DNI", response.getDocumentTypeUser());
-        assertNull(response.getDocumentNumberUser());
+        assertNull(response.getDocumentUser());
         assertEquals(1, response.getIdClient());
     }
 
@@ -55,7 +55,7 @@ class UserClientDtoResponseTest {
         UserClientDtoResponse response = new UserClientDtoResponse("DNI", 12345678L, null);
 
         assertEquals("DNI", response.getDocumentTypeUser());
-        assertEquals(12345678L, response.getDocumentNumberUser());
+        assertEquals(12345678L, response.getDocumentUser());
         assertNull(response.getIdClient());
     }
 }
