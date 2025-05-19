@@ -30,7 +30,7 @@ public class ConsultIncidentRequest {
     @Schema(description = "Estado del incidente", example = "EN PROCESO")
     @Pattern(regexp = Constants.VALIDACION_ESTADO, message = "El parámetro estado no cumple las validaciones.")
     @JsonProperty("estado")
-    private String status = Constants.ESTADO_DEFAULT;
+    private String status = Constants.ESTADO_DEFAULT_CONSULTA;
 
     @Schema(description = "Fecha de inicio del rango de consulta", example = "2023/01/01")
     @Pattern(regexp = Constants.VALIDACION_FECHA, message = "El parámetro fechaInicio no cumple las validaciones.")

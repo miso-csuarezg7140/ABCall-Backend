@@ -39,7 +39,7 @@ public class CreateIncidentRequest {
     private String description;
 
     private Boolean solved = false;
-    private String status = Constants.ESTADO_DEFAULT;
+    private String status = Constants.ESTADO_DEFAULT_CREACION;
     private String createdBy = Constants.USUARIO_DEFAULT;
     private LocalDateTime createdDate = LocalDateTime.now();
 }

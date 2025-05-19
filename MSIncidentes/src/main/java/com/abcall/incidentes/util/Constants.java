@@ -5,7 +5,8 @@ public class Constants {
     public static final String PAGINATION_VALUE = "paginacion";
     public static final String RESPONSE_VALUE = "data";
     public static final String VALIDACION_NUMERICO = "^\\d+$";
-    public static final String ESTADO_DEFAULT = "TODOS";
+    public static final String ESTADO_DEFAULT_CREACION = "ACTIVO";
+    public static final String ESTADO_DEFAULT_CONSULTA = "TODOS";
     public static final String USUARIO_DEFAULT = "USUARIO";
     public static final String VALIDACION_TIPO_DOC_USUARIO = "^[1-6]$";
     public static final String VALIDACION_DOCUMENTO_CLIENTE = "^[0-9]{9,10}$";
