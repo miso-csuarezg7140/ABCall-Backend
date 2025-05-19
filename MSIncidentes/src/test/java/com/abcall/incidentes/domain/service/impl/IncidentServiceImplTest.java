@@ -193,6 +193,7 @@ class IncidentServiceImplTest {
     void crearReturnsSuccessWhenUserClientExists() {
         CreateIncidentRequest request = new CreateIncidentRequest();
         UserClientDtoResponse userClientResponse = new UserClientDtoResponse();
+        userClientResponse.setIdClient(1);
         ResponseServiceDto serviceDto = new ResponseServiceDto();
         serviceDto.setData(userClientResponse);
         ResponseServiceDto successResponse = new ResponseServiceDto();
