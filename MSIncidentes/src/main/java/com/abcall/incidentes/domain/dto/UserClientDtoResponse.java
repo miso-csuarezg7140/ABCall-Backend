@@ -12,6 +12,6 @@ import lombok.Setter;
 public class UserClientDtoResponse {
 
     private String documentTypeUser;
-    private Long documentNumberUser;
+    private Long documentUser;
     private Integer idClient;
 }
