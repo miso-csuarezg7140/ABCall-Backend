@@ -168,7 +168,7 @@ public class AuthServiceImpl implements IAuthService {
             TokenPair tokenPair = tokenProvider.refreshTokens(request.getToken());
             String userType = tokenProvider.getUserTypeFromToken(tokenPair.getAccessToken());
 
-            if ("agent".equals(userType)) {
+            if ("agente".equals(userType)) {
                 Claims claims = tokenProvider.getClaimsFromToken(tokenPair.getAccessToken());
 
                 AgentJwtResponse response = new AgentJwtResponse(
