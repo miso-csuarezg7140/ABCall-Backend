@@ -50,7 +50,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public ResponseServiceDto authenticateUser(LoginRequest loginRequest) {
         try {
-            if ("agent".equals(loginRequest.getUserType()))
+            if ("agente".equals(loginRequest.getUserType()))
                 return authenticateAgent(loginRequest);
             else
                 return authenticateClient(loginRequest);
@@ -160,7 +160,7 @@ public class AuthServiceImpl implements IAuthService {
      * Refreshes the authentication tokens for a user based on the provided refresh token.
      *
      * @param request the token refresh request containing the current refresh token
-     * @return a ResponseServiceDto containing the new access and refresh tokens,
+     * @return a ResponseServiceDto containing the new access and refresh tokens,03
      * along with user details if the operation is successful, or an error message if not
      */
     public ResponseServiceDto refreshToken(TokenRefreshRequest request) {
@@ -168,7 +168,7 @@ public class AuthServiceImpl implements IAuthService {
             TokenPair tokenPair = tokenProvider.refreshTokens(request.getToken());
             String userType = tokenProvider.getUserTypeFromToken(tokenPair.getAccessToken());
 
-            if ("agent".equals(userType)) {
+            if ("agente".equals(userType)) {
                 Claims claims = tokenProvider.getClaimsFromToken(tokenPair.getAccessToken());
 
                 AgentJwtResponse response = new AgentJwtResponse(
