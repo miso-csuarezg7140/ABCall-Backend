@@ -16,7 +16,7 @@ paths:
       summary: Valida el estado del microservicio de autenticación
       operationId: pingAuth
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/ping
+        address: http://34.111.151.20.nip.io/service/abcall/auth/v1/ping
       responses:
         '200':
           description: Operación exitosa
@@ -32,7 +32,7 @@ paths:
       summary: Valida el estado del microservicio de agentes
       operationId: pingAgentes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/ping
+        address: http://34.111.151.20.nip.io/service/abcall/agentes/v1/ping
       responses:
         '200':
           description: Operación exitosa
@@ -48,7 +48,7 @@ paths:
       summary: Valida el estado del microservicio de clientes
       operationId: pingClientes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/ping
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/ping
       responses:
         '200':
           description: Operación exitosa
@@ -64,7 +64,7 @@ paths:
       summary: Valida el estado del microservicio de incidentes
       operationId: pingIncidentes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/ping
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/ping
       responses:
         '200':
           description: Operación exitosa
@@ -80,7 +80,7 @@ paths:
       summary: Permite la autenticación de un usuario
       operationId: autenticarUsuario
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
+        address: http://34.111.151.20.nip.io/service/abcall/auth/v1/login
       parameters:
         - name: body
           in: body
@@ -103,14 +103,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/login
+        address: http://34.111.151.20.nip.io/service/abcall/auth/v1/login
 
   /service/abcall/auth/v1/refrescar:
     post:
       summary: Permite la actualización del token de un usuario
       operationId: refrescarToken
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/refrescar
+        address: http://34.111.151.20.nip.io/service/abcall/auth/v1/refrescar
       parameters:
         - name: body
           in: body
@@ -133,14 +133,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/auth/v1/refrescar
+        address: http://34.111.151.20.nip.io/service/abcall/auth/v1/refrescar
 
   /service/abcall/agentes/v1/autenticar:
     post:
       summary: Permite la autenticación de un agente
       operationId: autenticarAgente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/autenticar
+        address: http://34.111.151.20.nip.io/service/abcall/agentes/v1/autenticar
       parameters:
         - name: body
           in: body
@@ -163,14 +163,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/autenticar
+        address: http://34.111.151.20.nip.io/service/abcall/agentes/v1/autenticar
 
   /service/abcall/agentes/v1/tiposDocumento:
     get:
       summary: Retorna la lista de tipos de documento
       operationId: listarTiposDocumentoAgente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/agentes/v1/tiposDocumento
+        address: http://34.111.151.20.nip.io/service/abcall/agentes/v1/tiposDocumento
       responses:
         '200':
           description: Operación exitosa
@@ -186,7 +186,7 @@ paths:
       summary: Permite el registro de un cliente
       operationId: registrarCliente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/registrar
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/registrar
       parameters:
         - name: body
           in: body
@@ -209,14 +209,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/registrar
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/registrar
 
   /service/abcall/clientes/v1/autenticar:
     post:
       summary: Permite la autenticación de un cliente
       operationId: autenticarCliente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/autenticar
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/autenticar
       parameters:
         - name: body
           in: body
@@ -239,14 +239,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/autenticar
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/autenticar
 
   /service/abcall/clientes/v1/validarUsuario:
     get:
       summary: Permite la validación de un usuario de un cliente
       operationId: validarUsuario
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/validarUsuario
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/validarUsuario
       parameters:
         - name: numeroDocumentoCliente
           in: path
@@ -278,7 +278,7 @@ paths:
       summary: Retorna la lista de clientes en estado activo
       operationId: listarClientes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/listar
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/listar
       responses:
         '200':
           description: Operación exitosa
@@ -294,7 +294,7 @@ paths:
       summary: Retorna la lista de tipos de documento
       operationId: listarTiposDocumentoUsuario
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/clientes/v1/tiposDocumento
+        address: http://34.111.151.20.nip.io/service/abcall/clientes/v1/tiposDocumento
       responses:
         '200':
           description: Operación exitosa
@@ -310,7 +310,7 @@ paths:
       summary: Permite la creación de un incidente
       operationId: crearIncidente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/crear
       parameters:
         - name: body
           in: body
@@ -333,14 +333,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/crear
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/crear
 
   /service/abcall/incidentes/v1/consultar:
     post:
       summary: Permite la consulta de incidentes
       operationId: consultarIncidentes
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/consultar
       parameters:
         - name: body
           in: body
@@ -363,14 +363,14 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultar
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/consultar
 
   /service/abcall/incidentes/v1/consultarDetalle:
     get:
       summary: Permite la consulta de detalles de un incidente
       operationId: consultarDetalleIncidente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/consultarDetalle
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/consultarDetalle
       parameters:
         - name: idIncidente
           in: path
@@ -392,7 +392,7 @@ paths:
       summary: Permite la actualización de un incidente
       operationId: actualizarIncidente
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/actualizar
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/actualizar
       parameters:
         - name: body
           in: body
@@ -415,7 +415,7 @@ paths:
         '204':
           description: Respuesta preflight CORS exitosa
       x-google-backend:
-        address: http://34.144.226.68.nip.io/service/abcall/incidentes/v1/actualizar
+        address: http://34.111.151.20.nip.io/service/abcall/incidentes/v1/actualizar
 
 # Sección para CORS y seguridad
 x-google-management:
